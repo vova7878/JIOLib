@@ -27,7 +27,7 @@ s8 FileInputStream::read(void *buf, s8 offset, s8 length) {
     return input.readsome(data + offset, n);
 }
 
-int FileInputStream::available() {
+s8 FileInputStream::available() {
     //TODO данные должны быть на основе длинны файла
     return !(input.peek() == -1);
 }
