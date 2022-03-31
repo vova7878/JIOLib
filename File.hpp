@@ -12,9 +12,6 @@ namespace JIO {
     class File final {
     public:
 
-        inline File(const std::string pathname) : path(pathname) {
-        }
-
         inline File(const fs::path pathname) : path(pathname) {
         }
         File(const File& orig) = default;
