@@ -14,13 +14,11 @@ namespace JIO {
         inline FileOutputStream(std::string path, bool append) :
         FileOutputStream(File(path), append) {
         }
-        
-        inline FileOutputStream(const char *path, bool append) :
-        FileOutputStream(File(path), append) {
-        }
 
         using OutputStream::write;
         virtual void write(u1 byte) override;
+        virtual void write(const void *buf, s8 offset, s8 length) override;
+        virtual void flush() override;
 
         virtual ~FileOutputStream();
     private:
