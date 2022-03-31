@@ -6,10 +6,17 @@ FileInputStream::FileInputStream(const File f) :
 file(f),
 input() {
     input.open(file.getPath(), std::ios::in | std::ios::binary);
+    if (input.fail()) {
+        throw IOException("Unable to open file");
+    }
 }
 
 int FileInputStream::read() {
-    return input.get();
+    int out = input.get();
+    if (input.fail()) {
+        throw IOException("Read error");
+    }
+    return out;
 }
 
 s8 FileInputStream::read(void *buf, s8 offset, s8 length) {
@@ -22,14 +29,21 @@ s8 FileInputStream::read(void *buf, s8 offset, s8 length) {
     if (input.peek() == -1) {
         return -1;
     }
-    std::streamsize n = length;
     char *data = reinterpret_cast<char*> (buf);
-    return input.readsome(data + offset, n);
+    s8 out = input.readsome(data + offset, length);
+    if (input.fail()) {
+        throw IOException("Read error");
+    }
+    return out;
 }
 
 s8 FileInputStream::available() {
-    //TODO данные должны быть на основе длинны файла
-    return !(input.peek() == -1);
+    std::streambuf *buf = input.rdbuf();
+    if (input.fail() || buf == nullptr) {
+        throw IOException("Unable to get available bytes");
+    }
+    s8 out = buf->in_avail();
+    return out < 0 ? 0 : out;
 }
 
 FileInputStream::~FileInputStream() {
