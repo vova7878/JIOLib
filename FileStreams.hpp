@@ -1,11 +1,31 @@
-#ifndef FILEOUTPUTSTREAM_HPP
-#define FILEOUTPUTSTREAM_HPP
+#ifndef FILESTREAMS_HPP
+#define FILESTREAMS_HPP
 
 #include <fstream>
 #include "Streams.hpp"
 #include "File.hpp"
 
 namespace JIO {
+
+    class FileInputStream : public InputStream {
+    public:
+        FileInputStream(const File file);
+
+        inline FileInputStream(std::string path) :
+        FileInputStream(File(path)) {
+        }
+
+        using InputStream::read;
+        virtual int read() override;
+        virtual s8 read(void *buf, s8 offset, s8 length) override;
+        virtual s8 available() override;
+
+        virtual ~FileInputStream();
+    private:
+        const File file;
+        std::ifstream input;
+        FileInputStream(const FileInputStream& orig);
+    };
 
     class FileOutputStream : public OutputStream {
     public:
@@ -28,5 +48,5 @@ namespace JIO {
     };
 }
 
-#endif /* FILEOUTPUTSTREAM_HPP */
+#endif /* FILESTREAMS_HPP */
 

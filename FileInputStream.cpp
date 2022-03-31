@@ -1,4 +1,4 @@
-#include "FileInputStream.hpp"
+#include "FileStreams.hpp"
 
 using namespace JIO;
 
