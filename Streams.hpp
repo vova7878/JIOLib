@@ -4,6 +4,7 @@
 #include <algorithm>
 #include "exceptions.hpp"
 #include "jtypes.hpp"
+#include "checks.hpp"
 
 namespace JIO {
 
@@ -34,20 +35,17 @@ namespace JIO {
          * чтения, будет возвращено специальное знаение -1
          */
         virtual s8 read(void *buf, s8 offset, s8 length) {
-            if ((offset | length) < 0) {
-                throw OutOfBoundsException("Negative offset or length");
-            }
             if (length == 0) {
                 return 0;
             }
 
-            u1 *data = reinterpret_cast<u1*> (buf);
+            u1 *data = SBoundsCheck<u1*>(buf, offset, length);
 
             int c = read();
             if (c == -1) {
                 return -1;
             }
-            data[offset] = c;
+            data[0] = c;
 
             s8 i = 1;
             for (; i < length; i++) {
@@ -55,7 +53,7 @@ namespace JIO {
                 if (c == -1) {
                     break;
                 }
-                data[offset + i] = c;
+                data[i] = c;
             }
             return i;
         }
@@ -65,7 +63,7 @@ namespace JIO {
         }
 
         virtual s8 skip(s8 count) {
-            const static s8 SKIP_BUFFER_SIZE = 2048;
+            constexpr const s8 SKIP_BUFFER_SIZE = 2048;
             static u1 SKIP_BUFFER[SKIP_BUFFER_SIZE];
             if (count <= 0) {
                 return 0;
@@ -98,14 +96,10 @@ namespace JIO {
         }
 
         virtual void write(const void *buf, s8 offset, s8 length) {
-            if ((offset | length) < 0) {
-                throw OutOfBoundsException("Negative offset or length");
-            }
-
-            const u1 *data = reinterpret_cast<const u1*> (buf);
+            const u1 *data = SBoundsCheck<const u1*>(buf, offset, length);
 
             for (s8 i = 0; i < length; i++) {
-                write(data[offset + i]);
+                write(data[i]);
             }
         }
 
