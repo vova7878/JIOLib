@@ -8,7 +8,7 @@ output() {
     output.open(file.getPath(), std::ios::out | std::ios::binary);
 
     if (output.fail()) {
-        throw IOException("Unable to open file");
+        throw IOException(_src_location, "Unable to open file");
     }
 }
 
@@ -16,7 +16,7 @@ void FileOutputStream::write(u1 byte) {
     output.put(byte);
 
     if (output.fail()) {
-        throw IOException("Write error");
+        throw IOException(_src_location, "Write error");
     }
 }
 
@@ -26,7 +26,7 @@ void FileOutputStream::write(const void *buf, s8 offset, s8 length) {
     output.write(data, length);
 
     if (output.fail()) {
-        throw IOException("Write error");
+        throw IOException(_src_location, "Write error");
     }
 }
 
@@ -34,7 +34,7 @@ void FileOutputStream::flush() {
     output.flush();
 
     if (output.fail()) {
-        throw IOException("Flush error");
+        throw IOException(_src_location, "Flush error");
     }
 }
 
