@@ -58,6 +58,20 @@ namespace JIO {
             return i;
         }
 
+        inline virtual void readFully(void *buf, s8 length) {
+            readFully(buf, 0, length);
+        }
+
+        virtual void readFully(void *buf, s8 offset, s8 length) {
+            s8 n = 0;
+            do {
+                s8 count = read(buf, offset + n, length - n);
+                if (count < 0)
+                    throw EOFException(_src_location);
+                n += count;
+            } while (n < length);
+        }
+
         inline virtual s8 available() {
             return 0;
         }

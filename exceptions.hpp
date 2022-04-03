@@ -8,7 +8,7 @@ namespace JIO {
 
 #define _src_location __FILE__, __func__, __LINE__
 
-    static std::string formatException(const char* why, const char *file,
+    inline std::string formatException(const char* why, const char *file,
             const char *func, const char *exname, int line) noexcept {
         try {
             std::ostringstream buf;
@@ -59,6 +59,17 @@ namespace JIO {
                 const char* why = nullptr,
                 const char *exname = "IOException") :
         JException(file, func, line, why, exname) {
+        }
+    };
+
+    class EOFException : public IOException {
+    public:
+
+        inline EOFException(
+                const char *file, const char *func, int line,
+                const char* why = nullptr,
+                const char *exname = "EOFException") :
+        IOException(file, func, line, why, exname) {
         }
     };
 }

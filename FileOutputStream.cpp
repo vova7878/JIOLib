@@ -5,7 +5,11 @@ using namespace JIO;
 FileOutputStream::FileOutputStream(const File f, bool append) :
 file(f),
 output() {
-    output.open(file.getPath(), std::ios::out | std::ios::binary);
+    std::ios::openmode mode = std::ios::out | std::ios::binary;
+    if (append) {
+        mode |= std::ios::in | std::ios::ate;
+    }
+    output.open(file.getPath(), mode);
 
     if (output.fail()) {
         throw IOException(_src_location, "Unable to open file");
