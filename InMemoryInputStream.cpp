@@ -18,7 +18,7 @@ s8 InMemoryInputStream::read(void *buf, s8 offset, s8 length) {
         return 0;
     }
 
-    char *data = SBoundsCheck<char*>(buf, offset, length);
+    char *cdata = SBoundsCheck<char*>(buf, offset, length);
 
     if (position >= count) {
         return -1;
@@ -31,7 +31,7 @@ s8 InMemoryInputStream::read(void *buf, s8 offset, s8 length) {
 
     u1 *tmp = reinterpret_cast<u1*> (data);
 
-    std::memcpy(buf, tmp + position, avail);
+    std::memcpy(cdata, tmp + position, avail);
 
     position += avail;
     return avail;
