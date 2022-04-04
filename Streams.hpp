@@ -67,7 +67,8 @@ namespace JIO {
             do {
                 s8 count = read(buf, offset + n, length - n);
                 if (count < 0)
-                    throw EOFException(_src_location);
+                    throw EOFException(_src_location,
+                        formatMsg("Required: ", length, " but readed: ", n));
                 n += count;
             } while (n < length);
         }

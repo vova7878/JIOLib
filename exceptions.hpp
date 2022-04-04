@@ -3,36 +3,62 @@
 
 #include <exception>
 #include <sstream>
+#include  <typeinfo>
 
 namespace JIO {
 
 #define _src_location __FILE__, __func__, __LINE__
 
-    inline std::string formatException(const char* why, const char *file,
-            const char *func, const char *exname, int line) noexcept {
+    inline void print(std::ostringstream &buf) {
+    }
+
+    template<typename One>
+    inline void print(std::ostringstream &buf, One value) {
+        buf << value;
+    }
+
+    template<typename First, typename... T>
+    inline void print(std::ostringstream &buf, First value, T... other) {
+        buf << value;
+        print(buf, other...);
+    }
+
+    template<typename... T>
+    inline std::string formatMsg(T... msg) noexcept {
+        try {
+            std::ostringstream buf;
+            print(buf, msg...);
+            return buf.str();
+        } catch (...) {
+            return "";
+        }
+    }
+
+    inline std::string formatException(const char *file, const char *func,
+            int line, const char *exname, std::string why) noexcept {
         try {
             std::ostringstream buf;
             buf << exname;
-            if (why != nullptr) {
+            if (why.length() != 0) {
                 buf << ": " << why;
             }
             buf << "\n\tat " << func << "(" << file << ":" << line << ")";
             return buf.str();
         } catch (...) {
-            return why;
+            return exname;
         }
     }
 
     class JException : public std::exception {
-        std::string msg;
+        const std::string msg;
 
     public:
 
         inline JException(
                 const char *file, const char *func, int line,
-                const char* why = nullptr,
+                std::string why = "",
                 const char *exname = "JException") :
-        msg(formatException(why, file, func, exname, line)) {
+        msg(formatException(file, func, line, exname, why)) {
         }
 
         virtual const char* what() const noexcept {
@@ -40,13 +66,13 @@ namespace JIO {
         }
     };
 
-    class OutOfBoundsException : public JException {
+    class IndexOutOfBoundsException : public JException {
     public:
 
-        inline OutOfBoundsException(
+        inline IndexOutOfBoundsException(
                 const char *file, const char *func, int line,
-                const char* why = nullptr,
-                const char *exname = "OutOfBoundsException") :
+                std::string why = "",
+                const char *exname = "IndexOutOfBoundsException") :
         JException(file, func, line, why, exname) {
         }
     };
@@ -56,7 +82,7 @@ namespace JIO {
 
         inline IOException(
                 const char *file, const char *func, int line,
-                const char* why = nullptr,
+                std::string why = "",
                 const char *exname = "IOException") :
         JException(file, func, line, why, exname) {
         }
@@ -67,7 +93,7 @@ namespace JIO {
 
         inline EOFException(
                 const char *file, const char *func, int line,
-                const char* why = nullptr,
+                std::string why = "",
                 const char *exname = "EOFException") :
         IOException(file, func, line, why, exname) {
         }

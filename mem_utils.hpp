@@ -4,7 +4,7 @@
 #include <cstring>
 #include "checks.hpp"
 
-inline void copyBytesWithCkeck(void *dst, size_t dstPos,
+inline void copyBytesWithCheck(void *dst, size_t dstPos,
         const void *src, size_t srcPos, size_t length) {
     void *d = checkUBounds<void*>(dst, dstPos, length);
     const void *s = checkUBounds<const void*>(src, srcPos, length);
