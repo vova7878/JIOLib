@@ -25,7 +25,7 @@ void FileOutputStream::write(u1 byte) {
 }
 
 void FileOutputStream::write(const void *buf, s8 offset, s8 length) {
-    const char *data = SBoundsCheck<const char*>(buf, offset, length);
+    const char *data = checkSBounds<const char*>(buf, offset, length);
 
     output.write(data, length);
 

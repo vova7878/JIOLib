@@ -39,7 +39,7 @@ namespace JIO {
                 return 0;
             }
 
-            u1 *data = SBoundsCheck<u1*>(buf, offset, length);
+            u1 *data = checkSBounds<u1*>(buf, offset, length);
 
             int c = read();
             if (c == -1) {
@@ -110,7 +110,7 @@ namespace JIO {
         }
 
         virtual void write(const void *buf, s8 offset, s8 length) {
-            const u1 *data = SBoundsCheck<const u1*>(buf, offset, length);
+            const u1 *data = checkSBounds<const u1*>(buf, offset, length);
 
             for (s8 i = 0; i < length; i++) {
                 write(data[i]);

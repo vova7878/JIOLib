@@ -22,6 +22,7 @@ namespace JIO {
         u8 position;
         u8 count;
         InMemoryInputStream(const InMemoryInputStream& orig);
+        InMemoryInputStream& operator=(const InMemoryInputStream&);
     };
 
     /*class FileOutputStream : public OutputStream {

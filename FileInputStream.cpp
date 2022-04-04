@@ -27,7 +27,7 @@ s8 FileInputStream::read(void *buf, s8 offset, s8 length) {
         return 0;
     }
 
-    char *data = SBoundsCheck<char*>(buf, offset, length);
+    char *data = checkSBounds<char*>(buf, offset, length);
 
     if (input.peek() == -1) {
         return -1;
