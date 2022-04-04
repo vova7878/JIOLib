@@ -37,6 +37,16 @@ s8 InMemoryInputStream::read(void *buf, s8 offset, s8 length) {
     return avail;
 }
 
+s8 InMemoryInputStream::skip(s8 n) {
+    s8 k = count - position;
+    if (n < k) {
+        k = n < 0 ? 0 : n;
+    }
+
+    position += k;
+    return k;
+}
+
 s8 InMemoryInputStream::available() {
     return count - position;
 }

@@ -12,6 +12,7 @@ namespace JIO {
         using InputStream::read;
         virtual int read() override;
         virtual s8 read(void *buf, s8 offset, s8 length) override;
+        virtual s8 skip(s8 count) override;
         virtual s8 available() override;
 
         inline virtual ~InMemoryInputStream() {

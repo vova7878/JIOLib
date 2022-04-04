@@ -72,10 +72,6 @@ namespace JIO {
             } while (n < length);
         }
 
-        inline virtual s8 available() {
-            return 0;
-        }
-
         virtual s8 skip(s8 count) {
             constexpr const s8 SKIP_BUFFER_SIZE = 2048;
             static u1 SKIP_BUFFER[SKIP_BUFFER_SIZE];
@@ -95,6 +91,10 @@ namespace JIO {
             }
 
             return count - remaining;
+        }
+
+        inline virtual s8 available() {
+            return 0;
         }
 
         inline virtual ~InputStream() {
