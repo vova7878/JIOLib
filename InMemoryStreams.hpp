@@ -15,8 +15,7 @@ namespace JIO {
         virtual s8 skip(s8 count) override;
         virtual s8 available() override;
 
-        inline virtual ~InMemoryInputStream() {
-        }
+        inline virtual ~InMemoryInputStream() { }
     private:
         void* data;
         u8 position;

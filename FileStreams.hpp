@@ -12,8 +12,7 @@ namespace JIO {
         FileInputStream(const File file);
 
         inline FileInputStream(std::string path) :
-        FileInputStream(File(path)) {
-        }
+        FileInputStream(File(path)) { }
 
         using InputStream::read;
         virtual int read() override;
@@ -33,8 +32,7 @@ namespace JIO {
         FileOutputStream(const File file, bool append);
 
         inline FileOutputStream(std::string path, bool append) :
-        FileOutputStream(File(path), append) {
-        }
+        FileOutputStream(File(path), append) { }
 
         using OutputStream::write;
         virtual void write(u1 byte) override;

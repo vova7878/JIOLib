@@ -7,10 +7,7 @@
 
 namespace JIO {
 
-#define _src_location __FILE__, __func__, __LINE__
-
-    inline void print(std::ostringstream &buf) {
-    }
+    inline void print(std::ostringstream &buf) { }
 
     template<typename One>
     inline void print(std::ostringstream &buf, One value) {
@@ -24,25 +21,14 @@ namespace JIO {
     }
 
     template<typename... T>
-    inline std::string formatMsg(T... msg) noexcept {
-        try {
-            std::ostringstream buf;
-            print(buf, msg...);
-            return buf.str();
-        } catch (...) {
-            return "";
-        }
-    }
-
-    inline std::string formatException(const char *file, const char *func,
-            int line, const char *exname, std::string why) noexcept {
+    std::string formatMsg(const char *exname, T... msg) noexcept {
         try {
             std::ostringstream buf;
             buf << exname;
-            if (why.length() != 0) {
-                buf << ": " << why;
+            if (sizeof...(msg) != 0) {
+                buf << ": ";
+                print(buf, msg...);
             }
-            buf << "\n\tat " << func << "(" << file << ":" << line << ")";
             return buf.str();
         } catch (...) {
             return exname;
@@ -51,15 +37,15 @@ namespace JIO {
 
     class JException : public std::exception {
         const std::string msg;
+    protected:
+
+        inline JException(std::string msg) : msg(msg) { }
 
     public:
 
-        inline JException(
-                const char *file, const char *func, int line,
-                std::string why = "",
-                const char *exname = "JException") :
-        msg(formatException(file, func, line, exname, why)) {
-        }
+        template<typename... T>
+        inline JException(T... why) :
+        msg(formatMsg("JException", why...)) { }
 
         virtual const char* what() const noexcept {
             return msg.c_str();
@@ -67,36 +53,42 @@ namespace JIO {
     };
 
     class IndexOutOfBoundsException : public JException {
+    protected:
+
+        inline IndexOutOfBoundsException(std::string msg) :
+        JException(msg) { }
+
     public:
 
-        inline IndexOutOfBoundsException(
-                const char *file, const char *func, int line,
-                std::string why = "",
-                const char *exname = "IndexOutOfBoundsException") :
-        JException(file, func, line, why, exname) {
-        }
+        template<typename... T>
+        inline IndexOutOfBoundsException(T... why) :
+        JException(formatMsg("IndexOutOfBoundsException", why...)) { }
     };
 
     class IOException : public JException {
+    protected:
+
+        inline IOException(std::string msg) :
+        JException(msg) { }
+
     public:
 
-        inline IOException(
-                const char *file, const char *func, int line,
-                std::string why = "",
-                const char *exname = "IOException") :
-        JException(file, func, line, why, exname) {
-        }
+        template<typename... T>
+        inline IOException(T... why) :
+        JException(formatMsg("IOException", why...)) { }
     };
 
     class EOFException : public IOException {
+    protected:
+
+        inline EOFException(std::string msg) :
+        IOException(msg) { }
+
     public:
 
-        inline EOFException(
-                const char *file, const char *func, int line,
-                std::string why = "",
-                const char *exname = "EOFException") :
-        IOException(file, func, line, why, exname) {
-        }
+        template<typename... T>
+        inline EOFException(T... why) :
+        IOException(formatMsg("EOFException", why...)) { }
     };
 }
 

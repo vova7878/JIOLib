@@ -9,10 +9,11 @@ output() {
     if (append) {
         mode |= std::ios::in | std::ios::ate;
     }
+
     output.open(file.getPath(), mode);
 
     if (output.fail()) {
-        throw IOException(_src_location, "Unable to open file");
+        throw IOException("Unable to open file");
     }
 }
 
@@ -20,7 +21,7 @@ void FileOutputStream::write(u1 byte) {
     output.put(byte);
 
     if (output.fail()) {
-        throw IOException(_src_location, "Write error");
+        throw IOException("Write error");
     }
 }
 
@@ -30,7 +31,7 @@ void FileOutputStream::write(const void *buf, s8 offset, s8 length) {
     output.write(data, length);
 
     if (output.fail()) {
-        throw IOException(_src_location, "Write error");
+        throw IOException("Write error");
     }
 }
 
@@ -38,7 +39,7 @@ void FileOutputStream::flush() {
     output.flush();
 
     if (output.fail()) {
-        throw IOException(_src_location, "Flush error");
+        throw IOException("Flush error");
     }
 }
 

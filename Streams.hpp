@@ -67,8 +67,7 @@ namespace JIO {
             do {
                 s8 count = read(buf, offset + n, length - n);
                 if (count < 0)
-                    throw EOFException(_src_location,
-                        formatMsg("Required: ", length, " but readed: ", n));
+                    throw EOFException("Required: ", length, " but readed: ", n);
                 n += count;
             } while (n < length);
         }
@@ -98,8 +97,7 @@ namespace JIO {
             return 0;
         }
 
-        inline virtual ~InputStream() {
-        };
+        inline virtual ~InputStream() { };
     };
 
     class OutputStream {
@@ -118,11 +116,9 @@ namespace JIO {
             }
         }
 
-        inline virtual void flush() {
-        }
+        inline virtual void flush() { }
 
-        inline virtual ~OutputStream() {
-        };
+        inline virtual ~OutputStream() { };
     };
 }
 
