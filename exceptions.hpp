@@ -52,6 +52,19 @@ namespace JIO {
         }
     };
 
+    class IllegalArgumentException : public JException {
+    protected:
+
+        inline IllegalArgumentException(std::string msg) :
+        JException(msg) { }
+
+    public:
+
+        template<typename... T>
+        inline IllegalArgumentException(T... why) :
+        JException(formatMsg("IllegalArgumentException", why...)) { }
+    };
+
     class IndexOutOfBoundsException : public JException {
     protected:
 

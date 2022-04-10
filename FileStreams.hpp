@@ -23,7 +23,7 @@ namespace JIO {
     private:
         const File file;
         std::ifstream input;
-        FileInputStream(const FileInputStream& orig);
+        FileInputStream(const FileInputStream&);
         FileInputStream& operator=(const FileInputStream&);
     };
 
@@ -43,7 +43,7 @@ namespace JIO {
     private:
         const File file;
         std::ofstream output;
-        FileOutputStream(const FileOutputStream& orig);
+        FileOutputStream(const FileOutputStream&);
         FileOutputStream& operator=(const FileOutputStream&);
     };
 }

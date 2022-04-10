@@ -20,7 +20,7 @@ namespace JIO {
         void* data;
         u8 position;
         u8 count;
-        InMemoryInputStream(const InMemoryInputStream& orig);
+        InMemoryInputStream(const InMemoryInputStream&);
         InMemoryInputStream& operator=(const InMemoryInputStream&);
     };
 
