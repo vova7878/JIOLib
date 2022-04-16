@@ -20,18 +20,15 @@ namespace JIO {
 
         inline ByteBuffer(const std::shared_ptr<char> &ptr, size_t start,
                 size_t capacity) :
-        ptr_data(ptr), start(start), _capacity(capacity) {
-        }
+        ptr_data(ptr), start(start), _capacity(capacity) { }
     public:
 
         inline ByteBuffer(void *ptr, size_t start, size_t capacity) :
         ptr_data(checkUBounds<char*>(ptr, start, capacity)),
-        start(0), _capacity(capacity) {
-        }
+        start(0), _capacity(capacity) { }
 
         inline ByteBuffer(size_t capacity) :
-        ByteBuffer(new char[capacity], 0, capacity) {
-        }
+        ByteBuffer(new char[capacity], 0, capacity) { }
 
         inline void set(ByteBuffer other) {
             ptr_data = other.ptr_data;
@@ -122,17 +119,14 @@ namespace JIO {
 
         inline ByteBuffer(const std::shared_ptr<char> &ptr, size_t start,
                 size_t capacity) :
-        ByteBuffer<false>(ptr, start, capacity), _position(0) {
-        }
+        ByteBuffer<false>(ptr, start, capacity), _position(0) { }
     public:
 
         inline ByteBuffer(void *ptr, size_t start, size_t capacity) :
-        ByteBuffer<false>(ptr, start, capacity), _position(0) {
-        }
+        ByteBuffer<false>(ptr, start, capacity), _position(0) { }
 
         inline ByteBuffer(size_t capacity) : ByteBuffer<false>(capacity),
-        _position(0) {
-        }
+        _position(0) { }
 
         inline void set(ByteBuffer<true> other) {
             ptr_data = other.ptr_data;

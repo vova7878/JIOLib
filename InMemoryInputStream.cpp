@@ -6,8 +6,7 @@ using namespace JIO;
 InMemoryInputStream::InMemoryInputStream(void *data, u8 offset, u8 length) :
 data(checkUBounds<void*>(data, offset, length)),
 position(0),
-count(length) {
-}
+count(length) { }
 
 int InMemoryInputStream::read() {
     u1 *tmp = reinterpret_cast<u1*> (data);
