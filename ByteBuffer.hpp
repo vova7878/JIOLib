@@ -116,7 +116,7 @@ namespace JIO {
     };
 
     template<>
-    class ByteBuffer <true> : private ByteBuffer<false> {
+    class ByteBuffer <true> : public ByteBuffer<false> {
     private:
         size_t _position;
 
@@ -145,7 +145,6 @@ namespace JIO {
         using ByteBuffer<false>::put;
         using ByteBuffer<false>::getObject;
         using ByteBuffer<false>::putObject;
-        using ByteBuffer<false>::operator[];
 
         inline void get(void *dst, size_t length) {
             size_t tmp = _position;
