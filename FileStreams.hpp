@@ -19,7 +19,7 @@ namespace JIO {
         virtual s8 read(void *buf, s8 offset, s8 length) override;
         virtual s8 available() override;
 
-        virtual ~FileInputStream();
+        virtual ~FileInputStream() override;
     private:
         const File file;
         std::ifstream input;
@@ -39,7 +39,7 @@ namespace JIO {
         virtual void write(const void *buf, s8 offset, s8 length) override;
         virtual void flush() override;
 
-        virtual ~FileOutputStream();
+        virtual ~FileOutputStream() override;
     private:
         const File file;
         std::ofstream output;

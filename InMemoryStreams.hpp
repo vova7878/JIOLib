@@ -15,7 +15,8 @@ namespace JIO {
         virtual s8 skip(s8 count) override;
         virtual s8 available() override;
 
-        inline virtual ~InMemoryInputStream() { }
+        inline virtual ~InMemoryInputStream() override {
+        }
     private:
         void* data;
         u8 position;
@@ -24,12 +25,10 @@ namespace JIO {
         InMemoryInputStream& operator=(const InMemoryInputStream&);
     };
 
-    /*class FileOutputStream : public OutputStream {
+    /*class InMemoryOutputStream : public OutputStream {
     public:
-        FileOutputStream(const File file, bool append);
 
-        inline FileOutputStream(std::string path, bool append) :
-        FileOutputStream(File(path), append) {
+        inline InMemoryOutputStream() {
         }
 
         using OutputStream::write;
@@ -37,11 +36,10 @@ namespace JIO {
         virtual void write(const void *buf, s8 offset, s8 length) override;
         virtual void flush() override;
 
-        virtual ~FileOutputStream();
+        virtual ~InMemoryOutputStream() override;
     private:
-        const File file;
-        std::ofstream output;
-        FileOutputStream(const FileOutputStream& orig);
+        InMemoryOutputStream(const InMemoryOutputStream&);
+        InMemoryOutputStream& operator=(const InMemoryOutputStream&);
     };*/
 }
 
