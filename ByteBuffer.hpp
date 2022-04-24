@@ -46,7 +46,7 @@ namespace JIO {
             start = other.start;
         }
 
-        inline size_t capacity() {
+        inline size_t capacity() const {
             return _capacity;
         }
 
@@ -118,6 +118,7 @@ namespace JIO {
         }
 
         ByteBuffer<true> operator[](size_t);
+        const ByteBuffer<true> operator[](size_t) const;
 
         friend ByteBuffer<true>;
     };
@@ -125,7 +126,7 @@ namespace JIO {
     template<>
     class ByteBuffer <true> : public ByteBuffer<false> {
     private:
-        size_t _position;
+        mutable size_t _position;
 
         inline ByteBuffer(const std::shared_ptr<char> &ptr, size_t start,
                 size_t capacity) :
@@ -153,7 +154,7 @@ namespace JIO {
         using ByteBuffer<false>::getObject;
         using ByteBuffer<false>::putObject;
 
-        inline void get(void *dst, size_t length) {
+        inline void get(void *dst, size_t length) const {
             size_t tmp = _position;
             get(tmp, dst, length);
             _position = tmp + length;
@@ -195,7 +196,7 @@ namespace JIO {
             return _position;
         }
 
-        inline void position(size_t newPosition) {
+        inline void position(size_t newPosition) const {
             if (newPosition > _capacity) {
                 throw IllegalArgumentException(
                         "newPosition > capacity: (",
@@ -211,6 +212,12 @@ namespace JIO {
         }
 
         template<typename T>
+        const ByteBuffer<true>& operator>>(T &obj) const {
+            getObject(obj);
+            return *this;
+        }
+
+        template<typename T>
         ByteBuffer<true>& operator>>(T &obj) {
             getObject(obj);
             return *this;
@@ -220,6 +227,13 @@ namespace JIO {
     };
 
     inline ByteBuffer<true> ByteBuffer<false>::operator[](size_t pos) {
+        ByteBuffer<true> out(ptr_data, start, _capacity);
+        out.position(pos);
+        return out;
+    }
+
+    inline const ByteBuffer<true>
+    ByteBuffer<false>::operator[](size_t pos) const {
         ByteBuffer<true> out(ptr_data, start, _capacity);
         out.position(pos);
         return out;
