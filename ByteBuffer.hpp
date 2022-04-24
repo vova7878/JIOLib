@@ -11,6 +11,12 @@ namespace JIO {
     template<bool>
     class ByteBuffer;
 
+    void free_deleter(void *ptr) {
+        free(ptr);
+    }
+
+    void null_deleter(void*) { }
+
     template<>
     class ByteBuffer<false> {
     private:
@@ -24,18 +30,9 @@ namespace JIO {
     public:
 
         inline ByteBuffer(void *ptr, size_t start, size_t capacity, bool clean) :
-        start(0), _capacity(capacity) {
-            if (clean) {
-                ptr_data = std::shared_ptr<char>(
-                        checkUBounds<char*>(ptr, start, capacity));
-            } else {
-                ptr_data = std::shared_ptr<char>(
-                        checkUBounds<char*>(ptr, start, capacity),
-                        [](char*) {
-                        }
-                );
-            }
-        }
+        ptr_data(checkUBounds<char*>(ptr, start, capacity),
+        clean ? free_deleter : null_deleter)
+        , start(0), _capacity(capacity) { }
 
         inline ByteBuffer(void *ptr, size_t start, size_t capacity) :
         ByteBuffer(ptr, start, capacity, true) { }
