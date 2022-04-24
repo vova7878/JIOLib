@@ -167,7 +167,7 @@ namespace JIO {
         }
 
         template<typename T>
-        inline void getObject(T &obj) {
+        inline void getObject(T &obj) const {
             get(&obj, sizeof (T));
         }
 
