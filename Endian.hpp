@@ -16,22 +16,22 @@ namespace JIO {
     class EInteger_Impl <T, false> : private TypeArray<T> {
     public:
 
-        EInteger_Impl() {
+        inline EInteger_Impl() {
             operator=(0);
         }
 
-        EInteger_Impl(T value) {
+        inline EInteger_Impl(T value) {
             operator=(value);
         }
 
-        EInteger_Impl(const EInteger_Impl<T, true> &other) {
+        inline EInteger_Impl(const EInteger_Impl<T, true> &other) {
             size_t offset = sizeof (T) - 1;
             for (unsigned i = 0; i < sizeof (T); i++) {
                 this->bytes[i] = other.bytes[offset - i];
             }
         }
 
-        operator const T() const {
+        inline operator const T() const {
             T value = 0;
             size_t offset = sizeof (T) - 1;
             for (int i = 0; i < sizeof (T); i++)
@@ -39,7 +39,7 @@ namespace JIO {
             return value;
         }
 
-        const T operator=(const T value) {
+        inline const T operator=(const T value) {
             size_t offset = sizeof (T) - 1;
             for (int i = 0; i < sizeof (T); i++)
                 this->bytes[offset - i] = value >> (i << 3);
@@ -53,29 +53,29 @@ namespace JIO {
     class EInteger_Impl <T, true> : private TypeArray<T> {
     public:
 
-        EInteger_Impl() {
+        inline EInteger_Impl() {
             operator=(0);
         }
 
-        EInteger_Impl(T value) {
+        inline EInteger_Impl(T value) {
             operator=(value);
         }
 
-        EInteger_Impl(const EInteger_Impl<T, false> &other) {
+        inline EInteger_Impl(const EInteger_Impl<T, false> &other) {
             size_t offset = sizeof (T) - 1;
             for (unsigned i = 0; i < sizeof (T); i++) {
                 this->bytes[i] = other.bytes[offset - i];
             }
         }
 
-        operator const T() const {
+        inline operator const T() const {
             T value = 0;
             for (int i = 0; i < sizeof (T); i++)
                 value |= T(this->bytes[i]) << (i << 3);
             return value;
         }
 
-        const T operator=(const T value) {
+        inline const T operator=(const T value) {
             for (int i = 0; i < sizeof (T); i++)
                 this->bytes[i] = value >> (i << 3);
             return value;
