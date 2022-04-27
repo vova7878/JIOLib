@@ -39,4 +39,10 @@ namespace JIO {
     typedef double f8;
     static_assert(sizeof (f8) == 8, "Size of double is not 8 byte");
 
+    typedef EFloat<f4, u4, true> f4_le;
+    typedef EFloat<f8, u8, true> f8_le;
+
+    typedef EFloat<f4, u4, false> f4_be;
+    typedef EFloat<f8, u8, false> f8_be;
+
 }
