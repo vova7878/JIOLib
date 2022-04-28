@@ -11,11 +11,11 @@ namespace JIO {
     template<bool>
     class ByteBuffer;
 
-    void free_deleter(void *ptr) {
+    inline void free_deleter(void *ptr) {
         free(ptr);
     }
 
-    void null_deleter(void*) { }
+    inline void null_deleter(void*) { }
 
     template<>
     class ByteBuffer<false> {
