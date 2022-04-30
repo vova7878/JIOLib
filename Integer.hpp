@@ -142,31 +142,65 @@ struct Operators_Impl : public T {
     inline Operators_Impl(const T &obj) : T(obj) { }
 
     inline Operators_Impl operator+(const Operators_Impl other) const {
-        return Operators_Impl::value + other.value;
+        return T::value + other.value;
     }
 
     inline Operators_Impl operator-(const Operators_Impl other) const {
-        return Operators_Impl::value - other.value;
+        return T::value - other.value;
+    }
+
+    inline Operators_Impl operator+() const {
+        return *this;
+    }
+
+    inline Operators_Impl operator-() const {
+        return -T::value;
+    }
+
+    inline Operators_Impl& operator++() {
+        ++T::value;
+        return *this;
+    }
+
+    inline Operators_Impl& operator--() {
+        --T::value;
+        return *this;
+    }
+
+    inline Operators_Impl operator++(int) {
+        Operators_Impl tmp = *this;
+        operator++();
+        return tmp;
+    }
+
+    inline Operators_Impl operator--(int) {
+        Operators_Impl tmp = *this;
+        operator--();
+        return tmp;
     }
 
     inline Operators_Impl operator*(const Operators_Impl other) const {
-        return Operators_Impl::value * other.value;
+        return T::value * other.value;
     }
 
     inline Operators_Impl operator|(const Operators_Impl other) const {
-        return Operators_Impl::value | other.value;
+        return T::value | other.value;
     }
 
     inline Operators_Impl operator&(const Operators_Impl other) const {
-        return Operators_Impl::value & other.value;
+        return T::value & other.value;
     }
 
     inline Operators_Impl operator^(const Operators_Impl other) const {
-        return Operators_Impl::value ^ other.value;
+        return T::value ^ other.value;
+    }
+
+    inline Operators_Impl operator~() const {
+        return ~T::value;
     }
 
     inline Operators_Impl operator<<(const Operators_Impl other) const {
-        return Operators_Impl::value << (other.value & T::shmask);
+        return T::value << (other.value & T::shmask);
     }
 };
 
@@ -210,12 +244,142 @@ struct Integer_Impl<8, true> {
     typedef Operators_Impl<Integer_S<uint64_t, int64_t>> type;
 };
 
-/*template<size_t size, bool sig>
+template<size_t half, bool sig>
+struct Pow2_Integer_Impl;
+
+template<size_t size, bool sig>
 struct Integer_Impl <size, sig, IType::pow2> {
-    typedef Operators_Impl<Integer_S<uint64_t, int64_t>> type;
-};*/
+    typedef Pow2_Integer_Impl<size / 2, sig> type;
+};
 
 template<size_t size, bool sig>
 using Integer = typename Integer_Impl<size, sig>::type;
+
+template<size_t half, bool sig>
+struct Pow2_Integer_Base;
+
+template<size_t half>
+struct Pow2_Integer_Base<half, false> {
+private:
+    typedef Integer<half, true> S;
+    typedef Integer<half, false> U;
+    U low, high;
+public:
+
+    inline Pow2_Integer_Base() : low(0), high(0) { }
+
+    inline Pow2_Integer_Base(U low) : low(low), high(0) { }
+
+    inline Pow2_Integer_Base(U low, U high) : low(low), high(high) { }
+
+    friend Pow2_Integer_Impl<half, false>;
+};
+
+template<size_t half, bool sig>
+struct Pow2_Integer_Impl : Pow2_Integer_Base<half, sig> {
+private:
+    typedef typename Pow2_Integer_Base<half, sig>::S S;
+    typedef typename Pow2_Integer_Base<half, sig>::U U;
+    typedef Pow2_Integer_Base<half, sig> T;
+    typedef Pow2_Integer_Impl<half, sig> I;
+
+    inline static void increment(I &value) {
+        U &tmp = ++value.low;
+        if (!bool(tmp)) {
+            ++value.high;
+        }
+    }
+
+    inline static void decrement(I &value) {
+        if (!bool(value.low)) {
+            --value.high;
+        }
+        --value.low;
+    }
+public:
+    using T::T;
+
+    inline Pow2_Integer_Impl(const T &obj) : T(obj) { }
+
+    inline U getLow() const {
+        return T::low;
+    }
+
+    inline U getHigh() const {
+        return T::high;
+    }
+
+    explicit inline operator U() const {
+        return T::low;
+    }
+
+    explicit inline operator bool() const {
+        return T::low && T::high;
+    }
+
+    inline I& operator++() {
+        increment(*this);
+        return *this;
+    }
+
+    inline I& operator--() {
+        decrement(*this);
+        return *this;
+    }
+
+    inline I operator++(int) {
+        I tmp = *this;
+        operator++();
+        return tmp;
+    }
+
+    inline I operator--(int) {
+        I tmp = *this;
+        operator--();
+        return tmp;
+    }
+
+    inline I operator+() const {
+        return *this;
+    }
+
+    inline I operator-() const {
+        I tmp = ~(*this);
+        ++tmp;
+        return tmp;
+    }
+
+    /*inline Operators_Impl operator+(const Operators_Impl other) const {
+        return Operators_Impl::value + other.value;
+    }
+
+    inline Operators_Impl operator-(const Operators_Impl other) const {
+        return Operators_Impl::value - other.value;
+    }
+
+    inline Operators_Impl operator*(const Operators_Impl other) const {
+        return Operators_Impl::value * other.value;
+    }
+
+    inline Operators_Impl operator<<(const Operators_Impl other) const {
+        return Operators_Impl::value << (other.value & T::shmask);
+    }*/
+
+    inline I operator|(const I other) const {
+        return I(T::low | other.low, T::high | other.high);
+    }
+
+    inline I operator&(const I other) const {
+        return I(T::low & other.low, T::high & other.high);
+    }
+
+    inline I operator^(const I other) const {
+        return I(T::low ^ other.low, T::high ^ other.high);
+    }
+
+    inline I operator~() const {
+        return I(~T::low, ~T::high);
+    }
+};
 
 #endif /* INTEGER_HPP */
