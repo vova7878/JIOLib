@@ -3,13 +3,47 @@
 
 #include <cstdint>
 
-constexpr size_t lowestOneBit(size_t i) {
+constexpr inline size_t lowestOneBit(size_t i) {
     // HD, Section 2-1
     return i & -i;
 }
 
-constexpr bool isOneBit(size_t i) {
+constexpr inline bool isOneBit(size_t i) {
     return lowestOneBit(i) == i;
+}
+
+constexpr inline size_t numberOfLeadingZeros2Bit(uint8_t i) {
+    return !i ? 2 : (1 - (i >> 1));
+}
+
+constexpr inline size_t numberOfLeadingZeros4Bit(uint8_t i) {
+    return (i >= 1 << 2) ? numberOfLeadingZeros2Bit(i >> 2) :
+            numberOfLeadingZeros2Bit(i) + 2;
+}
+
+constexpr inline size_t numberOfLeadingZeros(uint8_t i) {
+    return (i >= 1 << 4) ? numberOfLeadingZeros4Bit(i >> 4) :
+            numberOfLeadingZeros4Bit(i) + 4;
+}
+
+constexpr inline size_t numberOfLeadingZeros(uint16_t i) {
+    return (i >= 1 << 8) ? numberOfLeadingZeros(uint8_t(i >> 8)) :
+            numberOfLeadingZeros(uint8_t(i)) + 8;
+}
+
+constexpr inline size_t numberOfLeadingZeros(uint32_t i) {
+    return (i >= 1 << 16) ? numberOfLeadingZeros(uint16_t(i >> 16)) :
+            numberOfLeadingZeros(uint16_t(i)) + 16;
+}
+
+constexpr inline size_t numberOfLeadingZeros(uint64_t i) {
+    return (i >= uint64_t(1) << 32) ? numberOfLeadingZeros(uint32_t(i >> 32)) :
+            numberOfLeadingZeros(uint32_t(i)) + 32;
+}
+
+template <typename T>
+constexpr inline size_t logb2(T value) {
+    return sizeof (T) * 8 - numberOfLeadingZeros(value);
 }
 
 enum IType {
@@ -21,21 +55,9 @@ enum IType {
 };
 
 constexpr IType getIntegerType(size_t size) {
-    /*if (size == 0) {
-        return IType::illegal;
-    }
-    if (size == 1 || size == 2 || size == 4 || size == 8) {
-        return IType::native;
-    }
-    if (isOneBit(size)) {
-        return IType::pow2;
-    }
-    if ((size & 3) == 0) {
-        return IType::s4;
-    }
-    return IType::other;*/
     return (size == 1 || size == 2 || size == 4 || size == 8) ? IType::native :
-            (isOneBit(size) ? IType::pow2 : IType::other);
+            (isOneBit(size) ? IType::pow2 :
+            (size == 0 ? IType::illegal : IType::other));
 }
 
 template<size_t size, bool sig, IType = getIntegerType(size)>
@@ -51,6 +73,7 @@ template<typename U, typename S>
 class Integer_U {
 private:
     U value;
+    const static U shmask = (U(~U(0)))>>(numberOfLeadingZeros(U(sizeof (U) * 8)) + 1);
 public:
 
     inline Integer_U() : value(0) { }
@@ -72,6 +95,10 @@ public:
         return value % other.value;
     }
 
+    inline Integer_U operator>>(const Integer_U other) const {
+        return value >> (other.value & shmask);
+    }
+
     friend Operators_Impl<Integer_U<U, S>>;
 };
 
@@ -79,6 +106,7 @@ template<typename U, typename S>
 class Integer_S {
 private:
     U value;
+    static const U shmask = (U(~U(0)))>>(numberOfLeadingZeros(U(sizeof (U) * 8)) + 1);
 public:
 
     inline Integer_S() : value(0) { }
@@ -98,6 +126,10 @@ public:
 
     inline Integer_S operator%(const Integer_S other) const {
         return S(value) % S(other.value);
+    }
+
+    inline Integer_S operator>>(const Integer_S other) const {
+        return S(value) >> S(other.value & shmask);
     }
 
     friend Operators_Impl<Integer_S<U, S>>;
@@ -134,7 +166,7 @@ struct Operators_Impl : public T {
     }
 
     inline Operators_Impl operator<<(const Operators_Impl other) const {
-        return Operators_Impl::value << other;
+        return Operators_Impl::value << (other.value & T::shmask);
     }
 };
 
