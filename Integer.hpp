@@ -550,6 +550,16 @@ constexpr inline bool can_upcast() {
     return size >= sizeof (T);
 }
 
+template<typename T, enable_if(!std::is_integral<T>::value)>
+constexpr inline bool is_integral() {
+    return false;
+}
+
+template<typename T, enable_if(std::is_integral<T>::value)>
+constexpr inline bool is_integral() {
+    return true;
+}
+
 template<typename T, enable_if(!std::is_signed<T>::value)>
 constexpr inline bool is_signed() {
     return false;
@@ -665,8 +675,30 @@ public:
 
     template<size_t size2, bool sig2,
     enable_if(size2 < size)>
-    explicit inline operator Integer<size2, sig2>() const {
+    constexpr explicit inline operator Integer<size2, sig2>() const {
         return downcast<size2, sig2>();
+    }
+
+    template<typename T, enable_if((is_integral<T>())&&
+            (getIntegerType(size) == native) &&
+            (sizeof (T) >= size))>
+    constexpr inline operator T() const {
+        return T(castUS<typename V::U, typename V::S,
+                sig, typename V::U > (value.value));
+    }
+
+    template<typename T, enable_if((is_integral<T>())&&
+            (getIntegerType(size) == native) &&
+            (sizeof (T) < size))>
+    constexpr explicit inline operator T() const {
+        return T(value.value);
+    }
+
+    template<typename T, enable_if((is_integral<T>())&&
+            (getIntegerType(size) != native) &&
+            (sizeof (T) < size))>
+    constexpr explicit inline operator T() const {
+        return T(Integer<sizeof (T), is_signed<T>()>(*this));
     }
 
     template<size_t size1, bool sig1, size_t size2, bool sig2>
