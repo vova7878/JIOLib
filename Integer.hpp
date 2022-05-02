@@ -56,14 +56,15 @@ enum IType {
     illegal = 0,
     native,
     pow2,
-    s4,
+    u4array,
     other
 };
 
 constexpr IType getIntegerType(size_t size) {
-    return (size == 1 || size == 2 || size == 4 || size == 8) ? IType::native :
-            (isOneBit(size) ? IType::pow2 :
-            (size == 0 ? IType::illegal : IType::other));
+    return (size == 1 || size == 2 || size == 4 || size == 8) ? native :
+            (size == 0 ? illegal :
+            (isOneBit(size) ? pow2 :
+            ((size & 3) == 0 ? u4array : other)));
 }
 
 template<size_t size, bool sig>
@@ -403,7 +404,8 @@ public:
                 (low <= other.low));
     }
 
-    friend Pow2_Integer_Impl<half, true>;
+    template<size_t size2, bool sig2>
+    friend class Pow2_Integer_Impl;
 
     template<size_t size2, bool sig2>
     friend class Integer;
@@ -497,15 +499,7 @@ public:
         return *this +(-other);
     }
 
-    /*inline Operators_Impl operator+(const Operators_Impl other) const {
-        return Operators_Impl::value + other.value;
-    }
-
-    inline Operators_Impl operator-(const Operators_Impl other) const {
-        return Operators_Impl::value - other.value;
-    }
-
-    inline Operators_Impl operator*(const Operators_Impl other) const {
+    /*inline Operators_Impl operator*(const Operators_Impl other) const {
         return Operators_Impl::value * other.value;
     }
 
@@ -547,12 +541,12 @@ using enable_if_t = typename std::enable_if<A, int>::type;
 #define enable_if(B) enable_if_t<(B)> = 0
 
 template<typename T, size_t size, enable_if(!std::is_integral<T>::value)>
-constexpr inline bool is_allowed_integer() {
+constexpr inline bool can_upcast() {
     return false;
 }
 
 template<typename T, size_t size, enable_if(std::is_integral<T>::value)>
-constexpr inline bool is_allowed_integer() {
+constexpr inline bool can_upcast() {
     return size >= sizeof (T);
 }
 
@@ -566,11 +560,30 @@ constexpr inline bool is_signed() {
     return true;
 }
 
+template<typename U, typename S, bool sig, typename V, enable_if(sig)>
+constexpr inline S castUS(V value) {
+    return S(value);
+}
+
+template<typename U, typename S, bool sig, typename V, enable_if(!sig)>
+constexpr inline U castUS(V value) {
+    return U(value);
+}
+
 template<size_t size, bool sig>
 struct Integer {
 private:
     using V = typename Integer_Impl<size, sig>::type;
     V value;
+
+    template<size_t size2, bool sig2,
+    enable_if((getIntegerType(size) == native) &&
+            (getIntegerType(size2) == native))>
+    constexpr inline Integer<size2, sig2> upcast() const {
+        using I = Integer<size2, sig2>;
+        return typename I::V(castUS<typename I::V::U, typename I::V::S,
+                sig, typename V::U > (value.value));
+    }
 
     template<size_t size2, bool sig2,
     enable_if((size == size2) && (getIntegerType(size) == pow2))>
@@ -580,39 +593,30 @@ private:
     }
 
     template<size_t size2, bool sig2,
-    enable_if(sig && (getIntegerType(size) == native) &&
-            (getIntegerType(size2) == native))>
-    constexpr inline Integer<size2, sig2> upcast() const {
-        using I = Integer<size2, sig2>;
-        return typename I::V(typename V::S(value.value));
-    }
-
-    template<size_t size2, bool sig2,
-    enable_if((!sig) && (getIntegerType(size) == native) &&
-            (getIntegerType(size2) == native))>
-    constexpr inline Integer<size2, sig2> upcast() const {
-        using I = Integer<size2, sig2>;
-        return typename I::V(value.value);
-    }
-
-    template<size_t size2, bool sig2,
-    enable_if((size != size2) && sig &&
+    enable_if((size != size2) &&
             ((getIntegerType(size) == native) ||
             (getIntegerType(size) == pow2)) &&
             (getIntegerType(size2) == pow2))>
     constexpr inline Integer<size2, sig2> upcast() const {
         using I = Integer<size2, sig2>;
-        return typename I::V(this->operator typename I::V::S());
+        return typename I::V(castUS<typename I::V::U, typename I::V::S,
+                sig, Integer<size, sig> > (*this));
     }
 
     template<size_t size2, bool sig2,
-    enable_if((size != size2) && (!sig) &&
-            ((getIntegerType(size) == native) ||
-            (getIntegerType(size) == pow2)) &&
-            (getIntegerType(size2) == pow2))>
-    constexpr inline Integer<size2, sig2> upcast() const {
+    enable_if((getIntegerType(size) == native) &&
+            (getIntegerType(size2) == native))>
+    constexpr inline Integer<size2, sig2> downcast() const {
         using I = Integer<size2, sig2>;
-        return typename I::V(this->operator typename I::V::U());
+        return typename I::V(typename I::V::U(value.value));
+    }
+
+    template<size_t size2, bool sig2,
+    enable_if((getIntegerType(size) == pow2) &&
+            (getIntegerType(size2) == native))>
+    constexpr inline Integer<size2, sig2> downcast() const {
+        using I = Integer<size2, sig2>;
+        return I(value.low);
     }
 
     constexpr inline Integer p1() const {
@@ -626,14 +630,30 @@ private:
     constexpr inline Integer(const V n) : value(n) { }
 public:
 
+    constexpr inline static size_t SIZE() {
+        return size;
+    };
+
+    constexpr inline static bool IS_SIGNED() {
+        return sig;
+    };
+
+    constexpr inline static Integer ZERO() {
+        return Integer();
+    };
+
+    constexpr inline static Integer ONE() {
+        return ZERO().p1();
+    };
+
     constexpr inline Integer() : value() { }
 
     template<typename T, enable_if((getIntegerType(size) == native) &&
-            (is_allowed_integer<T, size>()))>
+            (can_upcast<T, size>()))>
     constexpr inline Integer(const T n) : value(n) { }
 
     template<typename T, enable_if((getIntegerType(size) != native) &&
-            (is_allowed_integer<T, size>()))>
+            (can_upcast<T, size>()))>
     constexpr inline Integer(const T n) :
     value(Integer(Integer<sizeof (T), is_signed<T>()>(n)).value) { }
 
@@ -646,7 +666,7 @@ public:
     template<size_t size2, bool sig2,
     enable_if(size2 < size)>
     explicit inline operator Integer<size2, sig2>() const {
-        throw std::runtime_error("Not implemented yet");
+        return downcast<size2, sig2>();
     }
 
     template<size_t size1, bool sig1, size_t size2, bool sig2>
