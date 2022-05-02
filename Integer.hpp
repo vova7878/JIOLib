@@ -194,6 +194,38 @@ struct Operators_Impl : public T {
         return Operators_Impl(T::value - other.value);
     }
 
+    constexpr inline Operators_Impl operator*(const Operators_Impl &other) const {
+        return Operators_Impl(T::value * other.value);
+    }
+
+    constexpr inline Operators_Impl operator|(const Operators_Impl &other) const {
+        return Operators_Impl(T::value | other.value);
+    }
+
+    constexpr inline Operators_Impl operator&(const Operators_Impl &other) const {
+        return Operators_Impl(T::value & other.value);
+    }
+
+    constexpr inline Operators_Impl operator^(const Operators_Impl &other) const {
+        return Operators_Impl(T::value ^ other.value);
+    }
+
+    constexpr inline Operators_Impl operator<<(const Operators_Impl &other) const {
+        return Operators_Impl(T::value << (other.value & T::shmask));
+    }
+
+    constexpr inline bool operator==(const Operators_Impl &other) const {
+        return T::value == other.value;
+    }
+
+    constexpr inline bool operator!=(const Operators_Impl &other) const {
+        return T::value != other.value;
+    }
+
+    constexpr inline Operators_Impl operator~() const {
+        return Operators_Impl(~T::value);
+    }
+
     inline Operators_Impl& operator++() {
         ++T::value;
         return *this;
@@ -214,38 +246,6 @@ struct Operators_Impl : public T {
         Operators_Impl tmp = *this;
         operator--();
         return tmp;
-    }
-
-    constexpr inline Operators_Impl operator*(const Operators_Impl &other) const {
-        return Operators_Impl(T::value * other.value);
-    }
-
-    constexpr inline Operators_Impl operator|(const Operators_Impl &other) const {
-        return Operators_Impl(T::value | other.value);
-    }
-
-    constexpr inline Operators_Impl operator&(const Operators_Impl &other) const {
-        return Operators_Impl(T::value & other.value);
-    }
-
-    constexpr inline Operators_Impl operator^(const Operators_Impl &other) const {
-        return Operators_Impl(T::value ^ other.value);
-    }
-
-    constexpr inline Operators_Impl operator~() const {
-        return Operators_Impl(~T::value);
-    }
-
-    constexpr inline Operators_Impl operator<<(const Operators_Impl &other) const {
-        return Operators_Impl(T::value << (other.value & T::shmask));
-    }
-
-    constexpr inline bool operator==(const Operators_Impl &other) const {
-        return T::value == other.value;
-    }
-
-    constexpr inline bool operator!=(const Operators_Impl &other) const {
-        return T::value != other.value;
     }
 };
 
@@ -312,9 +312,11 @@ public:
 
     constexpr explicit inline Pow2_Integer_Base(U low) : low(low), high() { }
 
-    constexpr explicit inline Pow2_Integer_Base(S low) : low(low), high((low < S()) ? ~U() : U()) { }
+    constexpr explicit inline Pow2_Integer_Base(S low) :
+    low(low), high((low < S()) ? ~U() : U()) { }
 
-    constexpr explicit inline Pow2_Integer_Base(U low, U high) : low(low), high(high) { }
+    constexpr explicit inline Pow2_Integer_Base(U low, U high) :
+    low(low), high(high) { }
 
     constexpr inline bool operator>(const Pow2_Integer_Base &other) const {
         return (S(high) > S(other.high)) ? true :
@@ -358,9 +360,11 @@ public:
 
     constexpr explicit inline Pow2_Integer_Base(U low) : low(low), high() { }
 
-    constexpr explicit inline Pow2_Integer_Base(S low) : low(low), high((low < S()) ? ~S() : S()) { }
+    constexpr explicit inline Pow2_Integer_Base(S low) :
+    low(low), high((low < S()) ? ~S() : S()) { }
 
-    constexpr explicit inline Pow2_Integer_Base(U low, S high) : low(low), high(high) { }
+    constexpr explicit inline Pow2_Integer_Base(U low, S high) :
+    low(low), high(high) { }
 
     constexpr inline bool operator>(const Pow2_Integer_Base &other) const {
         return (high > other.high) ? true :
@@ -515,99 +519,30 @@ public:
     friend class Integer;
 };
 
-template<typename T, size_t size>
-struct is_allowed_integer {
-    const static bool b = false;
-};
-
-template<size_t size>
-struct is_allowed_integer<int8_t, size> {
-    const static bool b = size >= 1;
-};
-
-template<size_t size>
-struct is_allowed_integer<uint8_t, size> {
-    const static bool b = size >= 1;
-};
-
-template<size_t size>
-struct is_allowed_integer<int16_t, size> {
-    const static bool b = size >= 2;
-};
-
-template<size_t size>
-struct is_allowed_integer<uint16_t, size> {
-    const static bool b = size >= 2;
-};
-
-template<size_t size>
-struct is_allowed_integer<int32_t, size> {
-    const static bool b = size >= 4;
-};
-
-template<size_t size>
-struct is_allowed_integer<uint32_t, size> {
-    const static bool b = size >= 4;
-};
-
-template<size_t size>
-struct is_allowed_integer<int64_t, size> {
-    const static bool b = size >= 8;
-};
-
-template<size_t size>
-struct is_allowed_integer<uint64_t, size> {
-    const static bool b = size >= 8;
-};
-
-template<typename T>
-struct is_signed {
-};
-
-template<>
-struct is_signed<int8_t> {
-    const static bool b = true;
-};
-
-template<>
-struct is_signed<uint8_t> {
-    const static bool b = false;
-};
-
-template<>
-struct is_signed<int16_t> {
-    const static bool b = true;
-};
-
-template<>
-struct is_signed<uint16_t> {
-    const static bool b = false;
-};
-
-template<>
-struct is_signed<int32_t> {
-    const static bool b = true;
-};
-
-template<>
-struct is_signed<uint32_t> {
-    const static bool b = false;
-};
-
-template<>
-struct is_signed<int64_t> {
-    const static bool b = true;
-};
-
-template<>
-struct is_signed<uint64_t> {
-    const static bool b = false;
-};
-
 template<bool A>
 using enable_if_t = typename std::enable_if<A, int>::type;
 
 #define enable_if(B) enable_if_t<(B)> = 0
+
+template<typename T, size_t size, enable_if(!std::is_integral<T>::value)>
+constexpr inline bool is_allowed_integer() {
+    return false;
+}
+
+template<typename T, size_t size, enable_if(std::is_integral<T>::value)>
+constexpr inline bool is_allowed_integer() {
+    return size >= sizeof (T);
+}
+
+template<typename T, enable_if(!std::is_signed<T>::value)>
+constexpr inline bool is_signed() {
+    return false;
+}
+
+template<typename T, enable_if(std::is_signed<T>::value)>
+constexpr inline bool is_signed() {
+    return true;
+}
 
 template<size_t size, bool sig>
 struct Integer {
@@ -639,7 +574,8 @@ private:
     }
 
     template<size_t size2, bool sig2,
-    enable_if((size != size2) && sig && ((getIntegerType(size) == native) ||
+    enable_if((size != size2) && sig &&
+            ((getIntegerType(size) == native) ||
             (getIntegerType(size) == pow2)) &&
             (getIntegerType(size2) == pow2))>
     constexpr inline Integer<size2, sig2> upcast() const {
@@ -648,7 +584,8 @@ private:
     }
 
     template<size_t size2, bool sig2,
-    enable_if((size != size2) && (!sig) && ((getIntegerType(size) == native) ||
+    enable_if((size != size2) && (!sig) &&
+            ((getIntegerType(size) == native) ||
             (getIntegerType(size) == pow2)) &&
             (getIntegerType(size2) == pow2))>
     constexpr inline Integer<size2, sig2> upcast() const {
@@ -662,13 +599,13 @@ public:
     constexpr inline Integer() : value() { }
 
     template<typename T, enable_if((getIntegerType(size) == native) &&
-            (is_allowed_integer<T, size>::b))>
+            (is_allowed_integer<T, size>()))>
     constexpr inline Integer(const T n) : value(n) { }
 
     template<typename T, enable_if((getIntegerType(size) != native) &&
-            (is_allowed_integer<T, size>::b))>
+            (is_allowed_integer<T, size>()))>
     constexpr inline Integer(const T n) :
-    value(Integer(Integer<sizeof (T), is_signed<T>::b>(n)).value) { }
+    value(Integer(Integer<sizeof (T), is_signed<T>()>(n)).value) { }
 
     template<size_t size2, bool sig2,
     enable_if(size2 >= size)>
