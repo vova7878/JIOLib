@@ -247,6 +247,19 @@ struct Operators_Impl : public T {
         operator--();
         return tmp;
     }
+
+private:
+
+    constexpr inline Operators_Impl p1() const {
+        return Operators_Impl(T::value + 1);
+    }
+
+    constexpr inline Operators_Impl m1() const {
+        return Operators_Impl(T::value - 1);
+    }
+
+    template<size_t size, bool sig>
+    friend class Integer;
 };
 
 template<>
@@ -417,6 +430,22 @@ private:
         }
         --value.low;
     }
+
+    constexpr inline static I p1_helper(U low, U high) {
+        return I(low, low == U() ? high.p1() : high);
+    }
+
+    constexpr inline static I plus_helper(U low, U oldlow, U high) {
+        return I(low, low < oldlow ? high.p1() : high);
+    }
+
+    constexpr inline I p1() const {
+        return p1_helper(T::low.p1(), T::high);
+    }
+
+    constexpr inline I m1() const {
+        return I(T::low.m1(), (T::low == U()) ? T::high.m1() : T::high);
+    }
 public:
     using T::T;
 
@@ -456,22 +485,15 @@ public:
         return *this;
     }
 
-    inline I operator-() const {
-        I tmp = ~(*this);
-        ++tmp;
-        return tmp;
+    constexpr inline I operator-() const {
+        return (~ * this).p1();
     }
 
-    inline I operator+(const I &other) const {
-        U tmpl = T::low + other.low;
-        U tmph = T::high + other.high;
-        if (tmpl < T::low) {
-            ++tmph;
-        }
-        return I(tmpl, tmph);
+    constexpr inline I operator+(const I &other) const {
+        return plus_helper(T::low + other.low, T::low, T::high + other.high);
     }
 
-    inline I operator-(const I &other) const {
+    constexpr inline I operator-(const I &other) const {
         return *this +(-other);
     }
 
@@ -593,6 +615,14 @@ private:
         return typename I::V(this->operator typename I::V::U());
     }
 
+    constexpr inline Integer p1() const {
+        return value.p1();
+    }
+
+    constexpr inline Integer m1() const {
+        return value.m1();
+    }
+
     constexpr inline Integer(const V n) : value(n) { }
 public:
 
@@ -620,82 +650,82 @@ public:
     }
 
     template<size_t size1, bool sig1, size_t size2, bool sig2>
-    friend Integer<max(size1, size2), sig1 && sig2> operator+(
+    friend constexpr Integer<max(size1, size2), sig1 && sig2> operator+(
             const Integer<size1, sig1> &v1,
             const Integer<size2, sig2> &v2);
 
     template<size_t size1, bool sig1, size_t size2, bool sig2>
-    friend Integer<max(size1, size2), sig1 && sig2> operator-(
+    friend constexpr Integer<max(size1, size2), sig1 && sig2> operator-(
             const Integer<size1, sig1> &v1,
             const Integer<size2, sig2> &v2);
 
     template<size_t size1, bool sig1, size_t size2, bool sig2>
-    friend Integer<max(size1, size2), sig1 && sig2> operator*(
+    friend constexpr Integer<max(size1, size2), sig1 && sig2> operator*(
             const Integer<size1, sig1> &v1,
             const Integer<size2, sig2> &v2);
 
     template<size_t size1, bool sig1, size_t size2, bool sig2>
-    friend Integer<max(size1, size2), sig1 && sig2> operator/(
+    friend constexpr Integer<max(size1, size2), sig1 && sig2> operator/(
             const Integer<size1, sig1> &v1,
             const Integer<size2, sig2> &v2);
 
     template<size_t size1, bool sig1, size_t size2, bool sig2>
-    friend Integer<max(size1, size2), sig1 && sig2> operator%(
+    friend constexpr Integer<max(size1, size2), sig1 && sig2> operator%(
             const Integer<size1, sig1> &v1,
             const Integer<size2, sig2> &v2);
 
     template<size_t size1, bool sig1, size_t size2, bool sig2>
-    friend Integer<max(size1, size2), sig1 && sig2> operator|(
+    friend constexpr Integer<max(size1, size2), sig1 && sig2> operator|(
             const Integer<size1, sig1> &v1,
             const Integer<size2, sig2> &v2);
 
     template<size_t size1, bool sig1, size_t size2, bool sig2>
-    friend Integer<max(size1, size2), sig1 && sig2> operator&(
+    friend constexpr Integer<max(size1, size2), sig1 && sig2> operator&(
             const Integer<size1, sig1> &v1,
             const Integer<size2, sig2> &v2);
 
     template<size_t size1, bool sig1, size_t size2, bool sig2>
-    friend Integer<max(size1, size2), sig1 && sig2> operator^(
+    friend constexpr Integer<max(size1, size2), sig1 && sig2> operator^(
             const Integer<size1, sig1> &v1,
             const Integer<size2, sig2> &v2);
 
     template<size_t size1, bool sig1, size_t size2, bool sig2>
-    friend bool operator==(
+    friend constexpr bool operator==(
             const Integer<size1, sig1> &v1,
             const Integer<size2, sig2> &v2);
 
     template<size_t size1, bool sig1, size_t size2, bool sig2>
-    friend bool operator!=(
+    friend constexpr bool operator!=(
             const Integer<size1, sig1> &v1,
             const Integer<size2, sig2> &v2);
 
     template<size_t size1, bool sig1, size_t size2, bool sig2>
-    friend bool operator<=(
+    friend constexpr bool operator<=(
             const Integer<size1, sig1> &v1,
             const Integer<size2, sig2> &v2);
 
     template<size_t size1, bool sig1, size_t size2, bool sig2>
-    friend bool operator>=(
+    friend constexpr bool operator>=(
             const Integer<size1, sig1> &v1,
             const Integer<size2, sig2> &v2);
 
     template<size_t size1, bool sig1, size_t size2, bool sig2>
-    friend bool operator<(
+    friend constexpr bool operator<(
             const Integer<size1, sig1> &v1,
             const Integer<size2, sig2> &v2);
 
     template<size_t size1, bool sig1, size_t size2, bool sig2>
-    friend bool operator>(
+    friend constexpr bool operator>(
             const Integer<size1, sig1> &v1,
             const Integer<size2, sig2> &v2);
 
     template<size_t size1, bool sig1, size_t size2, bool sig2>
-    friend Integer<size1, sig1> operator<<(
+    friend constexpr Integer<size1, sig1> operator<<(
             const Integer<size1, sig1> &v1,
             const Integer<size2, sig2> &v2);
 
     template<size_t size1, bool sig1, size_t size2, bool sig2>
-    friend Integer<size1, sig1> operator>>(
+    friend constexpr Integer<size1, sig1> operator>>(
             const Integer<size1, sig1> &v1,
             const Integer<size2, sig2> &v2);
 
@@ -713,10 +743,14 @@ public:
 
     template<size_t size2, bool sig2>
     friend class Integer;
+
+
+    template<size_t size2, bool sig2>
+    friend class Pow2_Integer_Impl;
 };
 
 template<size_t size1, bool sig1, size_t size2, bool sig2>
-inline Integer<max(size1, size2), sig1 && sig2> operator+(
+constexpr inline Integer<max(size1, size2), sig1 && sig2> operator+(
         const Integer<size1, sig1> &v1,
         const Integer<size2, sig2> &v2) {
     using R = Integer < max(size1, size2), sig1 && sig2>;
@@ -724,7 +758,7 @@ inline Integer<max(size1, size2), sig1 && sig2> operator+(
 }
 
 template<size_t size1, bool sig1, size_t size2, bool sig2>
-inline Integer<max(size1, size2), sig1 && sig2> operator-(
+constexpr inline Integer<max(size1, size2), sig1 && sig2> operator-(
         const Integer<size1, sig1> &v1,
         const Integer<size2, sig2> &v2) {
     using R = Integer < max(size1, size2), sig1 && sig2>;
@@ -732,7 +766,7 @@ inline Integer<max(size1, size2), sig1 && sig2> operator-(
 }
 
 template<size_t size1, bool sig1, size_t size2, bool sig2>
-inline Integer<max(size1, size2), sig1 && sig2> operator*(
+constexpr inline Integer<max(size1, size2), sig1 && sig2> operator*(
         const Integer<size1, sig1> &v1,
         const Integer<size2, sig2> &v2) {
     using R = Integer < max(size1, size2), sig1 && sig2>;
@@ -740,7 +774,7 @@ inline Integer<max(size1, size2), sig1 && sig2> operator*(
 }
 
 template<size_t size1, bool sig1, size_t size2, bool sig2>
-inline Integer<max(size1, size2), sig1 && sig2> operator/(
+constexpr inline Integer<max(size1, size2), sig1 && sig2> operator/(
         const Integer<size1, sig1> &v1,
         const Integer<size2, sig2> &v2) {
     using R = Integer < max(size1, size2), sig1 && sig2>;
@@ -748,7 +782,7 @@ inline Integer<max(size1, size2), sig1 && sig2> operator/(
 }
 
 template<size_t size1, bool sig1, size_t size2, bool sig2>
-inline Integer<max(size1, size2), sig1 && sig2> operator%(
+constexpr inline Integer<max(size1, size2), sig1 && sig2> operator%(
         const Integer<size1, sig1> &v1,
         const Integer<size2, sig2> &v2) {
     using R = Integer < max(size1, size2), sig1 && sig2>;
@@ -756,7 +790,7 @@ inline Integer<max(size1, size2), sig1 && sig2> operator%(
 }
 
 template<size_t size1, bool sig1, size_t size2, bool sig2>
-inline Integer<max(size1, size2), sig1 && sig2> operator|(
+constexpr inline Integer<max(size1, size2), sig1 && sig2> operator|(
         const Integer<size1, sig1> &v1,
         const Integer<size2, sig2> &v2) {
     using R = Integer < max(size1, size2), sig1 && sig2>;
@@ -764,7 +798,7 @@ inline Integer<max(size1, size2), sig1 && sig2> operator|(
 }
 
 template<size_t size1, bool sig1, size_t size2, bool sig2>
-inline Integer<max(size1, size2), sig1 && sig2> operator&(
+constexpr inline Integer<max(size1, size2), sig1 && sig2> operator&(
         const Integer<size1, sig1> &v1,
         const Integer<size2, sig2> &v2) {
     using R = Integer < max(size1, size2), sig1 && sig2>;
@@ -772,7 +806,7 @@ inline Integer<max(size1, size2), sig1 && sig2> operator&(
 }
 
 template<size_t size1, bool sig1, size_t size2, bool sig2>
-inline Integer<max(size1, size2), sig1 && sig2> operator^(
+constexpr inline Integer<max(size1, size2), sig1 && sig2> operator^(
         const Integer<size1, sig1> &v1,
         const Integer<size2, sig2> &v2) {
     using R = Integer < max(size1, size2), sig1 && sig2>;
@@ -780,7 +814,7 @@ inline Integer<max(size1, size2), sig1 && sig2> operator^(
 }
 
 template<size_t size1, bool sig1, size_t size2, bool sig2>
-inline bool operator==(
+constexpr inline bool operator==(
         const Integer<size1, sig1> &v1,
         const Integer<size2, sig2> &v2) {
     using R = Integer < max(size1, size2), sig1 && sig2>;
@@ -788,7 +822,7 @@ inline bool operator==(
 }
 
 template<size_t size1, bool sig1, size_t size2, bool sig2>
-inline bool operator!=(
+constexpr inline bool operator!=(
         const Integer<size1, sig1> &v1,
         const Integer<size2, sig2> &v2) {
     using R = Integer < max(size1, size2), sig1 && sig2>;
@@ -796,7 +830,7 @@ inline bool operator!=(
 }
 
 template<size_t size1, bool sig1, size_t size2, bool sig2>
-inline bool operator<=(
+constexpr inline bool operator<=(
         const Integer<size1, sig1> &v1,
         const Integer<size2, sig2> &v2) {
     using R = Integer < max(size1, size2), sig1 && sig2>;
@@ -804,7 +838,7 @@ inline bool operator<=(
 }
 
 template<size_t size1, bool sig1, size_t size2, bool sig2>
-inline bool operator>=(
+constexpr inline bool operator>=(
         const Integer<size1, sig1> &v1,
         const Integer<size2, sig2> &v2) {
     using R = Integer < max(size1, size2), sig1 && sig2>;
@@ -812,7 +846,7 @@ inline bool operator>=(
 }
 
 template<size_t size1, bool sig1, size_t size2, bool sig2>
-inline bool operator<(
+constexpr inline bool operator<(
         const Integer<size1, sig1> &v1,
         const Integer<size2, sig2> &v2) {
     using R = Integer < max(size1, size2), sig1 && sig2>;
@@ -820,7 +854,7 @@ inline bool operator<(
 }
 
 template<size_t size1, bool sig1, size_t size2, bool sig2>
-inline bool operator>(
+constexpr inline bool operator>(
         const Integer<size1, sig1> &v1,
         const Integer<size2, sig2> &v2) {
     using R = Integer < max(size1, size2), sig1 && sig2>;
@@ -828,14 +862,14 @@ inline bool operator>(
 }
 
 template<size_t size1, bool sig1, size_t size2, bool sig2>
-inline Integer<size1, sig1> operator<<(
+constexpr inline Integer<size1, sig1> operator<<(
         const Integer<size1, sig1> &v1,
         const Integer<size2, sig2> &v2) {
     return v1.value << Integer<size1, sig1>(v2).value;
 }
 
 template<size_t size1, bool sig1, size_t size2, bool sig2>
-inline Integer<size1, sig1> operator>>(
+constexpr inline Integer<size1, sig1> operator>>(
         const Integer<size1, sig1> &v1,
         const Integer<size2, sig2> &v2) {
     return v1.value >> Integer<size1, sig1>(v2).value;
