@@ -78,27 +78,29 @@ struct Operators_Impl;
 template<typename U, typename S>
 class Integer_S;
 
-template<typename U, typename S>
+template<typename UT, typename ST>
 class Integer_U {
 private:
+    typedef ST S;
+    typedef UT U;
     U value;
     const static U shmask = sizeof (U) * 8 - 1;
 public:
 
-    constexpr inline Integer_U() : value(0) { }
+    explicit constexpr inline Integer_U() : value(0) { }
 
-    constexpr inline Integer_U(U n) : value(n) { }
+    explicit constexpr inline Integer_U(U n) : value(n) { }
 
     constexpr inline Integer_U operator/(const Integer_U &other) const {
-        return value / other.value;
+        return Integer_U(value / other.value);
     }
 
     constexpr inline Integer_U operator%(const Integer_U &other) const {
-        return value % other.value;
+        return Integer_U(value % other.value);
     }
 
     constexpr inline Integer_U operator>>(const Integer_U &other) const {
-        return value >> (other.value & shmask);
+        return Integer_U(value >> (other.value & shmask));
     }
 
     constexpr inline bool operator>(const Integer_U &other) const {
@@ -123,27 +125,29 @@ public:
     friend Operators_Impl<Integer_U<U, S>>;
 };
 
-template<typename U, typename S>
+template<typename UT, typename ST>
 class Integer_S {
 private:
+    typedef ST S;
+    typedef UT U;
     U value;
     static const U shmask = sizeof (U) * 8 - 1;
 public:
 
-    constexpr inline Integer_S() : value(0) { }
+    constexpr explicit inline Integer_S() : value(0) { }
 
-    constexpr inline Integer_S(S n) : value(n) { }
+    constexpr explicit inline Integer_S(S n) : value(n) { }
 
     constexpr inline Integer_S operator/(const Integer_S &other) const {
-        return S(value) / S(other.value);
+        return Integer_S(S(value) / S(other.value));
     }
 
     constexpr inline Integer_S operator%(const Integer_S &other) const {
-        return S(value) % S(other.value);
+        return Integer_S(S(value) % S(other.value));
     }
 
     constexpr inline Integer_S operator>>(const Integer_S &other) const {
-        return S(value) >> S(other.value & shmask);
+        return Integer_S(S(value) >> S(other.value & shmask));
     }
 
     constexpr inline bool operator>(const Integer_S &other) const {
@@ -179,15 +183,15 @@ struct Operators_Impl : public T {
     }
 
     constexpr inline Operators_Impl operator-() const {
-        return -T::value;
+        return Operators_Impl(-T::value);
     }
 
     constexpr inline Operators_Impl operator+(const Operators_Impl &other) const {
-        return T::value + other.value;
+        return Operators_Impl(T::value + other.value);
     }
 
     constexpr inline Operators_Impl operator-(const Operators_Impl &other) const {
-        return T::value - other.value;
+        return Operators_Impl(T::value - other.value);
     }
 
     inline Operators_Impl& operator++() {
@@ -213,27 +217,27 @@ struct Operators_Impl : public T {
     }
 
     constexpr inline Operators_Impl operator*(const Operators_Impl &other) const {
-        return T::value * other.value;
+        return Operators_Impl(T::value * other.value);
     }
 
     constexpr inline Operators_Impl operator|(const Operators_Impl &other) const {
-        return T::value | other.value;
+        return Operators_Impl(T::value | other.value);
     }
 
     constexpr inline Operators_Impl operator&(const Operators_Impl &other) const {
-        return T::value & other.value;
+        return Operators_Impl(T::value & other.value);
     }
 
     constexpr inline Operators_Impl operator^(const Operators_Impl &other) const {
-        return T::value ^ other.value;
+        return Operators_Impl(T::value ^ other.value);
     }
 
     constexpr inline Operators_Impl operator~() const {
-        return ~T::value;
+        return Operators_Impl(~T::value);
     }
 
     constexpr inline Operators_Impl operator<<(const Operators_Impl &other) const {
-        return T::value << (other.value & T::shmask);
+        return Operators_Impl(T::value << (other.value & T::shmask));
     }
 
     constexpr inline bool operator==(const Operators_Impl &other) const {
@@ -304,13 +308,13 @@ private:
     U low, high;
 public:
 
-    constexpr inline Pow2_Integer_Base() : low(), high() { }
+    constexpr explicit inline Pow2_Integer_Base() : low(), high() { }
 
-    constexpr inline Pow2_Integer_Base(U low) : low(low), high() { }
+    constexpr explicit inline Pow2_Integer_Base(U low) : low(low), high() { }
 
-    constexpr inline Pow2_Integer_Base(S low) : low(low), high((low < S()) ? ~U() : U()) { }
+    constexpr explicit inline Pow2_Integer_Base(S low) : low(low), high((low < S()) ? ~U() : U()) { }
 
-    constexpr inline Pow2_Integer_Base(U low, U high) : low(low), high(high) { }
+    constexpr explicit inline Pow2_Integer_Base(U low, U high) : low(low), high(high) { }
 
     constexpr inline bool operator>(const Pow2_Integer_Base &other) const {
         return (S(high) > S(other.high)) ? true :
@@ -350,13 +354,13 @@ private:
     U low, high;
 public:
 
-    constexpr inline Pow2_Integer_Base() : low(), high() { }
+    constexpr explicit inline Pow2_Integer_Base() : low(), high() { }
 
-    constexpr inline Pow2_Integer_Base(U low) : low(low), high() { }
+    constexpr explicit inline Pow2_Integer_Base(U low) : low(low), high() { }
 
-    constexpr inline Pow2_Integer_Base(S low) : low(low), high((low < S()) ? ~S() : S()) { }
+    constexpr explicit inline Pow2_Integer_Base(S low) : low(low), high((low < S()) ? ~S() : S()) { }
 
-    constexpr inline Pow2_Integer_Base(U low, S high) : low(low), high(high) { }
+    constexpr explicit inline Pow2_Integer_Base(U low, S high) : low(low), high(high) { }
 
     constexpr inline bool operator>(const Pow2_Integer_Base &other) const {
         return (high > other.high) ? true :
@@ -420,10 +424,6 @@ public:
 
     constexpr inline U getHigh() const {
         return T::high;
-    }
-
-    constexpr explicit inline operator bool() const {
-        return T::low && T::high;
     }
 
     inline I& operator++() {
@@ -515,10 +515,99 @@ public:
     friend class Integer;
 };
 
-template<bool A>
-using enable_if_t = typename std::enable_if<A, bool>::type;
+template<typename T, size_t size>
+struct is_allowed_integer {
+    const static bool b = false;
+};
 
-#define enable_if(B) enable_if_t<(B)> = true
+template<size_t size>
+struct is_allowed_integer<int8_t, size> {
+    const static bool b = size >= 1;
+};
+
+template<size_t size>
+struct is_allowed_integer<uint8_t, size> {
+    const static bool b = size >= 1;
+};
+
+template<size_t size>
+struct is_allowed_integer<int16_t, size> {
+    const static bool b = size >= 2;
+};
+
+template<size_t size>
+struct is_allowed_integer<uint16_t, size> {
+    const static bool b = size >= 2;
+};
+
+template<size_t size>
+struct is_allowed_integer<int32_t, size> {
+    const static bool b = size >= 4;
+};
+
+template<size_t size>
+struct is_allowed_integer<uint32_t, size> {
+    const static bool b = size >= 4;
+};
+
+template<size_t size>
+struct is_allowed_integer<int64_t, size> {
+    const static bool b = size >= 8;
+};
+
+template<size_t size>
+struct is_allowed_integer<uint64_t, size> {
+    const static bool b = size >= 8;
+};
+
+template<typename T>
+struct is_signed {
+};
+
+template<>
+struct is_signed<int8_t> {
+    const static bool b = true;
+};
+
+template<>
+struct is_signed<uint8_t> {
+    const static bool b = false;
+};
+
+template<>
+struct is_signed<int16_t> {
+    const static bool b = true;
+};
+
+template<>
+struct is_signed<uint16_t> {
+    const static bool b = false;
+};
+
+template<>
+struct is_signed<int32_t> {
+    const static bool b = true;
+};
+
+template<>
+struct is_signed<uint32_t> {
+    const static bool b = false;
+};
+
+template<>
+struct is_signed<int64_t> {
+    const static bool b = true;
+};
+
+template<>
+struct is_signed<uint64_t> {
+    const static bool b = false;
+};
+
+template<bool A>
+using enable_if_t = typename std::enable_if<A, int>::type;
+
+#define enable_if(B) enable_if_t<(B)> = 0
 
 template<size_t size, bool sig>
 struct Integer {
@@ -528,51 +617,68 @@ private:
 
     template<size_t size2, bool sig2,
     enable_if((size == size2) && (getIntegerType(size) == pow2))>
-    inline Integer<size, sig2> upcast() {
+    constexpr inline Integer<size, sig2> upcast() const {
         using I = Integer<size2, sig2>;
         return I(typename I::V(value.low, value.high));
     }
 
     template<size_t size2, bool sig2,
-    enable_if((getIntegerType(size) == native) &&
+    enable_if(sig && (getIntegerType(size) == native) &&
             (getIntegerType(size2) == native))>
-    inline Integer<size2, sig2> upcast() {
+    constexpr inline Integer<size2, sig2> upcast() const {
         using I = Integer<size2, sig2>;
-        return I(typename I::V(value.value));
+        return typename I::V(typename V::S(value.value));
     }
 
     template<size_t size2, bool sig2,
-    enable_if((size != size2) && sig&&((getIntegerType(size) == native) ||
-            (getIntegerType(size) == pow2)) &&
-            (getIntegerType(size2) == pow2))>
-    inline Integer<size2, sig2> upcast() {
+    enable_if((!sig) && (getIntegerType(size) == native) &&
+            (getIntegerType(size2) == native))>
+    constexpr inline Integer<size2, sig2> upcast() const {
         using I = Integer<size2, sig2>;
-        return I(typename I::V(this->operator typename I::V::S()));
+        return typename I::V(value.value);
     }
 
     template<size_t size2, bool sig2,
-    enable_if((size != size2)&&(!sig)&&((getIntegerType(size) == native) ||
+    enable_if((size != size2) && sig && ((getIntegerType(size) == native) ||
             (getIntegerType(size) == pow2)) &&
             (getIntegerType(size2) == pow2))>
-    inline Integer<size2, sig2> upcast() {
+    constexpr inline Integer<size2, sig2> upcast() const {
         using I = Integer<size2, sig2>;
-        return I(typename I::V(this->operator typename I::V::U()));
+        return typename I::V(this->operator typename I::V::S());
     }
+
+    template<size_t size2, bool sig2,
+    enable_if((size != size2) && (!sig) && ((getIntegerType(size) == native) ||
+            (getIntegerType(size) == pow2)) &&
+            (getIntegerType(size2) == pow2))>
+    constexpr inline Integer<size2, sig2> upcast() const {
+        using I = Integer<size2, sig2>;
+        return typename I::V(this->operator typename I::V::U());
+    }
+
+    constexpr inline Integer(const V n) : value(n) { }
 public:
 
-    inline Integer() : value() { }
+    constexpr inline Integer() : value() { }
 
-    inline Integer(const V n) : value(n) { }
+    template<typename T, enable_if((getIntegerType(size) == native) &&
+            (is_allowed_integer<T, size>::b))>
+    constexpr inline Integer(const T n) : value(n) { }
+
+    template<typename T, enable_if((getIntegerType(size) != native) &&
+            (is_allowed_integer<T, size>::b))>
+    constexpr inline Integer(const T n) :
+    value(Integer(Integer<sizeof (T), is_signed<T>::b>(n)).value) { }
 
     template<size_t size2, bool sig2,
     enable_if(size2 >= size)>
-    inline operator Integer<size2, sig2>() {
+    constexpr inline operator Integer<size2, sig2>() const {
         return upcast<size2, sig2>();
     }
 
     template<size_t size2, bool sig2,
     enable_if(size2 < size)>
-    explicit inline operator Integer<size2, sig2>() {
+    explicit inline operator Integer<size2, sig2>() const {
         throw std::runtime_error("Not implemented yet");
     }
 
@@ -643,6 +749,16 @@ public:
 
     template<size_t size1, bool sig1, size_t size2, bool sig2>
     friend bool operator>(
+            const Integer<size1, sig1> &v1,
+            const Integer<size2, sig2> &v2);
+
+    template<size_t size1, bool sig1, size_t size2, bool sig2>
+    friend Integer<size1, sig1> operator<<(
+            const Integer<size1, sig1> &v1,
+            const Integer<size2, sig2> &v2);
+
+    template<size_t size1, bool sig1, size_t size2, bool sig2>
+    friend Integer<size1, sig1> operator>>(
             const Integer<size1, sig1> &v1,
             const Integer<size2, sig2> &v2);
 
@@ -772,6 +888,20 @@ inline bool operator>(
         const Integer<size2, sig2> &v2) {
     using R = Integer < max(size1, size2), sig1 && sig2>;
     return R(v1).value > R(v2).value;
+}
+
+template<size_t size1, bool sig1, size_t size2, bool sig2>
+inline Integer<size1, sig1> operator<<(
+        const Integer<size1, sig1> &v1,
+        const Integer<size2, sig2> &v2) {
+    return v1.value << Integer<size1, sig1>(v2).value;
+}
+
+template<size_t size1, bool sig1, size_t size2, bool sig2>
+inline Integer<size1, sig1> operator>>(
+        const Integer<size1, sig1> &v1,
+        const Integer<size2, sig2> &v2) {
+    return v1.value >> Integer<size1, sig1>(v2).value;
 }
 
 #endif /* INTEGER_HPP */
