@@ -5,12 +5,14 @@
 #include <stdexcept>
 #include <type_traits>
 
-constexpr inline size_t lowestOneBit(size_t i) {
+template<typename T>
+constexpr inline T lowestOneBit(const T i) {
     // HD, Section 2-1
     return i & -i;
 }
 
-constexpr inline bool isOneBit(size_t i) {
+template<typename T>
+constexpr inline bool isOneBit(const T i) {
     return lowestOneBit(i) == i;
 }
 
@@ -243,28 +245,6 @@ struct Operators_Impl : public T {
         return Operators_Impl(~T::value);
     }
 
-    inline Operators_Impl& operator++() {
-        ++T::value;
-        return *this;
-    }
-
-    inline Operators_Impl& operator--() {
-        --T::value;
-        return *this;
-    }
-
-    inline Operators_Impl operator++(int) {
-        Operators_Impl tmp = *this;
-        operator++();
-        return tmp;
-    }
-
-    inline Operators_Impl operator--(int) {
-        Operators_Impl tmp = *this;
-        operator--();
-        return tmp;
-    }
-
 private:
 
     constexpr inline Operators_Impl p1() const {
@@ -277,6 +257,12 @@ private:
 
     template<size_t size, bool sig>
     friend class Integer;
+
+    template<size_t size1, bool sig1>
+    friend constexpr Integer<size1, sig1>& operator++(Integer<size1, sig1>&);
+
+    template<size_t size1, bool sig1>
+    friend constexpr Integer<size1, sig1>& operator--(Integer<size1, sig1>&);
 };
 
 template<>
@@ -336,8 +322,27 @@ private:
     typedef Integer<half, true> S;
     typedef Integer<half, false> U;
     typedef SHType<half> M;
-    static const M shmask = half * 8 - 1;
+    static const M shmask = half * 2 * 8 - 1;
     U low, high;
+
+    constexpr inline static Pow2_Integer_Base rightShift2(
+            const Pow2_Integer_Base &value, const M shiftDistance) {
+        return Pow2_Integer_Base((value.low >> shiftDistance) |
+                (value.high << (half * 8 - shiftDistance)),
+                value.high >> shiftDistance);
+    }
+
+    constexpr inline static Pow2_Integer_Base rightShift3(
+            const Pow2_Integer_Base &value, const M shiftDistance) {
+        return Pow2_Integer_Base(value.high >> (shiftDistance - half * 8), U());
+    }
+
+    constexpr inline static Pow2_Integer_Base rightShift(
+            const Pow2_Integer_Base &value, const M shiftDistance) {
+        return shiftDistance == 0 ? value :
+                (shiftDistance < (half * 8) ? rightShift2(value, shiftDistance) :
+                rightShift3(value, shiftDistance));
+    }
 public:
 
     constexpr explicit inline Pow2_Integer_Base() : low(), high() { }
@@ -374,6 +379,10 @@ public:
                 (low <= other.low));
     }
 
+    constexpr inline Pow2_Integer_Base operator>>(const M other) const {
+        return rightShift(*this, other & shmask);
+    }
+
     friend Pow2_Integer_Impl<half, false>;
 
     template<size_t size2, bool sig2>
@@ -386,8 +395,28 @@ private:
     typedef Integer<half, true> S;
     typedef Integer<half, false> U;
     typedef SHType<half> M;
-    static const M shmask = half * 8 - 1;
+    static const M shmask = half * 2 * 8 - 1;
     U low, high;
+
+    constexpr inline static Pow2_Integer_Base rightShift2(
+            const Pow2_Integer_Base &value, const M shiftDistance) {
+        return Pow2_Integer_Base((value.low >> shiftDistance) |
+                (value.high << (half * 8 - shiftDistance)),
+                S(value.high) >> shiftDistance);
+    }
+
+    constexpr inline static Pow2_Integer_Base rightShift3(
+            const Pow2_Integer_Base &value, const M shiftDistance) {
+        return Pow2_Integer_Base(S(value.high) >> (shiftDistance - half * 8),
+                S(value.high) < 0 ? ~U() : U());
+    }
+
+    constexpr inline static Pow2_Integer_Base rightShift(
+            const Pow2_Integer_Base &value, const M shiftDistance) {
+        return shiftDistance == 0 ? value :
+                (shiftDistance < (half * 8) ? rightShift2(value, shiftDistance) :
+                rightShift3(value, shiftDistance));
+    }
 public:
 
     constexpr explicit inline Pow2_Integer_Base() : low(), high() { }
@@ -424,6 +453,10 @@ public:
                 (low <= other.low));
     }
 
+    constexpr inline Pow2_Integer_Base operator>>(const M other) const {
+        return rightShift(*this, other & shmask);
+    }
+
     template<size_t size2, bool sig2>
     friend class Pow2_Integer_Impl;
 
@@ -439,18 +472,22 @@ private:
     typedef Pow2_Integer_Base<half, sig> T;
     typedef Pow2_Integer_Impl<half, sig> I;
 
-    inline static void increment(I &value) {
-        U &tmp = ++value.low;
-        if (!bool(tmp)) {
-            ++value.high;
-        }
+    constexpr inline static I leftShift2(const I &value,
+            const typename T::M shiftDistance) {
+        return I(value.low << shiftDistance, (value.high << shiftDistance) |
+                (value.low >> (half * 8 - shiftDistance)));
     }
 
-    inline static void decrement(I &value) {
-        if (!bool(value.low)) {
-            --value.high;
-        }
-        --value.low;
+    constexpr inline static I leftShift3(const I &value,
+            const typename T::M shiftDistance) {
+        return I(U(), value.low << (shiftDistance - half * 8));
+    }
+
+    constexpr inline static I leftShift(const I &value,
+            const typename T::M shiftDistance) {
+        return shiftDistance == 0 ? value :
+                (shiftDistance < (half * 8) ? leftShift2(value, shiftDistance) :
+                leftShift3(value, shiftDistance));
     }
 
     constexpr inline static I p1_helper(const U low, const U high) {
@@ -474,42 +511,12 @@ public:
 
     constexpr inline Pow2_Integer_Impl(const T &obj) : T(obj) { }
 
-    constexpr inline U getLow() const {
-        return T::low;
-    }
-
-    constexpr inline U getHigh() const {
-        return T::high;
-    }
-
-    inline I& operator++() {
-        increment(*this);
-        return *this;
-    }
-
-    inline I& operator--() {
-        decrement(*this);
-        return *this;
-    }
-
-    inline I operator++(int) {
-        I tmp = *this;
-        operator++();
-        return tmp;
-    }
-
-    inline I operator--(int) {
-        I tmp = *this;
-        operator--();
-        return tmp;
-    }
-
     constexpr inline I operator+() const {
         return *this;
     }
 
     constexpr inline I operator-() const {
-        return (~ * this).p1();
+        return (~(*this)).p1();
     }
 
     constexpr inline I operator+(const I &other) const {
@@ -522,11 +529,11 @@ public:
 
     /*inline Operators_Impl operator*(const Operators_Impl other) const {
         return Operators_Impl::value * other.value;
-    }
-
-    inline Operators_Impl operator<<(const Operators_Impl other) const {
-        return Operators_Impl::value << (other.value & T::shmask);
     }*/
+
+    constexpr inline I operator<<(const typename T::M other) const {
+        return leftShift(*this, other & T::shmask);
+    }
 
     constexpr inline I operator|(const I &other) const {
         return I(T::low | other.low, T::high | other.high);
@@ -554,6 +561,12 @@ public:
 
     template<size_t size2, bool sig2>
     friend class Integer;
+
+    template<size_t size1, bool sig1>
+    friend constexpr Integer<size1, sig1>& operator++(Integer<size1, sig1>&);
+
+    template<size_t size1, bool sig1>
+    friend constexpr Integer<size1, sig1>& operator--(Integer<size1, sig1>&);
 };
 
 template<bool A>
@@ -599,6 +612,26 @@ constexpr inline S castUS(V value) {
 template<typename U, typename S, bool sig, typename V, enable_if(!sig)>
 constexpr inline U castUS(V value) {
     return U(value);
+}
+
+template<typename T, bool sig, enable_if(sig)>
+constexpr inline T max_value() {
+    return (~T()) >> 1;
+}
+
+template<typename T, bool sig, enable_if(!sig)>
+constexpr inline T max_value() {
+    return ~T();
+}
+
+template<typename T, bool sig, enable_if(sig)>
+constexpr inline T min_value() {
+    return T(1) << (sizeof (T) * 8 - 1);
+}
+
+template<typename T, bool sig, enable_if(!sig)>
+constexpr inline T min_value() {
+    return T();
 }
 
 template<size_t size, bool sig>
@@ -675,6 +708,14 @@ public:
 
     constexpr inline static Integer ONE() {
         return ZERO().p1();
+    };
+
+    constexpr inline static Integer MAX_VALUE() {
+        return max_value<Integer, sig>();
+    };
+
+    constexpr inline static Integer MIN_VALUE() {
+        return min_value<Integer, sig>();
     };
 
     constexpr inline Integer() : value() { }
@@ -809,7 +850,7 @@ public:
 
     template<typename T, enable_if((is_integral<T>()))>
     constexpr inline Integer operator>>(const T v2) const {
-        return value >> SHType<size>(v2);
+        return V(value >> SHType<size>(v2));
     }
 
     constexpr inline Integer operator~() const {
@@ -824,13 +865,62 @@ public:
         return *this;
     }
 
+    template<size_t size1, bool sig1>
+    friend constexpr Integer<size1, sig1>& operator++(Integer<size1, sig1>&);
+
+    template<size_t size1, bool sig1>
+    friend constexpr Integer<size1, sig1>& operator--(Integer<size1, sig1>&);
+
+    template<size_t size1, bool sig1>
+    friend constexpr Integer<size1, sig1>
+    operator++(Integer<size1, sig1>&, int);
+
+    template<size_t size1, bool sig1>
+    friend constexpr Integer<size1, sig1>
+    operator--(Integer<size1, sig1>&, int);
+
     template<size_t size2, bool sig2>
     friend class Integer;
-
 
     template<size_t size2, bool sig2>
     friend class Pow2_Integer_Impl;
 };
+
+template<size_t size1, bool sig1>
+constexpr inline Integer<size1, sig1>& operator++(
+        Integer<size1, sig1> &v1) {
+    return v1 = v1.p1();
+}
+
+template<size_t size1, bool sig1>
+constexpr inline Integer<size1, sig1>& operator--(
+        Integer<size1, sig1> &v1) {
+    return v1 = v1.m1();
+}
+
+template<size_t size1, bool sig1>
+constexpr inline Integer<size1, sig1>& __pp_mm_helper2(
+        Integer<size1, sig1> &v1, const Integer<size1, sig1> &v2) {
+    return v1;
+}
+
+template<size_t size1, bool sig1>
+constexpr inline Integer<size1, sig1>& __pp_mm_helper(Integer<size1, sig1> &v1,
+        const Integer<size1, sig1> &v2, Integer<size1, sig1> v3) {
+    return __pp_mm_helper2(v3, (v1 = v2));
+}
+
+template<size_t size1, bool sig1>
+constexpr inline Integer<size1, sig1> operator++(
+        Integer<size1, sig1> &v1, int) {
+    return __pp_mm_helper(v1, v1.p1(), v1);
+}
+
+template<size_t size1, bool sig1>
+constexpr inline Integer<size1, sig1> operator--(
+        Integer<size1, sig1> &v1, int) {
+    return __pp_mm_helper(v1, v1.m1(), v1);
+}
 
 template<size_t size1, bool sig1, size_t size2, bool sig2>
 constexpr inline Integer<max(size1, size2), sig1 && sig2> operator+(
@@ -854,6 +944,29 @@ constexpr inline Integer<max(size1, sizeof (T)), sig1 && (is_signed<T>())>
 operator+(const T v1, const Integer<size1, sig1> &v2) {
     using R = Integer < max(size1, sizeof (T)), sig1 && (is_signed<T>())>;
     return R(v1) + R(v2);
+}
+
+template<size_t size1, bool sig1, size_t size2, bool sig2,
+enable_if(size2 <= size1)>
+constexpr inline Integer<size1, sig1>& operator+=(
+        Integer<size1, sig1> &v1,
+        const Integer<size2, sig2> &v2) {
+    return v1 = (v1 + Integer<size1, sig1>(v2));
+}
+
+template<size_t size1, bool sig1, typename T,
+enable_if((is_integral<T>()) && (sizeof (T) <= size1))>
+constexpr inline Integer<size1, sig1>& operator+=(
+        Integer<size1, sig1> &v1, const T v2) {
+    return v1 = (v1 + Integer<size1, sig1>(v2));
+}
+
+template<size_t size1, bool sig1, typename T,
+enable_if((is_integral<T>()) && (size1 <= sizeof (T)))>
+constexpr inline T& operator+=(
+        T &v1, const Integer<size1, sig1> &v2) {
+    using R = Integer<sizeof (T), is_signed<T>()>;
+    return v1 = T(R(v1) + R(v2));
 }
 
 template<size_t size1, bool sig1, size_t size2, bool sig2>
@@ -880,6 +993,29 @@ operator-(const T v1, const Integer<size1, sig1> &v2) {
     return R(v1) - R(v2);
 }
 
+template<size_t size1, bool sig1, size_t size2, bool sig2,
+enable_if(size2 <= size1)>
+constexpr inline Integer<size1, sig1>& operator-=(
+        Integer<size1, sig1> &v1,
+        const Integer<size2, sig2> &v2) {
+    return v1 = (v1 - Integer<size1, sig1>(v2));
+}
+
+template<size_t size1, bool sig1, typename T,
+enable_if((is_integral<T>()) && (sizeof (T) <= size1))>
+constexpr inline Integer<size1, sig1>& operator-=(
+        Integer<size1, sig1> &v1, const T v2) {
+    return v1 = (v1 - Integer<size1, sig1>(v2));
+}
+
+template<size_t size1, bool sig1, typename T,
+enable_if((is_integral<T>()) && (size1 <= sizeof (T)))>
+constexpr inline T& operator-=(
+        T &v1, const Integer<size1, sig1> &v2) {
+    using R = Integer<sizeof (T), is_signed<T>()>;
+    return v1 = T(R(v1) - R(v2));
+}
+
 template<size_t size1, bool sig1, size_t size2, bool sig2>
 constexpr inline Integer<max(size1, size2), sig1 && sig2> operator*(
         const Integer<size1, sig1> &v1,
@@ -904,12 +1040,35 @@ operator*(const T v1, const Integer<size1, sig1> &v2) {
     return R(v1) * R(v2);
 }
 
+template<size_t size1, bool sig1, size_t size2, bool sig2,
+enable_if(size2 <= size1)>
+constexpr inline Integer<size1, sig1>& operator*=(
+        Integer<size1, sig1> &v1,
+        const Integer<size2, sig2> &v2) {
+    return v1 = (v1 * Integer<size1, sig1>(v2));
+}
+
+template<size_t size1, bool sig1, typename T,
+enable_if((is_integral<T>()) && (sizeof (T) <= size1))>
+constexpr inline Integer<size1, sig1>& operator*=(
+        Integer<size1, sig1> &v1, const T v2) {
+    return v1 = (v1 * Integer<size1, sig1>(v2));
+}
+
+template<size_t size1, bool sig1, typename T,
+enable_if((is_integral<T>()) && (size1 <= sizeof (T)))>
+constexpr inline T& operator*=(
+        T &v1, const Integer<size1, sig1> &v2) {
+    using R = Integer<sizeof (T), is_signed<T>()>;
+    return v1 = T(R(v1) * R(v2));
+}
+
 template<size_t size1, bool sig1, size_t size2, bool sig2>
 constexpr inline Integer<max(size1, size2), sig1 && sig2> operator/(
         const Integer<size1, sig1> &v1,
         const Integer<size2, sig2> &v2) {
     using R = Integer < max(size1, size2), sig1 && sig2>;
-    return R(v1).value / R(v2).value;
+    return typename R::V(R(v1).value / R(v2).value);
 }
 
 template<size_t size1, bool sig1, typename T,
@@ -928,12 +1087,35 @@ operator/(const T v1, const Integer<size1, sig1> &v2) {
     return R(v1) / R(v2);
 }
 
+template<size_t size1, bool sig1, size_t size2, bool sig2,
+enable_if(size2 <= size1)>
+constexpr inline Integer<size1, sig1>& operator/=(
+        Integer<size1, sig1> &v1,
+        const Integer<size2, sig2> &v2) {
+    return v1 = (v1 / Integer<size1, sig1>(v2));
+}
+
+template<size_t size1, bool sig1, typename T,
+enable_if((is_integral<T>()) && (sizeof (T) <= size1))>
+constexpr inline Integer<size1, sig1>& operator/=(
+        Integer<size1, sig1> &v1, const T v2) {
+    return v1 = (v1 / Integer<size1, sig1>(v2));
+}
+
+template<size_t size1, bool sig1, typename T,
+enable_if((is_integral<T>()) && (size1 <= sizeof (T)))>
+constexpr inline T& operator/=(
+        T &v1, const Integer<size1, sig1> &v2) {
+    using R = Integer<sizeof (T), is_signed<T>()>;
+    return v1 = T(R(v1) / R(v2));
+}
+
 template<size_t size1, bool sig1, size_t size2, bool sig2>
 constexpr inline Integer<max(size1, size2), sig1 && sig2> operator%(
         const Integer<size1, sig1> &v1,
         const Integer<size2, sig2> &v2) {
     using R = Integer < max(size1, size2), sig1 && sig2>;
-    return R(v1).value % R(v2).value;
+    return typename R::V(R(v1).value % R(v2).value);
 }
 
 template<size_t size1, bool sig1, typename T,
@@ -950,6 +1132,29 @@ constexpr inline Integer<max(size1, sizeof (T)), sig1 && (is_signed<T>())>
 operator%(const T v1, const Integer<size1, sig1> &v2) {
     using R = Integer < max(size1, sizeof (T)), sig1 && (is_signed<T>())>;
     return R(v1) % R(v2);
+}
+
+template<size_t size1, bool sig1, size_t size2, bool sig2,
+enable_if(size2 <= size1)>
+constexpr inline Integer<size1, sig1>& operator%=(
+        Integer<size1, sig1> &v1,
+        const Integer<size2, sig2> &v2) {
+    return v1 = (v1 % Integer<size1, sig1>(v2));
+}
+
+template<size_t size1, bool sig1, typename T,
+enable_if((is_integral<T>()) && (sizeof (T) <= size1))>
+constexpr inline Integer<size1, sig1>& operator%=(
+        Integer<size1, sig1> &v1, const T v2) {
+    return v1 = (v1 % Integer<size1, sig1>(v2));
+}
+
+template<size_t size1, bool sig1, typename T,
+enable_if((is_integral<T>()) && (size1 <= sizeof (T)))>
+constexpr inline T& operator%=(
+        T &v1, const Integer<size1, sig1> &v2) {
+    using R = Integer<sizeof (T), is_signed<T>()>;
+    return v1 = T(R(v1) % R(v2));
 }
 
 template<size_t size1, bool sig1, size_t size2, bool sig2>
@@ -976,6 +1181,29 @@ operator|(const T v1, const Integer<size1, sig1> &v2) {
     return R(v1) | R(v2);
 }
 
+template<size_t size1, bool sig1, size_t size2, bool sig2,
+enable_if(size2 <= size1)>
+constexpr inline Integer<size1, sig1>& operator|=(
+        Integer<size1, sig1> &v1,
+        const Integer<size2, sig2> &v2) {
+    return v1 = (v1 | Integer<size1, sig1>(v2));
+}
+
+template<size_t size1, bool sig1, typename T,
+enable_if((is_integral<T>()) && (sizeof (T) <= size1))>
+constexpr inline Integer<size1, sig1>& operator|=(
+        Integer<size1, sig1> &v1, const T v2) {
+    return v1 = (v1 | Integer<size1, sig1>(v2));
+}
+
+template<size_t size1, bool sig1, typename T,
+enable_if((is_integral<T>()) && (size1 <= sizeof (T)))>
+constexpr inline T& operator|=(
+        T &v1, const Integer<size1, sig1> &v2) {
+    using R = Integer<sizeof (T), is_signed<T>()>;
+    return v1 = T(R(v1) | R(v2));
+}
+
 template<size_t size1, bool sig1, size_t size2, bool sig2>
 constexpr inline Integer<max(size1, size2), sig1 && sig2> operator&(
         const Integer<size1, sig1> &v1,
@@ -1000,6 +1228,29 @@ operator&(const T v1, const Integer<size1, sig1> &v2) {
     return R(v1) & R(v2);
 }
 
+template<size_t size1, bool sig1, size_t size2, bool sig2,
+enable_if(size2 <= size1)>
+constexpr inline Integer<size1, sig1>& operator&=(
+        Integer<size1, sig1> &v1,
+        const Integer<size2, sig2> &v2) {
+    return v1 = (v1 & Integer<size1, sig1>(v2));
+}
+
+template<size_t size1, bool sig1, typename T,
+enable_if((is_integral<T>()) && (sizeof (T) <= size1))>
+constexpr inline Integer<size1, sig1>& operator&=(
+        Integer<size1, sig1> &v1, const T v2) {
+    return v1 = (v1 & Integer<size1, sig1>(v2));
+}
+
+template<size_t size1, bool sig1, typename T,
+enable_if((is_integral<T>()) && (size1 <= sizeof (T)))>
+constexpr inline T& operator&=(
+        T &v1, const Integer<size1, sig1> &v2) {
+    using R = Integer<sizeof (T), is_signed<T>()>;
+    return v1 = T(R(v1) & R(v2));
+}
+
 template<size_t size1, bool sig1, size_t size2, bool sig2>
 constexpr inline Integer<max(size1, size2), sig1 && sig2> operator^(
         const Integer<size1, sig1> &v1,
@@ -1022,6 +1273,29 @@ constexpr inline Integer<max(size1, sizeof (T)), sig1 && (is_signed<T>())>
 operator^(const T v1, const Integer<size1, sig1> &v2) {
     using R = Integer < max(size1, sizeof (T)), sig1 && (is_signed<T>())>;
     return R(v1) ^ R(v2);
+}
+
+template<size_t size1, bool sig1, size_t size2, bool sig2,
+enable_if(size2 <= size1)>
+constexpr inline Integer<size1, sig1>& operator^=(
+        Integer<size1, sig1> &v1,
+        const Integer<size2, sig2> &v2) {
+    return v1 = (v1 ^ Integer<size1, sig1>(v2));
+}
+
+template<size_t size1, bool sig1, typename T,
+enable_if((is_integral<T>()) && (sizeof (T) <= size1))>
+constexpr inline Integer<size1, sig1>& operator^=(
+        Integer<size1, sig1> &v1, const T v2) {
+    return v1 = (v1 ^ Integer<size1, sig1>(v2));
+}
+
+template<size_t size1, bool sig1, typename T,
+enable_if((is_integral<T>()) && (size1 <= sizeof (T)))>
+constexpr inline T& operator^=(
+        T &v1, const Integer<size1, sig1> &v2) {
+    using R = Integer<sizeof (T), is_signed<T>()>;
+    return v1 = T(R(v1) ^ R(v2));
 }
 
 template<size_t size1, bool sig1, size_t size2, bool sig2>
@@ -1171,10 +1445,31 @@ constexpr inline T operator<<(const T v1, const Integer<size1, sig1> &v2) {
 }
 
 template<size_t size1, bool sig1, size_t size2, bool sig2>
+constexpr inline Integer<size1, sig1>& operator<<=(
+        Integer<size1, sig1> &v1,
+        const Integer<size2, sig2> &v2) {
+    return v1 = (v1 << v2);
+}
+
+template<size_t size1, bool sig1, typename T,
+enable_if((is_integral<T>()))>
+constexpr inline Integer<size1, sig1>& operator<<=(
+        Integer<size1, sig1> &v1, const T v2) {
+    return v1 = (v1 << v2);
+}
+
+template<size_t size1, bool sig1, typename T,
+enable_if((is_integral<T>()))>
+constexpr inline T& operator<<=(
+        T &v1, const Integer<size1, sig1> &v2) {
+    return v1 = T(Integer<sizeof (T), is_signed<T>()>(v1) << v2);
+}
+
+template<size_t size1, bool sig1, size_t size2, bool sig2>
 constexpr inline Integer<size1, sig1> operator>>(
         const Integer<size1, sig1> &v1,
         const Integer<size2, sig2> &v2) {
-    return v1.value >> SHType<size1>(v2);
+    return typename Integer<size1, sig1>::V(v1.value >> SHType<size1>(v2));
 }
 
 template<size_t size1, bool sig1, typename T,
@@ -1182,6 +1477,27 @@ enable_if((is_integral<T>()))>
 constexpr inline T operator>>(const T v1, const Integer<size1, sig1> &v2) {
     using R = Integer <sizeof (T), (is_signed<T>())>;
     return T(R(v1) >> v2);
+}
+
+template<size_t size1, bool sig1, size_t size2, bool sig2>
+constexpr inline Integer<size1, sig1>& operator>>=(
+        Integer<size1, sig1> &v1,
+        const Integer<size2, sig2> &v2) {
+    return v1 = (v1 >> v2);
+}
+
+template<size_t size1, bool sig1, typename T,
+enable_if((is_integral<T>()))>
+constexpr inline Integer<size1, sig1>& operator>>=(
+        Integer<size1, sig1> &v1, const T v2) {
+    return v1 = (v1 >> v2);
+}
+
+template<size_t size1, bool sig1, typename T,
+enable_if((is_integral<T>()))>
+constexpr inline T& operator>>=(
+        T &v1, const Integer<size1, sig1> &v2) {
+    return v1 = T(Integer<sizeof (T), is_signed<T>()>(v1) >> v2);
 }
 
 #endif /* INTEGER_HPP */
