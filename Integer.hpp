@@ -750,17 +750,29 @@ public:
 
     constexpr inline Integer() : value() { }
 
-    template<size_t size2, bool sig2, size_t size3, bool sig3,
+    template<size_t size1, bool sig1, size_t size2, bool sig2,
     enable_if((getIntegerType(size) == pow2) &&
-            (size2 <= size / 2) && (size3 <= size / 2))>
-    constexpr inline Integer(const Integer<size2, sig2> &low,
-            const Integer<size3, sig3> &high) : value(low, high) { }
+            (size1 <= size / 2) && (size2 <= size / 2))>
+    constexpr inline Integer(const Integer<size1, sig1> &low,
+            const Integer<size2, sig2> &high) : value(low, high) { }
 
     template<typename T1, typename T2,
     enable_if((getIntegerType(size) == pow2) &&
             (is_integral<T1>()) && (is_integral<T2>())&&
             (sizeof (T1) <= size / 2) && (sizeof (T2) <= size / 2))>
     constexpr inline Integer(const T1 low, const T2 high) : value(low, high) { }
+
+    template<typename T1, size_t size2, bool sig2,
+    enable_if((getIntegerType(size) == pow2) &&
+            (sizeof (T1) <= size / 2) && (size2 <= size / 2))>
+    constexpr inline Integer(const T1 low,
+            const Integer<size2, sig2> &high) : value(low, high) { }
+
+    template<size_t size1, bool sig1, typename T2,
+    enable_if((getIntegerType(size) == pow2) &&
+            (size1 <= size / 2) && (sizeof (T2) <= size / 2))>
+    constexpr inline Integer(const Integer<size1, sig1> &low,
+            const T2 high) : value(low, high) { }
 
     template<typename T, enable_if((getIntegerType(size) == native) &&
             (can_upcast<T, size>()))>
@@ -1070,6 +1082,7 @@ constexpr inline Integer<size1 * 2, false> wmultiply_h2(
         const Integer<size1, false> &ac,
         const Integer<size1, false> &k,
         const Integer<size1, false> &bd) {
+    //overflow?
     return Integer<size1 * 2, false>(bd + (k << (size1 * 4)),
             ac + (k >> (size1 * 4)));
 }
