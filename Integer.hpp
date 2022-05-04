@@ -599,7 +599,7 @@ struct compare_types <T, T> {
 template<typename T1, typename T2>
 constexpr inline bool compare_types_cv() {
     return compare_types<typename std::remove_cv<T1>::type,
-            typename std::remove_cv<T2>::type>::type;
+            typename std::remove_cv<T2>::type>::value;
 }
 
 template<typename T, enable_if(((!std::is_integral<T>::value) ||
