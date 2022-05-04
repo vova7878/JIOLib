@@ -1078,7 +1078,7 @@ constexpr inline Integer<size1 * 2, false> wmultiply(
 }
 
 template<size_t size1>
-constexpr inline Integer<size1 * 2, false> wmultiply_h2(
+constexpr inline Integer<size1 * 2, false> __wmultiply_h2(
         const Integer<size1, false> &ac,
         const Integer<size1, false> &k,
         const Integer<size1, false> &bd) {
@@ -1088,20 +1088,20 @@ constexpr inline Integer<size1 * 2, false> wmultiply_h2(
 }
 
 template<size_t size1>
-constexpr inline Integer<size1 * 2, false> wmultiply_h(
+constexpr inline Integer<size1 * 2, false> __wmultiply_h(
         const Integer<size1, false> &ac,
         const Integer<size1, false> &bd,
         const Integer<size1, false> &abcd) {
-    return wmultiply_h2(ac, abcd - ac - bd, bd);
+    return __wmultiply_h2(ac, abcd - ac - bd, bd);
 }
 
 template<size_t size1>
-constexpr inline Integer<size1 * 4, false> wmultiply_h(
+constexpr inline Integer<size1 * 4, false> __wmultiply_h(
         const Integer<size1, false> &a,
         const Integer<size1, false> &b,
         const Integer<size1, false> &c,
         const Integer<size1, false> &d) {
-    return wmultiply_h(wmultiply(a, c), wmultiply(b, d),
+    return __wmultiply_h(wmultiply(a, c), wmultiply(b, d),
             wmultiply(a + b, c + d));
 }
 
@@ -1110,7 +1110,7 @@ constexpr inline Integer<size1 * 2, false> wmultiply(
         const Integer<size1, false> &v1,
         const Integer<size1, false> &v2) {
     using U = Integer < size1 / 2, false >;
-    return wmultiply_h(U(v1 >> (size1 * 4)), U(v1),
+    return __wmultiply_h(U(v1 >> (size1 * 4)), U(v1),
             U(v2 >> (size1 * 4)), U(v2));
 }
 
