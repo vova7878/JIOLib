@@ -675,7 +675,7 @@ private:
             (getIntegerType(size2) == native))>
     constexpr inline Integer<size2, sig2> upcast() const {
         using I = Integer<size2, sig2>;
-        return typename I::V(castUS<typename I::V::U, typename I::V::S,
+        return typename I::V(castUS<typename V::U, typename V::S,
                 sig, typename V::U > (value.value));
     }
 
