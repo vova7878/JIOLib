@@ -1070,8 +1070,8 @@ constexpr inline Integer<size1 * 2, false> wmultiply_h2(
         const Integer<size1, false> &ac,
         const Integer<size1, false> &k,
         const Integer<size1, false> &bd) {
-    return Integer<size1 * 2, false>(k << (size1 * 4) + bd,
-            ac + k >> (size1 * 4));
+    return Integer<size1 * 2, false>(bd + (k << (size1 * 4)),
+            ac + (k >> (size1 * 4)));
 }
 
 template<size_t size1>
@@ -1083,21 +1083,22 @@ constexpr inline Integer<size1 * 2, false> wmultiply_h(
 }
 
 template<size_t size1>
-constexpr inline Integer<size1 * 2, false> wmultiply_h(
+constexpr inline Integer<size1 * 4, false> wmultiply_h(
         const Integer<size1, false> &a,
         const Integer<size1, false> &b,
         const Integer<size1, false> &c,
         const Integer<size1, false> &d) {
-    return wmultiply_h(a * c, b * d, (a + c) * (b + d));
+    return wmultiply_h(wmultiply(a, c), wmultiply(b, d),
+            wmultiply(a + b, c + d));
 }
 
-template<size_t size1>
+template<size_t size1, enable_if((size1 > 4) && ((size1 & 1) == 0))>
 constexpr inline Integer<size1 * 2, false> wmultiply(
         const Integer<size1, false> &v1,
         const Integer<size1, false> &v2) {
-    using U = const Integer<size1, false>;
-    return wmultiply_h(v1 >> (size1 * 4), v1 & ((~U()) >> (size1 * 4)),
-            v2 >> (size1 * 4), v2 & ((~U()) >> (size1 * 4)));
+    using U = Integer < size1 / 2, false >;
+    return wmultiply_h(U(v1 >> (size1 * 4)), U(v1),
+            U(v2 >> (size1 * 4)), U(v2));
 }
 
 template<size_t size1, bool sig1, size_t size2, bool sig2>
