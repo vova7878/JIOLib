@@ -1080,19 +1080,39 @@ constexpr inline Integer<size1 * 2, false> wmultiply(
 template<size_t size1>
 constexpr inline Integer<size1 * 2, false> __wmultiply_h2(
         const Integer<size1, false> &ac,
-        const Integer<size1, false> &k,
-        const Integer<size1, false> &bd) {
+        const Integer<size1, false> &bd,
+        const Integer<size1 * 2, false> &k) {
     //overflow?
-    return Integer<size1 * 2, false>(bd + (k << (size1 * 4)),
-            ac + (k >> (size1 * 4)));
+    return Integer<size1 * 2, false>(bd, ac) + (k << (size1 * 4));
 }
 
 template<size_t size1>
 constexpr inline Integer<size1 * 2, false> __wmultiply_h(
         const Integer<size1, false> &ac,
         const Integer<size1, false> &bd,
-        const Integer<size1, false> &abcd) {
-    return __wmultiply_h2(ac, abcd - ac - bd, bd);
+        const Integer<size1 * 2, false> &abcd) {
+    return __wmultiply_h2(ac, bd, abcd - ac - bd);
+}
+
+template<size_t size1>
+constexpr inline Integer<size1 * 4, false> __wmultiply_h3(
+        const Integer<size1, false> &ab,
+        const Integer<size1, false> &cd,
+        bool o1, bool o2) {
+    using U1 = Integer<size1 * 2, false>;
+    using U2 = Integer<size1 * 4, false>;
+    return U2(wmultiply(ab, cd)) + ((o2 && o2) ? U2(1) << (size1 * 16) : U2()) +
+            (o1 ? (U1(cd) << (size1 * 8)) : U1()) +
+            (o2 ? (U1(ab) << (size1 * 8)) : U1());
+}
+
+template<size_t size1>
+constexpr inline Integer<size1 * 4, false> __wmultiply_h1(
+        const Integer<size1, false> &ab,
+        const Integer<size1, false> &cd,
+        const Integer<size1, false> &a,
+        const Integer<size1, false> &c) {
+    return __wmultiply_h3(ab, cd, ab < a, cd < c);
 }
 
 template<size_t size1>
@@ -1101,8 +1121,9 @@ constexpr inline Integer<size1 * 4, false> __wmultiply_h(
         const Integer<size1, false> &b,
         const Integer<size1, false> &c,
         const Integer<size1, false> &d) {
+    using U = Integer<size1 * 2, false>;
     return __wmultiply_h(wmultiply(a, c), wmultiply(b, d),
-            wmultiply(a + b, c + d));
+            __wmultiply_h1(a + b, c + d, a, c));
 }
 
 template<size_t size1, enable_if((size1 > 4) && ((size1 & 1) == 0))>
