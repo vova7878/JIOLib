@@ -202,6 +202,10 @@ struct Operators_Impl : public T {
 
     constexpr inline Operators_Impl(const T &obj) : T(obj) { }
 
+    void print(std::ostream &out) {
+        out << std::hex << T::value << std::dec;
+    }
+
     constexpr inline Operators_Impl operator+() const {
         return *this;
     }
@@ -326,7 +330,7 @@ struct Pow2_Integer_Base<half, false> {
 private:
     typedef Integer<half, true> S;
     typedef Integer<half, false> U;
-    typedef SHType<half> M;
+    typedef SHType<half * 2> M;
     static const M shmask = half * 2 * 8 - 1;
     U low, high;
 
@@ -345,7 +349,7 @@ private:
     constexpr inline static Pow2_Integer_Base rightShift(
             const Pow2_Integer_Base &value, const M shiftDistance) {
         return shiftDistance == 0 ? value :
-                (shiftDistance < (half * 8) ? rightShift2(value, shiftDistance) :
+                ((shiftDistance < (half * 8)) ? rightShift2(value, shiftDistance) :
                 rightShift3(value, shiftDistance));
     }
 public:
@@ -400,7 +404,7 @@ struct Pow2_Integer_Base<half, true> {
 private:
     typedef Integer<half, true> S;
     typedef Integer<half, false> U;
-    typedef SHType<half> M;
+    typedef SHType<half * 2> M;
     static const M shmask = half * 2 * 8 - 1;
     U low, high;
 
@@ -420,7 +424,7 @@ private:
     constexpr inline static Pow2_Integer_Base rightShift(
             const Pow2_Integer_Base &value, const M shiftDistance) {
         return shiftDistance == 0 ? value :
-                (shiftDistance < (half * 8) ? rightShift2(value, shiftDistance) :
+                ((shiftDistance < (half * 8)) ? rightShift2(value, shiftDistance) :
                 rightShift3(value, shiftDistance));
     }
 public:
@@ -430,7 +434,7 @@ public:
     constexpr explicit inline Pow2_Integer_Base(const U low) : low(low), high() { }
 
     constexpr explicit inline Pow2_Integer_Base(const S low) :
-    low(low), high((low < S()) ? ~S() : S()) { }
+    low(low), high((low < S()) ? (~S()) : S()) { }
 
     constexpr explicit inline Pow2_Integer_Base(const U low, const U high) :
     low(low), high(high) { }
@@ -492,7 +496,7 @@ private:
     constexpr inline static I leftShift(const I &value,
             const typename T::M shiftDistance) {
         return shiftDistance == 0 ? value :
-                (shiftDistance < (half * 8) ? leftShift2(value, shiftDistance) :
+                ((shiftDistance < (half * 8)) ? leftShift2(value, shiftDistance) :
                 leftShift3(value, shiftDistance));
     }
 
@@ -527,6 +531,12 @@ public:
     using T::T;
 
     constexpr inline Pow2_Integer_Impl(const T &obj) : T(obj) { }
+
+    void print(std::ostream &out) {
+        T::low.print(out);
+        out << ", ";
+        T::high.print(out);
+    }
 
     constexpr inline I operator+() const {
         return *this;
@@ -675,8 +685,8 @@ private:
             (getIntegerType(size2) == native))>
     constexpr inline Integer<size2, sig2> upcast() const {
         using I = Integer<size2, sig2>;
-        return typename I::V(castUS<typename V::U, typename V::S,
-                sig, typename V::U > (value.value));
+        return typename I::V(castUS<typename V::U,
+                typename V::S, sig > (value.value));
     }
 
     template<size_t size2, bool sig2,
@@ -693,8 +703,8 @@ private:
             (getIntegerType(size2) == pow2))>
     constexpr inline Integer<size2, sig2> upcast() const {
         using I = Integer<size2, sig2>;
-        return typename I::V(castUS<typename I::V::U, typename I::V::S,
-                sig, Integer<size, sig> > (*this));
+        using I2 = Integer < size2 / 2, sig>;
+        return I(I2(*this), *this < 0 ? ~I2() : I2());
     }
 
     template<size_t size2, bool sig2,
@@ -707,7 +717,8 @@ private:
 
     template<size_t size2, bool sig2,
     enable_if((getIntegerType(size) == pow2) &&
-            (getIntegerType(size2) == native))>
+            ((getIntegerType(size2) == pow2) ||
+            (getIntegerType(size2) == native)))>
     constexpr inline Integer<size2, sig2> downcast() const {
         using I = Integer<size2, sig2>;
         return I(value.low);
@@ -749,6 +760,12 @@ public:
     };
 
     constexpr inline Integer() : value() { }
+
+    void print(std::ostream &out) {
+        out << "I<" << size << ", " << (sig ? "t" : "f") << ">{";
+        value.print(out);
+        out << "}";
+    }
 
     template<size_t size1, bool sig1, size_t size2, bool sig2,
     enable_if((getIntegerType(size) == pow2) &&
