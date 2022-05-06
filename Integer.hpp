@@ -171,7 +171,7 @@ public:
     }
 
     constexpr inline Integer_S operator>>(const M other) const {
-        return Integer_S(S(value) >> other & shmask);
+        return Integer_S(S(value) >> (other & shmask));
     }
 
     constexpr inline bool operator>(const Integer_S &other) const {
@@ -202,7 +202,7 @@ struct Operators_Impl : public T {
 
     constexpr inline Operators_Impl(const T &obj) : T(obj) { }
 
-    void print(std::ostream &out) {
+    void printv(std::ostream &out) {
         out << std::hex << T::value << std::dec;
     }
 
@@ -356,35 +356,35 @@ public:
 
     constexpr explicit inline Pow2_Integer_Base() : low(), high() { }
 
-    constexpr explicit inline Pow2_Integer_Base(const U low) : low(low), high() { }
+    constexpr explicit inline Pow2_Integer_Base(const U &low) : low(low), high() { }
 
-    constexpr explicit inline Pow2_Integer_Base(const S low) :
+    constexpr explicit inline Pow2_Integer_Base(const S &low) :
     low(low), high((low < S()) ? ~U() : U()) { }
 
-    constexpr explicit inline Pow2_Integer_Base(const U low, const U high) :
+    constexpr explicit inline Pow2_Integer_Base(const U &low, const U &high) :
     low(low), high(high) { }
 
     constexpr inline bool operator>(const Pow2_Integer_Base &other) const {
-        return (S(high) > S(other.high)) ? true :
-                ((S(high) < S(other.high)) ? false :
+        return (high > other.high) ? true :
+                ((high < other.high) ? false :
                 (low > other.low));
     }
 
     constexpr inline bool operator<(const Pow2_Integer_Base &other) const {
-        return (S(high) < S(other.high)) ? true :
-                ((S(high) > S(other.high)) ? false :
+        return (high < other.high) ? true :
+                ((high > other.high) ? false :
                 (low < other.low));
     }
 
     constexpr inline bool operator>=(const Pow2_Integer_Base &other) const {
-        return (S(high) > S(other.high)) ? true :
-                ((S(high) < S(other.high)) ? false :
+        return (high > other.high) ? true :
+                ((high < other.high) ? false :
                 (low >= other.low));
     }
 
     constexpr inline bool operator<=(const Pow2_Integer_Base &other) const {
-        return (S(high) < S(other.high)) ? true :
-                ((S(high) > S(other.high)) ? false :
+        return (high < other.high) ? true :
+                ((high > other.high) ? false :
                 (low <= other.low));
     }
 
@@ -421,7 +421,7 @@ private:
                 S(value.high) < 0 ? ~U() : U());
     }
 
-    constexpr inline static Pow2_Integer_Base rightShift(
+    inline static Pow2_Integer_Base rightShift(
             const Pow2_Integer_Base &value, const M shiftDistance) {
         return shiftDistance == 0 ? value :
                 ((shiftDistance < (half * 8)) ? rightShift2(value, shiftDistance) :
@@ -431,35 +431,35 @@ public:
 
     constexpr explicit inline Pow2_Integer_Base() : low(), high() { }
 
-    constexpr explicit inline Pow2_Integer_Base(const U low) : low(low), high() { }
+    constexpr explicit inline Pow2_Integer_Base(const U &low) : low(low), high() { }
 
-    constexpr explicit inline Pow2_Integer_Base(const S low) :
-    low(low), high((low < S()) ? (~S()) : S()) { }
+    constexpr explicit inline Pow2_Integer_Base(const S &low) :
+    low(low), high(low < S() ? ~U() : U()) { }
 
-    constexpr explicit inline Pow2_Integer_Base(const U low, const U high) :
+    constexpr explicit inline Pow2_Integer_Base(const U &low, const U &high) :
     low(low), high(high) { }
 
     constexpr inline bool operator>(const Pow2_Integer_Base &other) const {
-        return (high > other.high) ? true :
-                ((high < other.high) ? false :
+        return (S(high) > S(other.high)) ? true :
+                ((S(high) < S(other.high)) ? false :
                 (low > other.low));
     }
 
     constexpr inline bool operator<(const Pow2_Integer_Base &other) const {
-        return (high < other.high) ? true :
-                ((high > other.high) ? false :
+        return (S(high) < S(other.high)) ? true :
+                ((S(high) > S(other.high)) ? false :
                 (low < other.low));
     }
 
     constexpr inline bool operator>=(const Pow2_Integer_Base &other) const {
-        return (high > other.high) ? true :
-                ((high < other.high) ? false :
+        return (S(high) > S(other.high)) ? true :
+                ((S(high) < S(other.high)) ? false :
                 (low >= other.low));
     }
 
     constexpr inline bool operator<=(const Pow2_Integer_Base &other) const {
-        return (high < other.high) ? true :
-                ((high > other.high) ? false :
+        return (S(high) < S(other.high)) ? true :
+                ((S(high) > S(other.high)) ? false :
                 (low <= other.low));
     }
 
@@ -532,10 +532,10 @@ public:
 
     constexpr inline Pow2_Integer_Impl(const T &obj) : T(obj) { }
 
-    void print(std::ostream &out) {
-        T::low.print(out);
+    void printv(std::ostream &out) {
+        T::high.printv(out);
         out << ", ";
-        T::high.print(out);
+        T::low.printv(out);
     }
 
     constexpr inline I operator+() const {
@@ -656,7 +656,7 @@ constexpr inline U castUS(V value) {
 
 template<typename T, bool sig, enable_if(sig)>
 constexpr inline T max_value() {
-    return (~T()) >> 1;
+    return ~(T(1) << (sizeof (T) * 8 - 1));
 }
 
 template<typename T, bool sig, enable_if(!sig)>
@@ -703,8 +703,8 @@ private:
             (getIntegerType(size2) == pow2))>
     constexpr inline Integer<size2, sig2> upcast() const {
         using I = Integer<size2, sig2>;
-        using I2 = Integer < size2 / 2, sig>;
-        return I(I2(*this), *this < 0 ? ~I2() : I2());
+        return typename I::V(castUS<typename I::V::U,
+                typename I::V::S, sig > (*this));
     }
 
     template<size_t size2, bool sig2,
@@ -763,8 +763,12 @@ public:
 
     void print(std::ostream &out) {
         out << "I<" << size << ", " << (sig ? "t" : "f") << ">{";
-        value.print(out);
+        value.printv(out);
         out << "}";
+    }
+
+    void printv(std::ostream &out) {
+        value.printv(out);
     }
 
     template<size_t size1, bool sig1, size_t size2, bool sig2,
@@ -831,7 +835,7 @@ public:
         return T(Integer<sizeof (T), is_signed<T>()>(*this));
     }
 
-    constexpr inline operator bool() const {
+    constexpr explicit inline operator bool() const {
         return *this != 0;
     }
 
@@ -960,6 +964,12 @@ public:
     template<typename T>
     friend class Operators_Impl;
 };
+
+template<size_t size1, bool sig1>
+std::ostream& operator<<(std::ostream &out, Integer<size1, sig1> &v) {
+    v.print(out);
+    return out;
+}
 
 template<size_t size1, bool sig1>
 constexpr inline Integer<size1, sig1>& operator++(Integer<size1, sig1> &v1) {
