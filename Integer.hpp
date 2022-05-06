@@ -1105,20 +1105,12 @@ constexpr inline Integer<size1 * 2, false> wmultiply(
 }
 
 template<size_t size1>
-constexpr inline Integer<size1 * 2, false> __wmultiply_h2(
-        const Integer<size1, false> &ac,
-        const Integer<size1, false> &bd,
-        const Integer<size1 * 2, false> &k) {
-    //overflow?
-    return Integer<size1 * 2, false>(bd, ac) + (k << (size1 * 4));
-}
-
-template<size_t size1>
 constexpr inline Integer<size1 * 2, false> __wmultiply_h(
         const Integer<size1, false> &ac,
         const Integer<size1, false> &bd,
         const Integer<size1 * 2, false> &abcd) {
-    return __wmultiply_h2(ac, bd, abcd - ac - bd);
+    return Integer<size1 * 2, false>(bd, ac)
+            + ((abcd - ac - bd) << (size1 * 4));
 }
 
 template<size_t size1>
