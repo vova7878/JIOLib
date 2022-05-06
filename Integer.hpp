@@ -966,7 +966,7 @@ public:
 };
 
 template<size_t size1, bool sig1>
-std::ostream& operator<<(std::ostream &out, Integer<size1, sig1> &v) {
+std::ostream& operator<<(std::ostream &out, Integer<size1, sig1> v) {
     v.print(out);
     return out;
 }
@@ -1128,7 +1128,7 @@ constexpr inline Integer<size1 * 4, false> __wmultiply_h3(
         bool o1, bool o2) {
     using U1 = Integer<size1 * 2, false>;
     using U2 = Integer<size1 * 4, false>;
-    return U2(wmultiply(ab, cd)) + ((o2 && o2) ? U2(1) << (size1 * 16) : U2()) +
+    return U2(wmultiply(ab, cd)) + ((o1 && o2) ? U2(1) << (size1 * 16) : U2()) +
             (o1 ? (U1(cd) << (size1 * 8)) : U1()) +
             (o2 ? (U1(ab) << (size1 * 8)) : U1());
 }
