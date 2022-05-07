@@ -2,8 +2,8 @@
 #define INTEGER_HPP
 
 #include <cstdint>
-#include <stdexcept>
 #include <type_traits>
+#include <iostream>
 
 template<bool A>
 using enable_if_t = typename std::enable_if<A, bool>::type;
