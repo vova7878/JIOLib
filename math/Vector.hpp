@@ -84,129 +84,61 @@ std::ostream& operator<<(std::ostream &out, Vector<T, size> v) {
     return out;
 }
 
-template<size_t index, typename T1, typename T2, typename T3,
-size_t size, typename I, enable_if(index == size)>
-constexpr inline void op_helper(const Vector<T1, size> &v1,
-        const Vector<T2, size> &v2, Vector<T3, size> &out, I op) { }
-
-template<size_t index, typename T1, typename T2, typename T3,
-size_t size, typename I, enable_if(index != size)>
-constexpr inline void op_helper(const Vector<T1, size> &v1,
-        const Vector<T2, size> &v2, Vector<T3, size> &out, I op) {
-    out[index] = op(v1[index], v2[index]);
-    op_helper < index + 1 > (v1, v2, out, op);
+#define BIN_OPERATOR_H(hname, op)                                 \
+template<size_t index, typename T1, typename T2, typename T3,     \
+size_t size, enable_if(index == size)>                            \
+constexpr inline void hname(const Vector<T1, size> &v1,           \
+        const Vector<T2, size> &v2, Vector<T3, size> &out) { }    \
+template<size_t index, typename T1, typename T2, typename T3,     \
+size_t size, enable_if(index != size)>                            \
+constexpr inline void hname(const Vector<T1, size> &v1,           \
+        const Vector<T2, size> &v2, Vector<T3, size> &out) {      \
+    out[index] = v1[index] op v2[index];                          \
+    hname < index + 1 > (v1, v2, out);                            \
 }
 
-template<typename T, size_t size>
-constexpr inline Vector<T, size> operator+(
-        const Vector<T, size> &v1,
-        const Vector<T, size> &v2) {
-    Vector<T, size> out;
-    op_helper<0>(v1, v2, out, [](T o1, T o2) {
-        return o1 + o2;
-    });
-    return out;
+#define BIN_OPERATOR(hname, op)                                   \
+BIN_OPERATOR_H(hname, op)                                         \
+template<typename T, size_t size>                                 \
+constexpr inline Vector<T, size> operator op(                     \
+        const Vector<T, size> &v1,                                \
+        const Vector<T, size> &v2) {                              \
+    Vector<T, size> out;                                          \
+    hname<0>(v1, v2, out);                                        \
+    return out;                                                   \
 }
 
-template<typename T, size_t size>
-constexpr inline Vector<T, size> operator-(
-        const Vector<T, size> &v1,
-        const Vector<T, size> &v2) {
-    Vector<T, size> out;
-    op_helper<0>(v1, v2, out, [](T o1, T o2) {
-        return o1 - o2;
-    });
-    return out;
-}
+BIN_OPERATOR(plus_h, +)
+BIN_OPERATOR(sub_h, -)
+BIN_OPERATOR(mul_h, *)
+BIN_OPERATOR(div_h, /)
+BIN_OPERATOR(rem_h, %)
+BIN_OPERATOR(or_h, |)
+BIN_OPERATOR(and_h, &)
+BIN_OPERATOR(xor_h, ^)
 
-template<typename T, size_t size>
-constexpr inline Vector<T, size> operator*(
-        const Vector<T, size> &v1,
-        const Vector<T, size> &v2) {
-    Vector<T, size> out;
-    op_helper<0>(v1, v2, out, [](T o1, T o2) {
-        return o1 * o2;
-    });
-    return out;
-}
-
-template<typename T, size_t size>
-constexpr inline Vector<T, size> operator/(
-        const Vector<T, size> &v1,
-        const Vector<T, size> &v2) {
-    Vector<T, size> out;
-    op_helper<0>(v1, v2, out, [](T o1, T o2) {
-        return o1 / o2;
-    });
-    return out;
-}
-
-template<typename T, size_t size>
-constexpr inline Vector<T, size> operator%(
-        const Vector<T, size> &v1,
-        const Vector<T, size> &v2) {
-    Vector<T, size> out;
-    op_helper<0>(v1, v2, out, [](T o1, T o2) {
-        return o1 % o2;
-    });
-    return out;
-}
-
-template<typename T, size_t size>
-constexpr inline Vector<T, size> operator|(
-        const Vector<T, size> &v1,
-        const Vector<T, size> &v2) {
-    Vector<T, size> out;
-    op_helper<0>(v1, v2, out, [](T o1, T o2) {
-        return o1 | o2;
-    });
-    return out;
-}
-
-template<typename T, size_t size>
-constexpr inline Vector<T, size> operator&(
-        const Vector<T, size> &v1,
-        const Vector<T, size> &v2) {
-    Vector<T, size> out;
-    op_helper<0>(v1, v2, out, [](T o1, T o2) {
-        return o1 & o2;
-    });
-    return out;
-}
-
-template<typename T, size_t size>
-constexpr inline Vector<T, size> operator^(
-        const Vector<T, size> &v1,
-        const Vector<T, size> &v2) {
-    Vector<T, size> out;
-    op_helper<0>(v1, v2, out, [](T o1, T o2) {
-        return o1 ^ o2;
-    });
-    return out;
-}
-
+BIN_OPERATOR_H(shl_h, <<)
 template<typename T1, typename T2, size_t size>
 constexpr inline Vector<T1, size> operator<<(
         const Vector<T1, size> &v1,
         const Vector<T2, size> &v2) {
     Vector<T1, size> out;
-    op_helper<0>(v1, v2, out, [](T1 o1, T2 o2) {
-        return o1 << o2;
-    });
+    shl_h<0>(v1, v2, out);
     return out;
 }
 
+BIN_OPERATOR_H(shr_h, >>)
 template<typename T1, typename T2, size_t size>
 constexpr inline Vector<T1, size> operator>>(
         const Vector<T1, size> &v1,
         const Vector<T2, size> &v2) {
     Vector<T1, size> out;
-    op_helper<0>(v1, v2, out, [](T1 o1, T2 o2) {
-        return o1 >> o2;
-    });
+    shr_h<0>(v1, v2, out);
     return out;
 }
 
+#undef BIN_OPERATOR_H
+#undef BIN_OPERATOR
 #undef enable_if
 
 #endif /* VECTOR_HPP */
