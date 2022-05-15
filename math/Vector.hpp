@@ -25,6 +25,9 @@ constexpr inline void copy_array(T1 *array1, const T2 *array2) {
             array1, array2);
 }
 
+struct __unused {
+};
+
 template<typename T, size_t size>
 class Vector {
 private:
@@ -48,12 +51,30 @@ private:
         data[index] = T(e);
         assign < index + 1 > (arr...);
     }
+
+    template<size_t index, enable_if(index == size)>
+    constexpr inline void assignOne(T e) { }
+
+    template<size_t index, enable_if(index != size)>
+    constexpr inline void assignOne(T e) {
+        data[index] = e;
+        assignOne < index + 1 > (e);
+    }
 public:
 
-    constexpr inline Vector() { }
+    constexpr inline Vector(__unused) { }
+
+    constexpr inline Vector() {
+        assignOne<0>(T());
+    }
+
+    template<typename Tp>
+    constexpr explicit inline Vector(Tp v) {
+        assignOne<0>(v);
+    }
 
     template<typename... Tp>
-    constexpr inline Vector(Tp... arr) {
+    constexpr explicit inline Vector(Tp... arr) {
         assign<0>(arr...);
     }
 
@@ -105,7 +126,7 @@ template<typename T1, typename T2, size_t size>                   \
 constexpr inline Vector<OP_TYPE(op, T1, T2), size> operator op(   \
         const Vector<T1, size> &v1,                               \
         const Vector<T2, size> &v2) {                             \
-    Vector<OP_TYPE(op, T1, T2), size> out;                        \
+    Vector<OP_TYPE(op, T1, T2), size> out((__unused()));          \
     hname<0>(v1, v2, out);                                        \
     return out;                                                   \
 }
@@ -142,7 +163,7 @@ BIN_VT_OPERATOR_H(hname, op)                                      \
 template<typename T1, typename T2, size_t size>                   \
 constexpr inline Vector<OP_TYPE(op, T1, T2), size> operator op(   \
         const Vector<T1, size> &v1, const T2 v2) {                \
-    Vector<OP_TYPE(op, T1, T2), size> out;                        \
+    Vector<OP_TYPE(op, T1, T2), size> out((__unused()));          \
     hname<0>(v1, v2, out);                                        \
     return out;                                                   \
 }
@@ -179,7 +200,7 @@ BIN_TV_OPERATOR_H(hname, op)                                      \
 template<typename T1, typename T2, size_t size>                   \
 constexpr inline Vector<OP_TYPE(op, T1, T2), size> operator op(   \
         const T1 v1, const Vector<T2, size> &v2) {                \
-    Vector<OP_TYPE(op, T1, T2), size> out;                        \
+    Vector<OP_TYPE(op, T1, T2), size> out((__unused()));          \
     hname<0>(v1, v2, out);                                        \
     return out;                                                   \
 }
