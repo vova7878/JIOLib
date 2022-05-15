@@ -114,6 +114,18 @@ public:
 
     explicit constexpr inline Integer_U(const U n) : value(n) { }
 
+    constexpr inline bool isZero() const {
+        return value == 0;
+    };
+
+    constexpr inline bool isNegative() const {
+        return false;
+    };
+
+    constexpr inline bool isSNegative() const {
+        return S(value) < 0;
+    };
+
     constexpr inline Integer_U operator/(const Integer_U &other) const {
         return Integer_U(value / other.value);
     }
@@ -161,6 +173,18 @@ public:
     constexpr explicit inline Integer_S() : value(0) { }
 
     constexpr explicit inline Integer_S(const S n) : value(n) { }
+
+    constexpr inline bool isZero() const {
+        return value == 0;
+    };
+
+    constexpr inline bool isNegative() const {
+        return S(value) < 0;
+    };
+
+    constexpr inline bool isSNegative() const {
+        return S(value) < 0;
+    };
 
     constexpr inline Integer_S operator/(const Integer_S &other) const {
         return Integer_S(S(value) / S(other.value));
@@ -359,10 +383,22 @@ public:
     constexpr explicit inline Pow2_Integer_Base(const U &low) : low(low), high() { }
 
     constexpr explicit inline Pow2_Integer_Base(const S &low) :
-    low(low), high((low < S()) ? ~U() : U()) { }
+    low(low), high(low.isSNegative() ? ~U() : U()) { }
 
     constexpr explicit inline Pow2_Integer_Base(const U &low, const U &high) :
     low(low), high(high) { }
+
+    constexpr inline bool isZero() const {
+        return low.isZero() && high.isZero();
+    };
+
+    constexpr inline bool isNegative() const {
+        return false;
+    };
+
+    constexpr inline bool isSNegative() const {
+        return high.isSNegative();
+    };
 
     constexpr inline bool operator>(const Pow2_Integer_Base &other) const {
         return (high > other.high) ? true :
@@ -418,7 +454,7 @@ private:
     constexpr inline static Pow2_Integer_Base rightShift3(
             const Pow2_Integer_Base &value, const M shiftDistance) {
         return Pow2_Integer_Base(S(value.high) >> (shiftDistance - half * 8),
-                S(value.high) < 0 ? ~U() : U());
+                value.high.isSNegative() ? ~U() : U());
     }
 
     inline static Pow2_Integer_Base rightShift(
@@ -434,10 +470,22 @@ public:
     constexpr explicit inline Pow2_Integer_Base(const U &low) : low(low), high() { }
 
     constexpr explicit inline Pow2_Integer_Base(const S &low) :
-    low(low), high(low < S() ? ~U() : U()) { }
+    low(low), high(low.isNegative() ? ~U() : U()) { }
 
     constexpr explicit inline Pow2_Integer_Base(const U &low, const U &high) :
     low(low), high(high) { }
+
+    constexpr inline bool isZero() const {
+        return low.isZero() && high.isZero();
+    };
+
+    constexpr inline bool isNegative() const {
+        return high.isSNegative();
+    };
+
+    constexpr inline bool isSNegative() const {
+        return high.isSNegative();
+    };
 
     constexpr inline bool operator>(const Pow2_Integer_Base &other) const {
         return (S(high) > S(other.high)) ? true :
@@ -475,7 +523,7 @@ public:
 };
 
 template<size_t half, bool sig>
-class Pow2_Integer_Impl : Pow2_Integer_Base<half, sig> {
+class Pow2_Integer_Impl : public Pow2_Integer_Base<half, sig> {
 private:
     typedef typename Pow2_Integer_Base<half, sig>::S S;
     typedef typename Pow2_Integer_Base<half, sig>::U U;
@@ -761,8 +809,20 @@ public:
 
     constexpr inline Integer() : value() { }
 
+    constexpr inline bool isZero() const {
+        return value.isZero();
+    };
+
+    constexpr inline bool isNegative() const {
+        return value.isNegative();
+    };
+
+    constexpr inline bool isSNegative() const {
+        return value.isSNegative();
+    };
+
     void print(std::ostream &out) {
-        out << "I<" << size << ", " << (sig ? "t" : "f") << ">{";
+        out << "I<" << std::dec << size << ", " << (sig ? "t" : "f") << ">{";
         value.printv(out);
         out << "}";
     }
@@ -967,7 +1027,9 @@ public:
 
 template<size_t size1, bool sig1>
 std::ostream& operator<<(std::ostream &out, Integer<size1, sig1> v) {
+    auto f = out.flags();
     v.print(out);
+    out.flags(f);
     return out;
 }
 
