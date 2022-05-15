@@ -84,7 +84,9 @@ std::ostream& operator<<(std::ostream &out, Vector<T, size> v) {
     return out;
 }
 
-#define BIN_OPERATOR_H(hname, op)                                 \
+#define OP_TYPE(op, T1, T2) decltype(std::declval<T1>() op std::declval<T2>())
+
+#define BIN_VV_OPERATOR_H(hname, op)                              \
 template<size_t index, typename T1, typename T2, typename T3,     \
 size_t size, enable_if(index == size)>                            \
 constexpr inline void hname(const Vector<T1, size> &v1,           \
@@ -97,48 +99,107 @@ constexpr inline void hname(const Vector<T1, size> &v1,           \
     hname < index + 1 > (v1, v2, out);                            \
 }
 
-#define BIN_OPERATOR(hname, op)                                   \
-BIN_OPERATOR_H(hname, op)                                         \
-template<typename T, size_t size>                                 \
-constexpr inline Vector<T, size> operator op(                     \
-        const Vector<T, size> &v1,                                \
-        const Vector<T, size> &v2) {                              \
-    Vector<T, size> out;                                          \
+#define BIN_VV_OPERATOR(hname, op)                                \
+BIN_VV_OPERATOR_H(hname, op)                                      \
+template<typename T1, typename T2, size_t size>                   \
+constexpr inline Vector<OP_TYPE(op, T1, T2), size> operator op(   \
+        const Vector<T1, size> &v1,                               \
+        const Vector<T2, size> &v2) {                             \
+    Vector<OP_TYPE(op, T1, T2), size> out;                        \
     hname<0>(v1, v2, out);                                        \
     return out;                                                   \
 }
 
-BIN_OPERATOR(plus_h, +)
-BIN_OPERATOR(sub_h, -)
-BIN_OPERATOR(mul_h, *)
-BIN_OPERATOR(div_h, /)
-BIN_OPERATOR(rem_h, %)
-BIN_OPERATOR(or_h, |)
-BIN_OPERATOR(and_h, &)
-BIN_OPERATOR(xor_h, ^)
+BIN_VV_OPERATOR(plus_h, +)
+BIN_VV_OPERATOR(sub_h, -)
+BIN_VV_OPERATOR(mul_h, *)
+BIN_VV_OPERATOR(div_h, /)
+BIN_VV_OPERATOR(rem_h, %)
+BIN_VV_OPERATOR(or_h, |)
+BIN_VV_OPERATOR(and_h, &)
+BIN_VV_OPERATOR(xor_h, ^)
+BIN_VV_OPERATOR(shl_h, <<)
+BIN_VV_OPERATOR(shr_h, >>)
 
-BIN_OPERATOR_H(shl_h, <<)
-template<typename T1, typename T2, size_t size>
-constexpr inline Vector<T1, size> operator<<(
-        const Vector<T1, size> &v1,
-        const Vector<T2, size> &v2) {
-    Vector<T1, size> out;
-    shl_h<0>(v1, v2, out);
-    return out;
+#undef BIN_VV_OPERATOR_H
+#undef BIN_VV_OPERATOR
+
+#define BIN_VT_OPERATOR_H(hname, op)                              \
+template<size_t index, typename T1, typename T2, typename T3,     \
+size_t size, enable_if(index == size)>                            \
+constexpr inline void hname(const Vector<T1, size> &v1,           \
+        const T2 v2, Vector<T3, size> &out) { }                   \
+template<size_t index, typename T1, typename T2, typename T3,     \
+size_t size, enable_if(index != size)>                            \
+constexpr inline void hname(const Vector<T1, size> &v1,           \
+        const T2 v2, Vector<T3, size> &out) {                     \
+    out[index] = v1[index] op v2;                                 \
+    hname < index + 1 > (v1, v2, out);                            \
 }
 
-BIN_OPERATOR_H(shr_h, >>)
-template<typename T1, typename T2, size_t size>
-constexpr inline Vector<T1, size> operator>>(
-        const Vector<T1, size> &v1,
-        const Vector<T2, size> &v2) {
-    Vector<T1, size> out;
-    shr_h<0>(v1, v2, out);
-    return out;
+#define BIN_VT_OPERATOR(hname, op)                                \
+BIN_VT_OPERATOR_H(hname, op)                                      \
+template<typename T1, typename T2, size_t size>                   \
+constexpr inline Vector<OP_TYPE(op, T1, T2), size> operator op(   \
+        const Vector<T1, size> &v1, const T2 v2) {                \
+    Vector<OP_TYPE(op, T1, T2), size> out;                        \
+    hname<0>(v1, v2, out);                                        \
+    return out;                                                   \
 }
 
-#undef BIN_OPERATOR_H
-#undef BIN_OPERATOR
+BIN_VT_OPERATOR(plus_h, +)
+BIN_VT_OPERATOR(sub_h, -)
+BIN_VT_OPERATOR(mul_h, *)
+BIN_VT_OPERATOR(div_h, /)
+BIN_VT_OPERATOR(rem_h, %)
+BIN_VT_OPERATOR(or_h, |)
+BIN_VT_OPERATOR(and_h, &)
+BIN_VT_OPERATOR(xor_h, ^)
+BIN_VT_OPERATOR(shl_h, <<)
+BIN_VT_OPERATOR(shr_h, >>)
+
+#undef BIN_VT_OPERATOR_H
+#undef BIN_VT_OPERATOR
+
+#define BIN_TV_OPERATOR_H(hname, op)                              \
+template<size_t index, typename T1, typename T2, typename T3,     \
+size_t size, enable_if(index == size)>                            \
+constexpr inline void hname(const T1 v1,                          \
+        const Vector<T2, size> &v2, Vector<T3, size> &out) { }    \
+template<size_t index, typename T1, typename T2, typename T3,     \
+size_t size, enable_if(index != size)>                            \
+constexpr inline void hname(const T1 v1,                          \
+        const Vector<T2, size> &v2, Vector<T3, size> &out) {      \
+    out[index] = v1 op v2[index];                                 \
+    hname < index + 1 > (v1, v2, out);                            \
+}
+
+#define BIN_TV_OPERATOR(hname, op)                                \
+BIN_TV_OPERATOR_H(hname, op)                                      \
+template<typename T1, typename T2, size_t size>                   \
+constexpr inline Vector<OP_TYPE(op, T1, T2), size> operator op(   \
+        const T1 v1, const Vector<T2, size> &v2) {                \
+    Vector<OP_TYPE(op, T1, T2), size> out;                        \
+    hname<0>(v1, v2, out);                                        \
+    return out;                                                   \
+}
+
+BIN_TV_OPERATOR(plus_h, +)
+BIN_TV_OPERATOR(sub_h, -)
+BIN_TV_OPERATOR(mul_h, *)
+BIN_TV_OPERATOR(div_h, /)
+BIN_TV_OPERATOR(rem_h, %)
+BIN_TV_OPERATOR(or_h, |)
+BIN_TV_OPERATOR(and_h, &)
+BIN_TV_OPERATOR(xor_h, ^)
+BIN_TV_OPERATOR(shl_h, <<)
+BIN_TV_OPERATOR(shr_h, >>)
+
+#undef BIN_VV_OPERATOR_H
+#undef BIN_VV_OPERATOR
+
+#undef OP_TYPE
+
 #undef enable_if
 
 #endif /* VECTOR_HPP */
