@@ -89,7 +89,7 @@ template<size_t size>
 using SHType = typename SHValue<size>::type;
 
 template<size_t size, bool sig>
-struct Integer;
+class Integer;
 
 template<size_t size, bool sig, IType = getIntegerType(size)>
 struct Integer_Impl;
@@ -315,7 +315,7 @@ struct Integer_Impl<8, true> {
 };
 
 template<size_t half, bool sig>
-struct Pow2_Integer_Impl;
+class Pow2_Integer_Impl;
 
 template<size_t size, bool sig>
 struct Integer_Impl <size, sig, IType::pow2> {
@@ -323,10 +323,10 @@ struct Integer_Impl <size, sig, IType::pow2> {
 };
 
 template<size_t half, bool sig>
-struct Pow2_Integer_Base;
+class Pow2_Integer_Base;
 
 template<size_t half>
-struct Pow2_Integer_Base<half, false> {
+class Pow2_Integer_Base<half, false> {
 private:
     typedef Integer<half, true> S;
     typedef Integer<half, false> U;
@@ -400,7 +400,7 @@ public:
 };
 
 template<size_t half>
-struct Pow2_Integer_Base<half, true> {
+class Pow2_Integer_Base<half, true> {
 private:
     typedef Integer<half, true> S;
     typedef Integer<half, false> U;
@@ -475,7 +475,7 @@ public:
 };
 
 template<size_t half, bool sig>
-struct Pow2_Integer_Impl : Pow2_Integer_Base<half, sig> {
+class Pow2_Integer_Impl : Pow2_Integer_Base<half, sig> {
 private:
     typedef typename Pow2_Integer_Base<half, sig>::S S;
     typedef typename Pow2_Integer_Base<half, sig>::U U;
@@ -675,7 +675,7 @@ constexpr inline T min_value() {
 }
 
 template<size_t size, bool sig>
-struct Integer {
+class Integer {
 private:
     using V = typename Integer_Impl<size, sig>::type;
     V value;
@@ -962,7 +962,7 @@ public:
     friend class Pow2_Integer_Impl;
 
     template<typename T>
-    friend class Operators_Impl;
+    friend struct Operators_Impl;
 };
 
 template<size_t size1, bool sig1>
@@ -1140,7 +1140,6 @@ constexpr inline Integer<size1 * 4, false> __wmultiply_h(
         const Integer<size1, false> &b,
         const Integer<size1, false> &c,
         const Integer<size1, false> &d) {
-    using U = Integer<size1 * 2, false>;
     return __wmultiply_h(wmultiply(a, c), wmultiply(b, d),
             __wmultiply_h1(a + b, c + d, a, c));
 }

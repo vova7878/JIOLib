@@ -26,13 +26,13 @@ namespace JIO {
 
         inline ByteBuffer(const std::shared_ptr<char> &ptr, size_t start,
                 size_t capacity) :
-        ptr_data(ptr), start(start), _capacity(capacity) { }
+        start(start), _capacity(capacity), ptr_data(ptr) { }
     public:
 
         inline ByteBuffer(void *ptr, size_t start, size_t capacity, bool clean) :
+        start(0), _capacity(capacity),
         ptr_data(checkUBounds<char*>(ptr, start, capacity),
-        clean ? free_deleter : null_deleter)
-        , start(0), _capacity(capacity) { }
+        clean ? free_deleter : null_deleter) { }
 
         inline ByteBuffer(void *ptr, size_t start, size_t capacity) :
         ByteBuffer(ptr, start, capacity, true) { }
