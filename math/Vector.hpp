@@ -1,6 +1,8 @@
 #ifndef VECTOR_HPP
 #define VECTOR_HPP
 
+#if __cplusplus >= 201402L
+
 #include <cassert>
 #include <type_traits>
 #include <iostream>
@@ -216,12 +218,49 @@ BIN_TV_OPERATOR(xor_h, ^)
 BIN_TV_OPERATOR(shl_h, <<)
 BIN_TV_OPERATOR(shr_h, >>)
 
-#undef BIN_VV_OPERATOR_H
-#undef BIN_VV_OPERATOR
+#undef BIN_TV_OPERATOR_H
+#undef BIN_TV_OPERATOR
+
+#define UNARY_V_OPERATOR_H(hname, op)                             \
+template<size_t index, typename T1, typename T2,                  \
+size_t size, enable_if(index == size)>                            \
+constexpr inline void hname(const Vector<T1, size> &v1,           \
+        Vector<T2, size> &out) { }                                \
+template<size_t index, typename T1, typename T2,                  \
+size_t size, enable_if(index != size)>                            \
+constexpr inline void hname(const Vector<T1, size> &v1,           \
+        Vector<T2, size> &out) {                                  \
+    out[index] = op v1[index];                                    \
+    hname < index + 1 > (v1, out);                                \
+}
+
+#define UNARY_V_OPERATOR(hname, op)                               \
+UNARY_V_OPERATOR_H(hname, op)                                     \
+template<typename T, size_t size>                                 \
+constexpr inline Vector<T, size> operator op(                     \
+        const Vector<T, size> &v1) {                              \
+    Vector<T, size> out((__unused()));                            \
+    hname<0>(v1, out);                                            \
+    return out;                                                   \
+}
+
+template<typename T, size_t size>
+constexpr inline Vector<T, size> operator+(
+        const Vector<T, size> &v1) {
+    return v1;
+}
+
+UNARY_V_OPERATOR(sub_h, -)
+UNARY_V_OPERATOR(neg_h, ~)
+
+#undef UNARY_V_OPERATOR_H
+#undef UNARY_V_OPERATOR
 
 #undef OP_TYPE
 
 #undef enable_if
+
+#endif
 
 #endif /* VECTOR_HPP */
 
