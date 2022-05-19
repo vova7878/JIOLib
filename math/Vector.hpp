@@ -75,8 +75,8 @@ public:
         assignOne<0>(v);
     }
 
-    template<typename T2>
-    constexpr explicit inline Vector(Vector<T2, size> v) {
+    template<typename Tp>
+    constexpr explicit inline Vector(Vector<Tp, size> v) {
         assign<0>(v);
     }
 
@@ -266,6 +266,76 @@ UNARY_V_OPERATOR(neg_h, ~)
 
 #undef UNARY_V_OPERATOR_H
 #undef UNARY_V_OPERATOR
+
+#define ASSIGN_VV_OPERATOR_H(hname, op)                           \
+template<size_t index, typename T1, typename T2,                  \
+size_t size, enable_if(index == size)>                            \
+constexpr inline void hname(Vector<T1, size> &v1,                 \
+        const Vector<T2, size> &v2) { }                           \
+template<size_t index, typename T1, typename T2,                  \
+size_t size, enable_if(index != size)>                            \
+constexpr inline void hname(Vector<T1, size> &v1,                 \
+        const Vector<T2, size> &v2) {                             \
+    v1[index] op v2[index];                                       \
+    hname < index + 1 > (v1, v2);                                 \
+}
+
+#define ASSIGN_VV_OPERATOR(hname, op)                             \
+ASSIGN_VV_OPERATOR_H(hname, op)                                   \
+template<typename T1, typename T2, size_t size>                   \
+constexpr inline Vector<T1, size>& operator op(                   \
+        Vector<T1, size> &v1, const Vector<T2, size> &v2) {       \
+    hname<0>(v1, v2);                                             \
+    return v1;                                                    \
+}
+
+ASSIGN_VV_OPERATOR(a_plus_h, +=)
+ASSIGN_VV_OPERATOR(a_sub_h, -=)
+ASSIGN_VV_OPERATOR(a_mul_h, *=)
+ASSIGN_VV_OPERATOR(a_div_h, /=)
+ASSIGN_VV_OPERATOR(a_rem_h, %=)
+ASSIGN_VV_OPERATOR(a_or_h, |=)
+ASSIGN_VV_OPERATOR(a_and_h, &=)
+ASSIGN_VV_OPERATOR(a_xor_h, ^=)
+ASSIGN_VV_OPERATOR(a_shl_h, <<=)
+ASSIGN_VV_OPERATOR(a_shr_h, >>=)
+
+#undef ASSIGN_VV_OPERATOR_H
+#undef ASSIGN_VV_OPERATOR
+
+#define ASSIGN_VT_OPERATOR_H(hname, op)                           \
+template<size_t index, typename T1, typename T2,                  \
+size_t size, enable_if(index == size)>                            \
+constexpr inline void hname(Vector<T1, size> &v1, const T2 v2) { }\
+template<size_t index, typename T1, typename T2,                  \
+size_t size, enable_if(index != size)>                            \
+constexpr inline void hname(Vector<T1, size> &v1, const T2 v2) {  \
+    v1[index] op v2;                                              \
+    hname < index + 1 > (v1, v2);                                 \
+}
+
+#define ASSIGN_VT_OPERATOR(hname, op)                             \
+ASSIGN_VT_OPERATOR_H(hname, op)                                   \
+template<typename T1, typename T2, size_t size>                   \
+constexpr inline Vector<T1, size>& operator op(                   \
+        Vector<T1, size> &v1, const T2 v2) {                      \
+    hname<0>(v1, v2);                                             \
+    return v1;                                                    \
+}
+
+ASSIGN_VT_OPERATOR(a_plus_h, +=)
+ASSIGN_VT_OPERATOR(a_sub_h, -=)
+ASSIGN_VT_OPERATOR(a_mul_h, *=)
+ASSIGN_VT_OPERATOR(a_div_h, /=)
+ASSIGN_VT_OPERATOR(a_rem_h, %=)
+ASSIGN_VT_OPERATOR(a_or_h, |=)
+ASSIGN_VT_OPERATOR(a_and_h, &=)
+ASSIGN_VT_OPERATOR(a_xor_h, ^=)
+ASSIGN_VT_OPERATOR(a_shl_h, <<=)
+ASSIGN_VT_OPERATOR(a_shr_h, >>=)
+
+#undef ASSIGN_VT_OPERATOR_H
+#undef ASSIGN_VT_OPERATOR
 
 #undef OP_TYPE
 
