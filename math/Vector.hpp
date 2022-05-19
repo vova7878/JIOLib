@@ -75,6 +75,11 @@ public:
         assignOne<0>(v);
     }
 
+    template<typename T2>
+    constexpr explicit inline Vector(Vector<T2, size> v) {
+        assign<0>(v);
+    }
+
     template<typename... Tp>
     constexpr explicit inline Vector(Tp... arr) {
         assign<0>(arr...);
