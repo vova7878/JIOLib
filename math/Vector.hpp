@@ -408,6 +408,42 @@ ASSIGN_VT_OPERATOR(_a_shr_h, >>=)
 
 #undef OP_TYPE
 
+template<typename T, size_t size>
+constexpr inline T dot(const Vector<T, size> &v) {
+    T out = T();
+    for (size_t i = 0; i < size; i++) {
+        T tmp(v[i]);
+        out += tmp * tmp;
+    }
+    return out;
+}
+
+template<typename T, size_t size>
+constexpr inline T length(const Vector<T, size> &v) {
+    return sqrt(dot(v));
+}
+
+#define SIMPLE_V_FUNCTION(fname, std_fname)                       \
+template<typename T, size_t size>                                 \
+constexpr inline Vector<T, size> fname(const Vector<T, size> &v) {\
+    Vector<T, size> out((__unused()));                            \
+    for (size_t i = 0; i < size; i++) {                           \
+        out[i] = std_fname(v[i]);                                 \
+    }                                                             \
+    return out;                                                   \
+}
+
+SIMPLE_V_FUNCTION(abs, abs);
+SIMPLE_V_FUNCTION(sqrt, sqrt);
+SIMPLE_V_FUNCTION(sin, sin);
+SIMPLE_V_FUNCTION(cos, cos);
+SIMPLE_V_FUNCTION(tan, tan);
+SIMPLE_V_FUNCTION(asin, asin);
+SIMPLE_V_FUNCTION(acos, acos);
+SIMPLE_V_FUNCTION(atan, atan);
+
+#undef SIMPLE_V_FUNCTION
+
 #undef enable_if
 
 #endif
