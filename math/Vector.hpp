@@ -40,15 +40,16 @@ private:
         static_assert(index == size, "Wrong arguments length");
     }
 
-    template<size_t index, size_t size2, typename T2, typename... Tp>
-    constexpr inline void assign(Vector<T2, size2> e, Tp... arr) {
+    template<size_t index, typename T2, size_t size2, typename... Tp>
+    constexpr inline void assign(const Vector<T2, size2> &v, Tp... arr) {
         static_assert(index + size2 <= size, "Wrong arguments length");
-        copy_array<size, size2, index, 0, size2, 0>(data, e.data);
+        copy_array<size, size2, index, 0, size2, 0>(data, v.data);
         assign < index + size2 > (arr...);
     }
 
-    template<size_t index, typename T2, typename... Tp>
-    constexpr inline void assign(T2 e, Tp... arr) {
+    template<size_t index, typename T2, typename... Tp,
+    typename V = decltype(T(std::declval<T2>()))>
+    constexpr inline void assign(const T2 e, Tp... arr) {
         static_assert(index + 1 <= size, "Wrong arguments length");
         data[index] = T(e);
         assign < index + 1 > (arr...);
@@ -71,12 +72,12 @@ public:
     }
 
     template<typename Tp>
-    constexpr explicit inline Vector(Tp v) {
+    constexpr explicit inline Vector(const Tp v) {
         assignOne<0>(v);
     }
 
     template<typename Tp>
-    constexpr explicit inline Vector(Vector<Tp, size> v) {
+    constexpr explicit inline Vector(const Vector<Tp, size> &v) {
         assign<0>(v);
     }
 
