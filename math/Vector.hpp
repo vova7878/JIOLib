@@ -16,6 +16,9 @@ using enable_if_t = typename std::enable_if<A, bool>::type;
 
 #define enable_if(B) enable_if_t<(B)> = false
 
+struct __unused {
+};
+
 template<size_t size1, size_t size2, size_t index1, size_t index2,
 size_t length, size_t counter, typename T1, typename T2, enable_if(counter == length)>
 constexpr inline void copy_array(T1 *array1, const T2 *array2) { }
@@ -27,9 +30,6 @@ constexpr inline void copy_array(T1 *array1, const T2 *array2) {
     copy_array<size1, size2, index1, index2, length, counter + 1 > (
             array1, array2);
 }
-
-struct __unused {
-};
 
 template<typename T, size_t size>
 class Vector {
@@ -135,7 +135,7 @@ constexpr inline void hname(const Vector<T1, size> &v1,           \
 template<typename T1, typename T2, typename T3, size_t size>      \
 constexpr inline void hname(const Vector<T1, size> &v1,           \
         const Vector<T2, size> &v2, Vector<T3, size> &out) {      \
-    for(int i = 0; i < size; i++){                                \
+    for(size_t i = 0; i < size; i++){                             \
         out[i] = v1[i] op v2[i];                                  \
     }                                                             \
 }
@@ -152,18 +152,18 @@ constexpr inline Vector<OP_TYPE(op, T1, T2), size> operator op(   \
     return out;                                                   \
 }
 
-BIN_VV_OPERATOR(plus_h, +)
-BIN_VV_OPERATOR(sub_h, -)
-BIN_VV_OPERATOR(mul_h, *)
-BIN_VV_OPERATOR(div_h, /)
-BIN_VV_OPERATOR(rem_h, %)
-BIN_VV_OPERATOR(or_h, |)
-BIN_VV_OPERATOR(and_h, &)
-BIN_VV_OPERATOR(xor_h, ^)
-BIN_VV_OPERATOR(l_and_h, &&)
-BIN_VV_OPERATOR(l_or_h, ||)
-BIN_VV_OPERATOR(shl_h, <<)
-BIN_VV_OPERATOR(shr_h, >>)
+BIN_VV_OPERATOR(_plus_h, +)
+BIN_VV_OPERATOR(_sub_h, -)
+BIN_VV_OPERATOR(_mul_h, *)
+BIN_VV_OPERATOR(_div_h, /)
+BIN_VV_OPERATOR(_rem_h, %)
+BIN_VV_OPERATOR(_or_h, |)
+BIN_VV_OPERATOR(_and_h, &)
+BIN_VV_OPERATOR(_xor_h, ^)
+BIN_VV_OPERATOR(_l_and_h, &&)
+BIN_VV_OPERATOR(_l_or_h, ||)
+BIN_VV_OPERATOR(_shl_h, <<)
+BIN_VV_OPERATOR(_shr_h, >>)
 
 #undef BIN_VV_OPERATOR_H
 #undef BIN_VV_OPERATOR
@@ -186,7 +186,7 @@ constexpr inline void hname(const Vector<T1, size> &v1,           \
 template<typename T1, typename T2, typename T3, size_t size>      \
 constexpr inline void hname(const Vector<T1, size> &v1,           \
         const T2 v2, Vector<T3, size> &out) {                     \
-    for(int i = 0; i < size; i++){                                \
+    for(size_t i = 0; i < size; i++){                             \
         out[i] = v1[i] op v2;                                     \
     }                                                             \
 }
@@ -202,18 +202,18 @@ constexpr inline Vector<OP_TYPE(op, T1, T2), size> operator op(   \
     return out;                                                   \
 }
 
-BIN_VT_OPERATOR(plus_h, +)
-BIN_VT_OPERATOR(sub_h, -)
-BIN_VT_OPERATOR(mul_h, *)
-BIN_VT_OPERATOR(div_h, /)
-BIN_VT_OPERATOR(rem_h, %)
-BIN_VT_OPERATOR(or_h, |)
-BIN_VT_OPERATOR(and_h, &)
-BIN_VT_OPERATOR(xor_h, ^)
-BIN_VT_OPERATOR(l_and_h, &&)
-BIN_VT_OPERATOR(l_or_h, ||)
-BIN_VT_OPERATOR(shl_h, <<)
-BIN_VT_OPERATOR(shr_h, >>)
+BIN_VT_OPERATOR(_plus_h, +)
+BIN_VT_OPERATOR(_sub_h, -)
+BIN_VT_OPERATOR(_mul_h, *)
+BIN_VT_OPERATOR(_div_h, /)
+BIN_VT_OPERATOR(_rem_h, %)
+BIN_VT_OPERATOR(_or_h, |)
+BIN_VT_OPERATOR(_and_h, &)
+BIN_VT_OPERATOR(_xor_h, ^)
+BIN_VT_OPERATOR(_l_and_h, &&)
+BIN_VT_OPERATOR(_l_or_h, ||)
+BIN_VT_OPERATOR(_shl_h, <<)
+BIN_VT_OPERATOR(_shr_h, >>)
 
 #undef BIN_VT_OPERATOR_H
 #undef BIN_VT_OPERATOR
@@ -236,7 +236,7 @@ constexpr inline void hname(const T1 v1,                          \
 template<typename T1, typename T2, typename T3, size_t size>      \
 constexpr inline void hname(const T1 v1,                          \
         const Vector<T2, size> &v2, Vector<T3, size> &out) {      \
-    for(int i = 0; i < size; i++){                                \
+    for(size_t i = 0; i < size; i++){                             \
         out[i] = v1 op v2[i];                                     \
     }                                                             \
 }
@@ -252,18 +252,18 @@ constexpr inline Vector<OP_TYPE(op, T1, T2), size> operator op(   \
     return out;                                                   \
 }
 
-BIN_TV_OPERATOR(plus_h, +)
-BIN_TV_OPERATOR(sub_h, -)
-BIN_TV_OPERATOR(mul_h, *)
-BIN_TV_OPERATOR(div_h, /)
-BIN_TV_OPERATOR(rem_h, %)
-BIN_TV_OPERATOR(or_h, |)
-BIN_TV_OPERATOR(and_h, &)
-BIN_TV_OPERATOR(xor_h, ^)
-BIN_TV_OPERATOR(l_and_h, &&)
-BIN_TV_OPERATOR(l_or_h, ||)
-BIN_TV_OPERATOR(shl_h, <<)
-BIN_TV_OPERATOR(shr_h, >>)
+BIN_TV_OPERATOR(_plus_h, +)
+BIN_TV_OPERATOR(_sub_h, -)
+BIN_TV_OPERATOR(_mul_h, *)
+BIN_TV_OPERATOR(_div_h, /)
+BIN_TV_OPERATOR(_rem_h, %)
+BIN_TV_OPERATOR(_or_h, |)
+BIN_TV_OPERATOR(_and_h, &)
+BIN_TV_OPERATOR(_xor_h, ^)
+BIN_TV_OPERATOR(_l_and_h, &&)
+BIN_TV_OPERATOR(_l_or_h, ||)
+BIN_TV_OPERATOR(_shl_h, <<)
+BIN_TV_OPERATOR(_shr_h, >>)
 
 #undef BIN_TV_OPERATOR_H
 #undef BIN_TV_OPERATOR
@@ -286,7 +286,7 @@ constexpr inline void hname(const Vector<T1, size> &v1,           \
 template<typename T1, typename T2, size_t size>                   \
 constexpr inline void hname(const Vector<T1, size> &v1,           \
         Vector<T2, size> &out) {                                  \
-    for(int i = 0; i < size; i++){                                \
+    for(size_t i = 0; i < size; i++){                             \
         out[i] = op v1[i];                                        \
     }                                                             \
 }
@@ -308,8 +308,8 @@ constexpr inline Vector<T, size> operator+(
     return v1;
 }
 
-UNARY_V_OPERATOR(sub_h, -)
-UNARY_V_OPERATOR(neg_h, ~)
+UNARY_V_OPERATOR(_sub_h, -)
+UNARY_V_OPERATOR(_neg_h, ~)
 
 #undef UNARY_V_OPERATOR_H
 #undef UNARY_V_OPERATOR
@@ -332,7 +332,7 @@ constexpr inline void hname(Vector<T1, size> &v1,                 \
 template<typename T1, typename T2, size_t size>                   \
 constexpr inline void hname(Vector<T1, size> &v1,                 \
         const Vector<T2, size> &v2) {                             \
-    for(int i = 0; i < size; i++){                                \
+    for(size_t i = 0; i < size; i++){                             \
         v1[i] op v2[i];                                           \
     }                                                             \
 }
@@ -347,16 +347,16 @@ constexpr inline Vector<T1, size>& operator op(                   \
     return v1;                                                    \
 }
 
-ASSIGN_VV_OPERATOR(a_plus_h, +=)
-ASSIGN_VV_OPERATOR(a_sub_h, -=)
-ASSIGN_VV_OPERATOR(a_mul_h, *=)
-ASSIGN_VV_OPERATOR(a_div_h, /=)
-ASSIGN_VV_OPERATOR(a_rem_h, %=)
-ASSIGN_VV_OPERATOR(a_or_h, |=)
-ASSIGN_VV_OPERATOR(a_and_h, &=)
-ASSIGN_VV_OPERATOR(a_xor_h, ^=)
-ASSIGN_VV_OPERATOR(a_shl_h, <<=)
-ASSIGN_VV_OPERATOR(a_shr_h, >>=)
+ASSIGN_VV_OPERATOR(_a_plus_h, +=)
+ASSIGN_VV_OPERATOR(_a_sub_h, -=)
+ASSIGN_VV_OPERATOR(_a_mul_h, *=)
+ASSIGN_VV_OPERATOR(_a_div_h, /=)
+ASSIGN_VV_OPERATOR(_a_rem_h, %=)
+ASSIGN_VV_OPERATOR(_a_or_h, |=)
+ASSIGN_VV_OPERATOR(_a_and_h, &=)
+ASSIGN_VV_OPERATOR(_a_xor_h, ^=)
+ASSIGN_VV_OPERATOR(_a_shl_h, <<=)
+ASSIGN_VV_OPERATOR(_a_shr_h, >>=)
 
 #undef ASSIGN_VV_OPERATOR_H
 #undef ASSIGN_VV_OPERATOR
@@ -377,7 +377,7 @@ constexpr inline void hname(Vector<T1, size> &v1, const T2 v2) {  \
 template<typename T1, typename T2, size_t size>                   \
 constexpr inline void hname(Vector<T1, size> &v1,                 \
         const T2 v2) {                                            \
-    for(int i = 0; i < size; i++){                                \
+    for(size_t i = 0; i < size; i++){                             \
         v1[i] op v2;                                              \
     }                                                             \
 }
@@ -392,16 +392,16 @@ constexpr inline Vector<T1, size>& operator op(                   \
     return v1;                                                    \
 }
 
-ASSIGN_VT_OPERATOR(a_plus_h, +=)
-ASSIGN_VT_OPERATOR(a_sub_h, -=)
-ASSIGN_VT_OPERATOR(a_mul_h, *=)
-ASSIGN_VT_OPERATOR(a_div_h, /=)
-ASSIGN_VT_OPERATOR(a_rem_h, %=)
-ASSIGN_VT_OPERATOR(a_or_h, |=)
-ASSIGN_VT_OPERATOR(a_and_h, &=)
-ASSIGN_VT_OPERATOR(a_xor_h, ^=)
-ASSIGN_VT_OPERATOR(a_shl_h, <<=)
-ASSIGN_VT_OPERATOR(a_shr_h, >>=)
+ASSIGN_VT_OPERATOR(_a_plus_h, +=)
+ASSIGN_VT_OPERATOR(_a_sub_h, -=)
+ASSIGN_VT_OPERATOR(_a_mul_h, *=)
+ASSIGN_VT_OPERATOR(_a_div_h, /=)
+ASSIGN_VT_OPERATOR(_a_rem_h, %=)
+ASSIGN_VT_OPERATOR(_a_or_h, |=)
+ASSIGN_VT_OPERATOR(_a_and_h, &=)
+ASSIGN_VT_OPERATOR(_a_xor_h, ^=)
+ASSIGN_VT_OPERATOR(_a_shl_h, <<=)
+ASSIGN_VT_OPERATOR(_a_shr_h, >>=)
 
 #undef ASSIGN_VT_OPERATOR_H
 #undef ASSIGN_VT_OPERATOR
