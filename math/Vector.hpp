@@ -310,6 +310,7 @@ constexpr inline Vector<T, size> operator+(
 
 UNARY_V_OPERATOR(_sub_h, -)
 UNARY_V_OPERATOR(_neg_h, ~)
+UNARY_V_OPERATOR(_not_h, !)
 
 #undef UNARY_V_OPERATOR_H
 #undef UNARY_V_OPERATOR
@@ -441,6 +442,24 @@ SIMPLE_V_FUNCTION(tan, tan);
 SIMPLE_V_FUNCTION(asin, asin);
 SIMPLE_V_FUNCTION(acos, acos);
 SIMPLE_V_FUNCTION(atan, atan);
+
+template<size_t size>
+constexpr inline bool any(const Vector<bool, size> &v) {
+    bool out = false;
+    for (size_t i = 0; (!out) && (i < size); i++) {
+        out |= v[i];
+    }
+    return out;
+}
+
+template<size_t size>
+constexpr inline bool all(const Vector<bool, size> &v) {
+    bool out = true;
+    for (size_t i = 0; out && (i < size); i++) {
+        out &= v[i];
+    }
+    return out;
+}
 
 #undef SIMPLE_V_FUNCTION
 
