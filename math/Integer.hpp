@@ -859,6 +859,10 @@ public:
             (can_upcast<T, size>()))>
     constexpr inline Integer(const T n) : value(n) { }
 
+    template<typename T, enable_if((getIntegerType(size) == native) &&
+            (is_integral<T>()) && (sizeof (T) > size))>
+    constexpr explicit inline Integer(const T n) : value(n) { }
+
     template<typename T, enable_if((getIntegerType(size) != native) &&
             (can_upcast<T, size>()))>
     constexpr inline Integer(const T n) :
@@ -896,7 +900,7 @@ public:
     }
 
     constexpr explicit inline operator bool() const {
-        return *this != 0;
+        return !(*this->isZero());
     }
 
     template<size_t size1, bool sig1, size_t size2, bool sig2>
