@@ -26,38 +26,38 @@ constexpr const T& max(const T &v1, const T &v2) {
     return v1 < v2 ? v2 : v1;
 }
 
-constexpr inline size_t numberOfLeadingZeros2Bit(uint8_t i) {
+constexpr inline size_t _numberOfLeadingZeros2Bit_h(uint8_t i) {
     return !i ? 2 : (1 - (i >> 1));
 }
 
-constexpr inline size_t numberOfLeadingZeros4Bit(uint8_t i) {
-    return (i >= 1 << 2) ? numberOfLeadingZeros2Bit(i >> 2) :
-            numberOfLeadingZeros2Bit(i) + 2;
+constexpr inline size_t _numberOfLeadingZeros4Bit_h(uint8_t i) {
+    return (i >= 1 << 2) ? _numberOfLeadingZeros2Bit_h(i >> 2) :
+            _numberOfLeadingZeros2Bit_h(i) + 2;
 }
 
-constexpr inline size_t numberOfLeadingZeros(uint8_t i) {
-    return (i >= 1 << 4) ? numberOfLeadingZeros4Bit(i >> 4) :
-            numberOfLeadingZeros4Bit(i) + 4;
+constexpr inline size_t _numberOfLeadingZeros_h(uint8_t i) {
+    return (i >= 1 << 4) ? _numberOfLeadingZeros4Bit_h(i >> 4) :
+            _numberOfLeadingZeros4Bit_h(i) + 4;
 }
 
-constexpr inline size_t numberOfLeadingZeros(uint16_t i) {
-    return (i >= 1 << 8) ? numberOfLeadingZeros(uint8_t(i >> 8)) :
-            numberOfLeadingZeros(uint8_t(i)) + 8;
+constexpr inline size_t _numberOfLeadingZeros_h(uint16_t i) {
+    return (i >= 1 << 8) ? _numberOfLeadingZeros_h(uint8_t(i >> 8)) :
+            _numberOfLeadingZeros_h(uint8_t(i)) + 8;
 }
 
-constexpr inline size_t numberOfLeadingZeros(uint32_t i) {
-    return (i >= 1 << 16) ? numberOfLeadingZeros(uint16_t(i >> 16)) :
-            numberOfLeadingZeros(uint16_t(i)) + 16;
+constexpr inline size_t _numberOfLeadingZeros_h(uint32_t i) {
+    return (i >= 1 << 16) ? _numberOfLeadingZeros_h(uint16_t(i >> 16)) :
+            _numberOfLeadingZeros_h(uint16_t(i)) + 16;
 }
 
-constexpr inline size_t numberOfLeadingZeros(uint64_t i) {
-    return (i >= uint64_t(1) << 32) ? numberOfLeadingZeros(uint32_t(i >> 32)) :
-            numberOfLeadingZeros(uint32_t(i)) + 32;
+constexpr inline size_t _numberOfLeadingZeros_h(uint64_t i) {
+    return (i >= uint64_t(1) << 32) ? _numberOfLeadingZeros_h(uint32_t(i >> 32)) :
+            _numberOfLeadingZeros_h(uint32_t(i)) + 32;
 }
 
 template <typename T>
 constexpr inline size_t logb2(T value) {
-    return sizeof (T) * 8 - numberOfLeadingZeros(value);
+    return sizeof (T) * 8 - _numberOfLeadingZeros_h(value);
 }
 
 enum IType {
@@ -228,6 +228,10 @@ struct Operators_Impl : public T {
 
     void printv(std::ostream &out) {
         out << std::hex << T::value << std::dec;
+    }
+
+    constexpr inline size_t numberOfLeadingZeros() {
+        return _numberOfLeadingZeros_h(T::value);
     }
 
     constexpr inline Operators_Impl operator+() const {
@@ -586,6 +590,11 @@ public:
         T::low.printv(out);
     }
 
+    constexpr inline size_t numberOfLeadingZeros() {
+        return (T::high.isZero()) ? T::low.numberOfLeadingZeros() + half * 8 :
+                T::high.numberOfLeadingZeros();
+    }
+
     constexpr inline I operator+() const {
         return *this;
     }
@@ -820,6 +829,18 @@ public:
     constexpr inline bool isSNegative() const {
         return value.isSNegative();
     };
+
+    constexpr inline size_t numberOfLeadingZeros() {
+        return value.numberOfLeadingZeros();
+    }
+
+    constexpr inline Integer<size, true> s() {
+        return *this;
+    }
+
+    constexpr inline Integer<size, false> u() {
+        return *this;
+    }
 
     void print(std::ostream &out) {
         out << "I<" << std::dec << size << ", " << (sig ? "t" : "f") << ">{";
