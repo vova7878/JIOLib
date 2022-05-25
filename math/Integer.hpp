@@ -230,7 +230,7 @@ struct Operators_Impl : public T {
         out << std::hex << T::value << std::dec;
     }
 
-    constexpr inline size_t numberOfLeadingZeros() {
+    constexpr inline size_t numberOfLeadingZeros() const {
         return _numberOfLeadingZeros_h(T::value);
     }
 
@@ -533,6 +533,8 @@ private:
     typedef typename Pow2_Integer_Base<half, sig>::U U;
     typedef Pow2_Integer_Base<half, sig> T;
     typedef Pow2_Integer_Impl<half, sig> I;
+    typedef Pow2_Integer_Impl<half, false> UI;
+    typedef Pow2_Integer_Impl<half, true> SI;
 
     constexpr inline static I leftShift2(const I &value,
             const typename T::M shiftDistance) {
@@ -572,6 +574,51 @@ private:
         return I(U(), a * d + b * c) + mul_helper2(wmultiply(b, d).value);
     }
 
+    constexpr inline static UI divideUnsigned_h4(const UI out, bool bit) {
+        return (out << 1) | (bit ? UI(U(1)) : UI());
+    }
+
+    constexpr inline static UI divideUnsigned_h3(
+            const UI &x, const UI &y, bool xmey, size_t i, const UI out) {
+        return i == 0 ? divideUnsigned_h4(out, xmey) :
+                (divideUnsigned_h2(xmey ? x - y : x,
+                y >> 1, i - 1, divideUnsigned_h4(out, xmey)));
+    }
+
+    constexpr inline static UI divideUnsigned_h2(
+            const UI &x, const UI &y, size_t i, const UI out) {
+        return divideUnsigned_h3(x, y, x >= y, i, out);
+    }
+
+    constexpr inline static UI divideUnsigned_h1(
+            const UI &x, const UI &y, size_t xZeros, size_t yZeros) {
+        return yZeros < xZeros ? UI() : divideUnsigned_h2(x,
+                y << (yZeros - xZeros), yZeros - xZeros, UI());
+    }
+
+    constexpr inline static UI divideUnsigned(
+            const UI &x, const UI &y) {
+        return divideUnsigned_h1(x, y, x.numberOfLeadingZeros(),
+                y.numberOfLeadingZeros());
+    }
+
+    constexpr inline static SI divideSigned_h2(
+            const SI &out, bool neg) {
+        return neg ? -out : out;
+    }
+
+    constexpr inline static SI divideSigned_h1(
+            const SI &x, const SI &y, bool xNeg, bool yNeg) {
+        return divideSigned_h2(
+                divideUnsigned((xNeg ? -x : x).u(), (yNeg ? -y : y).u()).s(),
+                xNeg ^ yNeg);
+    }
+
+    constexpr inline static SI divideSigned(
+            const SI &x, const SI &y) {
+        return divideSigned_h1(x, y, x.isNegative(), y.isNegative());
+    }
+
     constexpr inline I p1() const {
         return p1_helper(T::low.p1(), T::high);
     }
@@ -584,13 +631,21 @@ public:
 
     constexpr inline Pow2_Integer_Impl(const T &obj) : T(obj) { }
 
+    constexpr inline SI s() const {
+        return SI(T::low, T::high);
+    }
+
+    constexpr inline UI u() const {
+        return UI(T::low, T::high);
+    }
+
     void printv(std::ostream &out) {
         T::high.printv(out);
         out << ", ";
         T::low.printv(out);
     }
 
-    constexpr inline size_t numberOfLeadingZeros() {
+    constexpr inline size_t numberOfLeadingZeros() const {
         return (T::high.isZero()) ? T::low.numberOfLeadingZeros() + half * 8 :
                 T::high.numberOfLeadingZeros();
     }
@@ -601,6 +656,16 @@ public:
 
     constexpr inline I operator-() const {
         return (~(*this)).p1();
+    }
+
+    template<bool sig2, enable_if(!(sig || sig2))>
+    constexpr inline I operator/(const Pow2_Integer_Impl<half, sig2> &other) const {
+        return divideUnsigned(*this, other);
+    }
+
+    template<bool sig2, enable_if(sig && sig2)>
+    constexpr inline I operator/(const Pow2_Integer_Impl<half, sig2> &other) const {
+        return divideSigned(*this, other);
     }
 
     constexpr inline I operator+(const I &other) const {
@@ -830,15 +895,15 @@ public:
         return value.isSNegative();
     };
 
-    constexpr inline size_t numberOfLeadingZeros() {
+    constexpr inline size_t numberOfLeadingZeros() const {
         return value.numberOfLeadingZeros();
     }
 
-    constexpr inline Integer<size, true> s() {
+    constexpr inline Integer<size, true> s() const {
         return *this;
     }
 
-    constexpr inline Integer<size, false> u() {
+    constexpr inline Integer<size, false> u() const {
         return *this;
     }
 
