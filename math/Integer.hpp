@@ -575,17 +575,21 @@ private:
         return I(U(), a * d + b * c) + mul_helper2(wmultiply(b, d).value);
     }
 
-    constexpr inline static UI divremUnsigned_h4(
+    constexpr inline static UI divremUnsigned_h5(
             const UI &out, bool bit) {
         return (out << 1) | (bit ? UI(U(1)) : UI());
     }
 
+    constexpr inline static std::pair<UI, UI> divremUnsigned_h4(
+            const UI &nx, const UI &ny, size_t i, const UI &out) {
+        return i == 0 ? std::pair<UI, UI>(out, nx) :
+                (divremUnsigned_h2(nx, ny, i - 1, out));
+    }
+
     constexpr inline static std::pair<UI, UI> divremUnsigned_h3(
             const UI &x, const UI &y, bool xmey, size_t i, const UI &out) {
-        return i == 0 ? std::pair<UI, UI>(
-                divremUnsigned_h4(out, xmey), xmey ? x - y : x) :
-                (divremUnsigned_h2(xmey ? x - y : x,
-                y >> 1, i - 1, divremUnsigned_h4(out, xmey)));
+        return divremUnsigned_h4(xmey ? x - y : x,
+                y >> 1, i, divremUnsigned_h5(out, xmey));
     }
 
     constexpr inline static std::pair<UI, UI> divremUnsigned_h2(
