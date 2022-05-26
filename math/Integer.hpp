@@ -574,19 +574,19 @@ private:
         return I(U(), a * d + b * c) + mul_helper2(wmultiply(b, d).value);
     }
 
-    constexpr inline static UI divideUnsigned_h4(const UI out, bool bit) {
+    constexpr inline static UI divideUnsigned_h4(const UI &out, bool bit) {
         return (out << 1) | (bit ? UI(U(1)) : UI());
     }
 
     constexpr inline static UI divideUnsigned_h3(
-            const UI &x, const UI &y, bool xmey, size_t i, const UI out) {
+            const UI &x, const UI &y, bool xmey, size_t i, const UI &out) {
         return i == 0 ? divideUnsigned_h4(out, xmey) :
                 (divideUnsigned_h2(xmey ? x - y : x,
                 y >> 1, i - 1, divideUnsigned_h4(out, xmey)));
     }
 
     constexpr inline static UI divideUnsigned_h2(
-            const UI &x, const UI &y, size_t i, const UI out) {
+            const UI &x, const UI &y, size_t i, const UI &out) {
         return divideUnsigned_h3(x, y, x >= y, i, out);
     }
 
@@ -598,7 +598,8 @@ private:
 
     constexpr inline static UI divideUnsigned(
             const UI &x, const UI &y) {
-        return divideUnsigned_h1(x, y, x.numberOfLeadingZeros(),
+        return y.isZero() ? throw std::runtime_error("Dividing by zero") :
+                divideUnsigned_h1(x, y, x.numberOfLeadingZeros(),
                 y.numberOfLeadingZeros());
     }
 
