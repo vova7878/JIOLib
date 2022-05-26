@@ -4,6 +4,7 @@
 #include <cstdint>
 #include <type_traits>
 #include <iostream>
+#include <utility>
 
 template<bool A>
 using enable_if_t = typename std::enable_if<A, bool>::type;
@@ -574,50 +575,54 @@ private:
         return I(U(), a * d + b * c) + mul_helper2(wmultiply(b, d).value);
     }
 
-    constexpr inline static UI divideUnsigned_h4(const UI &out, bool bit) {
+    constexpr inline static UI divremUnsigned_h4(
+            const UI &out, bool bit) {
         return (out << 1) | (bit ? UI(U(1)) : UI());
     }
 
-    constexpr inline static UI divideUnsigned_h3(
+    constexpr inline static std::pair<UI, UI> divremUnsigned_h3(
             const UI &x, const UI &y, bool xmey, size_t i, const UI &out) {
-        return i == 0 ? divideUnsigned_h4(out, xmey) :
-                (divideUnsigned_h2(xmey ? x - y : x,
-                y >> 1, i - 1, divideUnsigned_h4(out, xmey)));
+        return i == 0 ? std::pair<UI, UI>(
+                divremUnsigned_h4(out, xmey), xmey ? x - y : x) :
+                (divremUnsigned_h2(xmey ? x - y : x,
+                y >> 1, i - 1, divremUnsigned_h4(out, xmey)));
     }
 
-    constexpr inline static UI divideUnsigned_h2(
+    constexpr inline static std::pair<UI, UI> divremUnsigned_h2(
             const UI &x, const UI &y, size_t i, const UI &out) {
-        return divideUnsigned_h3(x, y, x >= y, i, out);
+        return divremUnsigned_h3(x, y, x >= y, i, out);
     }
 
-    constexpr inline static UI divideUnsigned_h1(
+    constexpr inline static std::pair<UI, UI> divremUnsigned_h1(
             const UI &x, const UI &y, size_t xZeros, size_t yZeros) {
-        return yZeros < xZeros ? UI() : divideUnsigned_h2(x,
-                y << (yZeros - xZeros), yZeros - xZeros, UI());
+        return yZeros < xZeros ? std::pair<UI, UI>(UI(), x) :
+                divremUnsigned_h2(x, y << (yZeros - xZeros),
+                yZeros - xZeros, UI());
     }
 
-    constexpr inline static UI divideUnsigned(
+    constexpr inline static std::pair<UI, UI> divremUnsigned(
             const UI &x, const UI &y) {
         return y.isZero() ? throw std::runtime_error("Dividing by zero") :
-                divideUnsigned_h1(x, y, x.numberOfLeadingZeros(),
+                divremUnsigned_h1(x, y, x.numberOfLeadingZeros(),
                 y.numberOfLeadingZeros());
     }
 
-    constexpr inline static SI divideSigned_h2(
-            const SI &out, bool neg) {
-        return neg ? -out : out;
+    constexpr inline static std::pair<SI, SI> divremSigned_h2(
+            const std::pair<UI, UI> &tmp, bool neg1, bool neg2) {
+        return std::pair<SI, SI>((neg1 ? -tmp.first : tmp.first).s(),
+                (neg2 ? -tmp.second : tmp.second).s());
     }
 
-    constexpr inline static SI divideSigned_h1(
+    constexpr inline static std::pair<SI, SI> divremSigned_h1(
             const SI &x, const SI &y, bool xNeg, bool yNeg) {
-        return divideSigned_h2(
-                divideUnsigned((xNeg ? -x : x).u(), (yNeg ? -y : y).u()).s(),
-                xNeg ^ yNeg);
+        return divremSigned_h2(
+                divremUnsigned((xNeg ? -x : x).u(), (yNeg ? -y : y).u()),
+                xNeg ^ yNeg, xNeg);
     }
 
-    constexpr inline static SI divideSigned(
+    constexpr inline static std::pair<SI, SI> divremSigned(
             const SI &x, const SI &y) {
-        return divideSigned_h1(x, y, x.isNegative(), y.isNegative());
+        return divremSigned_h1(x, y, x.isNegative(), y.isNegative());
     }
 
     constexpr inline I p1() const {
@@ -661,12 +666,22 @@ public:
 
     template<bool sig2, enable_if(!(sig || sig2))>
     constexpr inline I operator/(const Pow2_Integer_Impl<half, sig2> &other) const {
-        return divideUnsigned(*this, other);
+        return divremUnsigned(*this, other).first;
     }
 
     template<bool sig2, enable_if(sig && sig2)>
     constexpr inline I operator/(const Pow2_Integer_Impl<half, sig2> &other) const {
-        return divideSigned(*this, other);
+        return divremSigned(*this, other).first;
+    }
+
+    template<bool sig2, enable_if(!(sig || sig2))>
+    constexpr inline I operator%(const Pow2_Integer_Impl<half, sig2> &other) const {
+        return divremUnsigned(*this, other).second;
+    }
+
+    template<bool sig2, enable_if(sig && sig2)>
+    constexpr inline I operator%(const Pow2_Integer_Impl<half, sig2> &other) const {
+        return divremSigned(*this, other).second;
     }
 
     constexpr inline I operator+(const I &other) const {
