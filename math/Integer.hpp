@@ -754,36 +754,19 @@ constexpr inline bool compare_types_cv() {
             typename std::remove_cv<T2>::type>::value;
 }
 
-template<typename T, enable_if(((!std::is_integral<T>::value) ||
-        compare_types_cv<T, bool>()))>
+template<typename T>
 constexpr inline bool is_integral() {
-    return false;
+    return std::is_integral<T>::value && (!compare_types_cv<T, bool>());
 }
 
-template<typename T, enable_if(std::is_integral<T>::value &&
-        (!compare_types_cv<T, bool>()))>
-constexpr inline bool is_integral() {
-    return true;
-}
-
-template<typename T, size_t size, enable_if(!is_integral<T>())>
+template<typename T, size_t size>
 constexpr inline bool can_upcast() {
-    return false;
+    return is_integral<T>() ? size >= sizeof (T) : false;
 }
 
-template<typename T, size_t size, enable_if(is_integral<T>())>
-constexpr inline bool can_upcast() {
-    return size >= sizeof (T);
-}
-
-template<typename T, enable_if(!std::is_signed<T>::value)>
+template<typename T>
 constexpr inline bool is_signed() {
-    return false;
-}
-
-template<typename T, enable_if(std::is_signed<T>::value)>
-constexpr inline bool is_signed() {
-    return true;
+    return std::is_signed<T>::value;
 }
 
 template<typename U, typename S, bool sig, typename V, enable_if(sig)>
