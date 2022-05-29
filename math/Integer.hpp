@@ -806,47 +806,80 @@ private:
     V value;
 
     template<size_t size2, bool sig2,
-    enable_if((getIntegerType(size) == native) &&
-            (getIntegerType(size2) == native))>
-    constexpr inline Integer<size2, sig2> upcast() const {
-        using I = Integer<size2, sig2>;
-        return typename I::V(castUS<typename V::U,
-                typename V::S, sig > (value.value));
-    }
-
-    template<size_t size2, bool sig2,
-    enable_if((size == size2) && (getIntegerType(size) == pow2))>
-    constexpr inline Integer<size, sig2> upcast() const {
-        using I = Integer<size2, sig2>;
-        return I(typename I::V(value.low, value.high));
-    }
-
-    template<size_t size2, bool sig2,
-    enable_if((size != size2) &&
-            ((getIntegerType(size) == native) ||
+    bool = (getIntegerType(size) == native) &&
+    (getIntegerType(size2) == native),
+    bool = (size == size2) && (getIntegerType(size) == pow2),
+    bool = (size != size2) &&
+    ((getIntegerType(size) == native) ||
             (getIntegerType(size) == pow2)) &&
-            (getIntegerType(size2) == pow2))>
+    (getIntegerType(size2) == pow2)>
+    struct upcast_h {
+    };
+
+    template<size_t size2, bool sig2>
+    struct upcast_h<size2, sig2, true, false, false> {
+
+        constexpr inline static Integer<size2, sig2> upcast(const Integer &v) {
+            using I = Integer<size2, sig2>;
+            return typename I::V(castUS<typename V::U,
+                    typename V::S, sig > (v.value.value));
+        }
+    };
+
+    template<size_t size2, bool sig2>
+    struct upcast_h<size2, sig2, false, true, false> {
+
+        constexpr inline static Integer<size2, sig2> upcast(const Integer &v) {
+            using I = Integer<size2, sig2>;
+            return I(typename I::V(v.value.low, v.value.high));
+        }
+    };
+
+    template<size_t size2, bool sig2>
+    struct upcast_h<size2, sig2, false, false, true> {
+
+        constexpr inline static Integer<size2, sig2> upcast(const Integer &v) {
+            using I = Integer<size2, sig2>;
+            return typename I::V(castUS<typename I::V::U,
+                    typename I::V::S, sig > (v));
+        }
+    };
+
+    template<size_t size2, bool sig2>
     constexpr inline Integer<size2, sig2> upcast() const {
-        using I = Integer<size2, sig2>;
-        return typename I::V(castUS<typename I::V::U,
-                typename I::V::S, sig > (*this));
+        return upcast_h<size2, sig2>::upcast(*this);
     }
 
     template<size_t size2, bool sig2,
-    enable_if((getIntegerType(size) == native) &&
+    bool = (getIntegerType(size) == native) &&
+    (getIntegerType(size2) == native),
+    bool = (getIntegerType(size) == pow2) &&
+    ((getIntegerType(size2) == pow2) ||
             (getIntegerType(size2) == native))>
-    constexpr inline Integer<size2, sig2> downcast() const {
-        using I = Integer<size2, sig2>;
-        return typename I::V(typename I::V::U(value.value));
-    }
+    struct downcast_h {
+    };
 
-    template<size_t size2, bool sig2,
-    enable_if((getIntegerType(size) == pow2) &&
-            ((getIntegerType(size2) == pow2) ||
-            (getIntegerType(size2) == native)))>
+    template<size_t size2, bool sig2>
+    struct downcast_h<size2, sig2, true, false> {
+
+        constexpr inline static Integer<size2, sig2> downcast(const Integer &v) {
+            using I = Integer<size2, sig2>;
+            return typename I::V(typename I::V::U(v.value.value));
+        }
+    };
+
+    template<size_t size2, bool sig2>
+    struct downcast_h<size2, sig2, false, true> {
+
+        constexpr inline static Integer<size2, sig2> downcast(const Integer &v) {
+            using I = Integer<size2, sig2>;
+            return I(v.value.low);
+        }
+    };
+
+    template<size_t size2, bool sig2>
     constexpr inline Integer<size2, sig2> downcast() const {
-        using I = Integer<size2, sig2>;
-        return I(value.low);
+        return downcast_h<size2, sig2>::downcast(*this);
     }
 
     constexpr inline Integer p1() const {
@@ -944,18 +977,37 @@ public:
     constexpr inline Integer(const Integer<size1, sig1> &low,
             const T2 high) : value(low, high) { }
 
-    template<typename T, enable_if((getIntegerType(size) == native) &&
-            (can_upcast<T, size>()))>
-    constexpr inline Integer(const T n) : value(n) { }
+private:
 
-    template<typename T, enable_if((getIntegerType(size) == native) &&
-            (is_integral<T>()) && (sizeof (T) > size))>
-    constexpr explicit inline Integer(const T n) : value(n) { }
+    template<typename T,
+    bool = (getIntegerType(size) == native),
+    bool = (getIntegerType(size) != native) && (size >= sizeof (T))>
+    struct tcast_h {
+    };
 
-    template<typename T, enable_if((getIntegerType(size) != native) &&
-            (can_upcast<T, size>()))>
-    constexpr inline Integer(const T n) :
-    value(Integer(Integer<sizeof (T), is_signed<T>()>(n)).value) { }
+    template<typename T>
+    struct tcast_h<T, true, false> {
+
+        constexpr inline static V tcast(const T n) {
+            return V(n);
+        }
+    };
+
+    template<typename T>
+    struct tcast_h<T, false, true> {
+
+        constexpr inline static V tcast(const T n) {
+            return Integer(Integer<sizeof (T), is_signed<T>()>(n)).value;
+        }
+    };
+
+public:
+
+    template<typename T, enable_if((is_integral<T>()) && (size >= sizeof (T)))>
+    constexpr inline Integer(const T n) : value(tcast_h<T>::tcast(n)) { }
+
+    template<typename T, enable_if((is_integral<T>()) && (size < sizeof (T)))>
+    constexpr explicit inline Integer(const T n) : value(tcast_h<T>::tcast(n)) { }
 
     template<size_t size2, bool sig2,
     enable_if(size2 >= size)>
@@ -969,23 +1021,50 @@ public:
         return downcast<size2, sig2>();
     }
 
-    template<typename T, enable_if((is_integral<T>()) &&
-            (getIntegerType(size) == native) && (sizeof (T) >= size))>
+private:
+
+    template<typename T,
+    bool = (getIntegerType(size) == native) && (sizeof (T) >= size),
+    bool = (getIntegerType(size) == native) && (sizeof (T) < size),
+    bool = (getIntegerType(size) != native) && (sizeof (T) < size)>
+    struct pcast_h {
+    };
+
+    template<typename T>
+    struct pcast_h<T, true, false, false> {
+
+        constexpr inline static T pcast(const Integer& v) {
+            return T(castUS<typename V::U, typename V::S,
+                    sig, typename V::U > (v.value.value));
+        }
+    };
+
+    template<typename T>
+    struct pcast_h<T, false, true, false> {
+
+        constexpr inline static T pcast(const Integer& v) {
+            return T(v.value.value);
+        }
+    };
+
+    template<typename T>
+    struct pcast_h<T, false, false, true> {
+
+        constexpr inline static T pcast(const Integer& v) {
+            return T(Integer<sizeof (T), is_signed<T>()>(v));
+        }
+    };
+
+public:
+
+    template<typename T, enable_if((is_integral<T>()) && (sizeof (T) >= size))>
     constexpr inline operator T() const {
-        return T(castUS<typename V::U, typename V::S,
-                sig, typename V::U > (value.value));
+        return pcast_h<T>::pcast(*this);
     }
 
-    template<typename T, enable_if((is_integral<T>()) &&
-            (getIntegerType(size) == native) && (sizeof (T) < size))>
+    template<typename T, enable_if((is_integral<T>()) && (sizeof (T) < size))>
     constexpr explicit inline operator T() const {
-        return T(value.value);
-    }
-
-    template<typename T, enable_if((is_integral<T>()) &&
-            (getIntegerType(size) != native) && (sizeof (T) < size))>
-    constexpr explicit inline operator T() const {
-        return T(Integer<sizeof (T), is_signed<T>()>(*this));
+        return pcast_h<T>::pcast(*this);
     }
 
     constexpr explicit inline operator bool() const {
