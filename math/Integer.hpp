@@ -56,11 +56,6 @@ constexpr inline size_t _numberOfLeadingZeros_h(uint64_t i) {
             _numberOfLeadingZeros_h(uint32_t(i)) + 32;
 }
 
-template <typename T>
-constexpr inline size_t logb2(T value) {
-    return sizeof (T) * 8 - _numberOfLeadingZeros_h(value);
-}
-
 enum IType {
     illegal = 0,
     native,
@@ -1196,6 +1191,16 @@ public:
     template<typename T>
     friend struct Operators_Impl;
 };
+
+template <typename T>
+constexpr inline size_t logb2(T value) {
+    return sizeof (T) * 8 - _numberOfLeadingZeros_h(value);
+}
+
+template <size_t size, bool sig>
+constexpr inline size_t logb2(const Integer<size, sig> &value) {
+    return size * 8 - value.numberOfLeadingZeros();
+}
 
 template<size_t size1, bool sig1>
 std::ostream& operator<<(std::ostream &out, Integer<size1, sig1> v) {
