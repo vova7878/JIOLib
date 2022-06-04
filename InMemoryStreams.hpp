@@ -17,7 +17,7 @@ namespace JIO {
 
         inline virtual ~InMemoryInputStream() override { }
     private:
-        const void* data;
+        void *const data;
         u8 position;
         const u8 count;
         InMemoryInputStream(const InMemoryInputStream&);
