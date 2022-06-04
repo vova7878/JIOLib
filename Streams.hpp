@@ -73,7 +73,7 @@ namespace JIO {
         }
 
         virtual s8 skip(s8 count) {
-            constexpr const s8 SKIP_BUFFER_SIZE = 2048;
+            constexpr s8 SKIP_BUFFER_SIZE = 2048;
             static u1 SKIP_BUFFER[SKIP_BUFFER_SIZE];
             if (count <= 0) {
                 return 0;

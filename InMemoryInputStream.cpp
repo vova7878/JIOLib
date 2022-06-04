@@ -10,7 +10,12 @@ count(length) { }
 
 int InMemoryInputStream::read() {
     u1 *tmp = reinterpret_cast<u1*> (data);
-    return position < count ? tmp[position++] : -1;
+    s8 tmp_pos = position + 1;
+    if (tmp_pos <= count) {
+        position = tmp_pos;
+        return tmp[tmp_pos];
+    }
+    return -1;
 }
 
 s8 InMemoryInputStream::read(void *buf, s8 offset, s8 length) {
@@ -18,30 +23,33 @@ s8 InMemoryInputStream::read(void *buf, s8 offset, s8 length) {
         return 0;
     }
 
-    checkSBounds<char*>(buf, offset, length);
+    checkSBounds(buf, offset, length);
 
-    if (position >= count) {
+    s8 tmp_pos = position;
+    if (tmp_pos >= count) {
         return -1;
     }
 
-    s8 avail = count - position;
+    s8 avail = count - tmp_pos;
     if (avail > length) {
         avail = length;
     }
 
-    copyBytes(buf, offset, data, position, avail);
+    //Переполнение невозможно
+    copyBytes(buf, offset, data, tmp_pos, avail);
 
-    position += avail;
+    position = tmp_pos + avail;
     return avail;
 }
 
 s8 InMemoryInputStream::skip(s8 n) {
-    s8 k = count - position;
+    s8 tmp_pos = position;
+    s8 k = count - tmp_pos;
     if (n < k) {
         k = n < 0 ? 0 : n;
     }
 
-    position += k;
+    position = tmp_pos + k;
     return k;
 }
 
