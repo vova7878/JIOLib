@@ -30,7 +30,7 @@ namespace JIO {
     }
 
     constexpr inline size_t _numberOfLeadingZeros2Bit_h(uint8_t i) {
-        return !i ? 2 : (1 - (i >> 1));
+        return i ? (1 - (i >> 1)) : 2;
     }
 
     constexpr inline size_t _numberOfLeadingZeros4Bit_h(uint8_t i) {
@@ -56,6 +56,35 @@ namespace JIO {
     constexpr inline size_t _numberOfLeadingZeros_h(uint64_t i) {
         return (i >= uint64_t(1) << 32) ? _numberOfLeadingZeros_h(uint32_t(i >> 32)) :
                 _numberOfLeadingZeros_h(uint32_t(i)) + 32;
+    }
+
+    constexpr inline size_t _numberOfTrailingZeros2Bit_h(uint8_t i) {
+        return i ? (1 - (i & 1)) : 2;
+    }
+
+    constexpr inline size_t _numberOfTrailingZeros4Bit_h(uint8_t i) {
+        return (i & 0x3) ? _numberOfTrailingZeros2Bit_h(i) :
+                _numberOfTrailingZeros2Bit_h(i >> 2) + 2;
+    }
+
+    constexpr inline size_t _numberOfTrailingZeros_h(uint8_t i) {
+        return (i & 0xf) ? _numberOfTrailingZeros4Bit_h(i) :
+                _numberOfTrailingZeros4Bit_h(i >> 4) + 4;
+    }
+
+    constexpr inline size_t _numberOfTrailingZeros_h(uint16_t i) {
+        return (uint8_t(i)) ? _numberOfTrailingZeros_h(uint8_t(i)) :
+                _numberOfTrailingZeros_h(uint8_t(i >> 8)) + 8;
+    }
+
+    constexpr inline size_t _numberOfTrailingZeros_h(uint32_t i) {
+        return (uint16_t(i)) ? _numberOfTrailingZeros_h(uint16_t(i)) :
+                _numberOfTrailingZeros_h(uint16_t(i >> 16)) + 16;
+    }
+
+    constexpr inline size_t _numberOfTrailingZeros_h(uint64_t i) {
+        return (uint32_t(i)) ? _numberOfTrailingZeros_h(uint32_t(i)) :
+                _numberOfTrailingZeros_h(uint32_t(i >> 32)) + 32;
     }
 
     enum IType {
@@ -111,10 +140,6 @@ namespace JIO {
         explicit constexpr inline Integer_U() : value(0) { }
 
         explicit constexpr inline Integer_U(const U n) : value(n) { }
-
-        constexpr inline bool isZero() const {
-            return value == 0;
-        };
 
         constexpr inline bool isNegative() const {
             return false;
@@ -172,10 +197,6 @@ namespace JIO {
 
         constexpr explicit inline Integer_S(const S n) : value(n) { }
 
-        constexpr inline bool isZero() const {
-            return value == 0;
-        };
-
         constexpr inline bool isNegative() const {
             return S(value) < 0;
         };
@@ -224,12 +245,20 @@ namespace JIO {
 
         constexpr inline Operators_Impl(const T &obj) : T(obj) { }
 
+        constexpr inline bool isZero() const {
+            return T::value == 0;
+        };
+
         void printv(std::ostream &out) {
             out << std::hex << T::value << std::dec;
         }
 
         constexpr inline size_t numberOfLeadingZeros() const {
             return _numberOfLeadingZeros_h(T::value);
+        }
+
+        constexpr inline size_t numberOfTrailingZeros() const {
+            return _numberOfTrailingZeros_h(T::value);
         }
 
         constexpr inline Operators_Impl operator+() const {
@@ -390,10 +419,6 @@ namespace JIO {
         constexpr explicit inline Pow2_Integer_Base(const U &low, const U &high) :
         low(low), high(high) { }
 
-        constexpr inline bool isZero() const {
-            return low.isZero() && high.isZero();
-        };
-
         constexpr inline bool isNegative() const {
             return false;
         };
@@ -477,10 +502,6 @@ namespace JIO {
         constexpr explicit inline Pow2_Integer_Base(const U &low, const U &high) :
         low(low), high(high) { }
 
-        constexpr inline bool isZero() const {
-            return low.isZero() && high.isZero();
-        };
-
         constexpr inline bool isNegative() const {
             return high.isSNegative();
         };
@@ -533,6 +554,10 @@ namespace JIO {
         typedef Pow2_Integer_Impl<half, sig> I;
         typedef Pow2_Integer_Impl<half, false> UI;
         typedef Pow2_Integer_Impl<half, true> SI;
+
+        constexpr inline bool isZero() const {
+            return T::low.isZero() && T::high.isZero();
+        };
 
         constexpr inline static I leftShift2(const I &value,
                 const typename T::M shiftDistance) {
@@ -655,6 +680,11 @@ namespace JIO {
         constexpr inline size_t numberOfLeadingZeros() const {
             return (T::high.isZero()) ? T::low.numberOfLeadingZeros() + half * 8 :
                     T::high.numberOfLeadingZeros();
+        }
+
+        constexpr inline size_t numberOfTrailingZeros() const {
+            return (T::low.isZero()) ? T::high.numberOfTrailingZeros() + half * 8 :
+                    T::low.numberOfTrailingZeros();
         }
 
         constexpr inline I operator+() const {
@@ -930,6 +960,10 @@ namespace JIO {
 
         constexpr inline size_t numberOfLeadingZeros() const {
             return value.numberOfLeadingZeros();
+        }
+
+        constexpr inline size_t numberOfTrailingZeros() const {
+            return value.numberOfTrailingZeros();
         }
 
         constexpr inline Integer<size, true> s() const {
