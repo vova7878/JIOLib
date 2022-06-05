@@ -1099,7 +1099,7 @@ namespace JIO {
         }
 
         constexpr explicit inline operator bool() const {
-            return !(*this->isZero());
+            return !(this->isZero());
         }
 
         template<size_t size1, bool sig1, size_t size2, bool sig2>
