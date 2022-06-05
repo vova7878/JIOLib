@@ -555,10 +555,6 @@ namespace JIO {
         typedef Pow2_Integer_Impl<half, false> UI;
         typedef Pow2_Integer_Impl<half, true> SI;
 
-        constexpr inline bool isZero() const {
-            return T::low.isZero() && T::high.isZero();
-        };
-
         constexpr inline static I leftShift2(const I &value,
                 const typename T::M shiftDistance) {
             return I(value.low << shiftDistance, (value.high << shiftDistance) |
@@ -670,6 +666,10 @@ namespace JIO {
         constexpr inline UI u() const {
             return UI(T::low, T::high);
         }
+
+        constexpr inline bool isZero() const {
+            return T::low.isZero() && T::high.isZero();
+        };
 
         void printv(std::ostream &out) {
             T::high.printv(out);
