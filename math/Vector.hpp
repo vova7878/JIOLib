@@ -1,8 +1,6 @@
 #ifndef VECTOR_HPP
 #define VECTOR_HPP
 
-#if __cplusplus >= 201402L
-
 #include <math.h>
 #include <cassert>
 #include <type_traits>
@@ -469,6 +467,8 @@ constexpr inline Vector<T, size> fname(const Vector<T, size> &v) {\
 
 }
 
+#ifdef VECTOR_USE_RECURSIVE_OPERATIONS
+#undef VECTOR_USE_RECURSIVE_OPERATIONS
 #endif
 
 #endif /* VECTOR_HPP */
