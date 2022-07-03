@@ -205,12 +205,60 @@ namespace JIO {
             return S(value) < 0;
         };
 
+        template<size_t size>
+        struct divrem_h {
+
+            constexpr inline static Integer_S div(const Integer_S &a, const Integer_S &b) {
+                return Integer_S(S(a.value) / S(b.value));
+            }
+
+            constexpr inline static Integer_S rem(const Integer_S &a, const Integer_S &b) {
+                return Integer_S(S(a.value) % S(b.value));
+            }
+        };
+
+        template<>
+        struct divrem_h<4> {
+
+            constexpr inline static Integer_S div(const Integer_S &a, const Integer_S &b) {
+                if ((a.value == 0x80000000) && (b.value == -1)) {
+                    return Integer_S(0x80000000);
+                }
+                return Integer_S(S(a.value) / S(b.value));
+            }
+
+            constexpr inline static Integer_S rem(const Integer_S &a, const Integer_S &b) {
+                if ((a.value == 0x80000000) && (b.value == -1)) {
+                    return Integer_S(0);
+                }
+                return Integer_S(S(a.value) % S(b.value));
+            }
+        };
+
+        template<>
+        struct divrem_h<8> {
+
+            constexpr inline static Integer_S div(const Integer_S &a, const Integer_S &b) {
+                if ((a.value == 0x8000000000000000LL) && (b.value == -1LL)) {
+                    return Integer_S(0x8000000000000000LL);
+                }
+                return Integer_S(S(a.value) / S(b.value));
+            }
+
+            constexpr inline static Integer_S rem(const Integer_S &a, const Integer_S &b) {
+                if ((a.value == 0x8000000000000000LL) && (b.value == -1LL)) {
+                    return Integer_S(0);
+                }
+                return Integer_S(S(a.value) % S(b.value));
+            }
+        };
+
         constexpr inline Integer_S operator/(const Integer_S &other) const {
-            return Integer_S(S(value) / S(other.value));
+            return divrem_h<sizeof (U)>::div(*this, other);
         }
 
         constexpr inline Integer_S operator%(const Integer_S &other) const {
-            return Integer_S(S(value) % S(other.value));
+            return divrem_h<sizeof (U)>::rem(*this, other);
         }
 
         constexpr inline Integer_S operator>>(const M other) const {
