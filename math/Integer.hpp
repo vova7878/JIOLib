@@ -205,7 +205,7 @@ namespace JIO {
             return S(value) < 0;
         };
 
-        template<size_t size>
+        template<size_t size, bool = (size == 4), bool = (size == 8)>
         struct divrem_h {
 
             constexpr inline static _Integer_S div(const _Integer_S &a, const _Integer_S &b) {
@@ -217,8 +217,8 @@ namespace JIO {
             }
         };
 
-        template<>
-        struct divrem_h<4> {
+        template<size_t size>
+        struct divrem_h<size, true, false> {
 
             constexpr inline static _Integer_S div(const _Integer_S &a, const _Integer_S &b) {
                 return ((a.value == 0x80000000) && (b.value == -1)) ?
@@ -231,8 +231,8 @@ namespace JIO {
             }
         };
 
-        template<>
-        struct divrem_h<8> {
+        template<size_t size>
+        struct divrem_h<size, false, true> {
 
             constexpr inline static _Integer_S div(const _Integer_S &a, const _Integer_S &b) {
                 return ((a.value == 0x8000000000000000LL) && (b.value == -1LL)) ?
