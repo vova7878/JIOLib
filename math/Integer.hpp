@@ -290,7 +290,7 @@ namespace JIO {
         };
 
         void printv(std::ostream &out) {
-            out << std::hex << T::value << std::dec;
+            out << std::hex << uint64_t(T::value) << std::dec;
         }
 
         constexpr inline size_t numberOfLeadingZeros() const {
