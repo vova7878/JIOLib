@@ -101,7 +101,12 @@ namespace JIO {
             std::memmove(data + toIndex, data + fromIndex, length);
         }
 
-        inline ByteBuffer slice(size_t index, size_t length) const {
+        inline const ByteBuffer slice(size_t index, size_t length) const {
+            checkRange(index, length, _capacity);
+            return ByteBuffer(ptr_data, start + index, length);
+        }
+
+        inline ByteBuffer slice(size_t index, size_t length) {
             checkRange(index, length, _capacity);
             return ByteBuffer(ptr_data, start + index, length);
         }
@@ -176,7 +181,12 @@ namespace JIO {
             put(&obj, sizeof (T));
         }
 
-        inline ByteBuffer<true> slice(size_t index, size_t length) const {
+        const inline ByteBuffer<true> slice(size_t index, size_t length) const {
+            checkRange(index, length, _capacity);
+            return ByteBuffer<true>(ptr_data, start + index, length);
+        }
+
+        inline ByteBuffer<true> slice(size_t index, size_t length) {
             checkRange(index, length, _capacity);
             return ByteBuffer<true>(ptr_data, start + index, length);
         }
