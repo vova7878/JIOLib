@@ -181,7 +181,7 @@ namespace JIO {
             put(&obj, sizeof (T));
         }
 
-        const inline ByteBuffer<true> slice(size_t index, size_t length) const {
+        inline const ByteBuffer<true> slice(size_t index, size_t length) const {
             checkRange(index, length, _capacity);
             return ByteBuffer<true>(ptr_data, start + index, length);
         }
