@@ -12,22 +12,22 @@ namespace JIO {
     class Vector;
 
     template<bool A>
-    using _enable_if_t = typename std::enable_if<A, bool>::type;
+    using p_enable_if_t = typename std::enable_if<A, bool>::type;
 
-#define _enable_if(B) _enable_if_t<(B)> = false
+#define p_enable_if(B) p_enable_if_t<(B)> = false
 
-    struct __unused {
+    struct p_unused {
     };
 
     template<size_t size1, size_t size2, size_t index1, size_t index2,
-    size_t length, size_t counter, typename T1, typename T2, _enable_if(counter == length)>
-    constexpr inline void _copy_array(T1 *array1, const T2 *array2) { }
+    size_t length, size_t counter, typename T1, typename T2, p_enable_if(counter == length)>
+    constexpr inline void p_copy_array(T1 *array1, const T2 *array2) { }
 
     template<size_t size1, size_t size2, size_t index1, size_t index2,
-    size_t length, size_t counter, typename T1, typename T2, _enable_if(counter != length)>
-    constexpr inline void _copy_array(T1 *array1, const T2 *array2) {
+    size_t length, size_t counter, typename T1, typename T2, p_enable_if(counter != length)>
+    constexpr inline void p_copy_array(T1 *array1, const T2 *array2) {
         array1[index1 + counter] = T1(array2[index2 + counter]);
-        _copy_array<size1, size2, index1, index2, length, counter + 1 > (
+        p_copy_array<size1, size2, index1, index2, length, counter + 1 > (
                 array1, array2);
     }
 
@@ -44,7 +44,7 @@ namespace JIO {
         template<size_t index, typename T2, size_t size2, typename... Tp>
         constexpr inline void assign(const Vector<T2, size2> &v, Tp... arr) {
             static_assert(index + size2 <= size, "Wrong arguments length");
-            _copy_array<size, size2, index, 0, size2, 0>(data, v.data);
+            p_copy_array<size, size2, index, 0, size2, 0>(data, v.data);
             assign < index + size2 > (arr...);
         }
 
@@ -57,17 +57,17 @@ namespace JIO {
             assign < index + 1 > (arr...);
         }
 
-        template<size_t index, _enable_if(index == size)>
+        template<size_t index, p_enable_if(index == size)>
         constexpr inline void assignOne(T e) { }
 
-        template<size_t index, _enable_if(index != size)>
+        template<size_t index, p_enable_if(index != size)>
         constexpr inline void assignOne(T e) {
             data[index] = e;
             assignOne < index + 1 > (e);
         }
     public:
 
-        constexpr inline Vector(__unused) { }
+        constexpr inline Vector(p_unused) { }
 
         constexpr inline Vector() {
             assignOne<0>(T());
@@ -120,11 +120,11 @@ namespace JIO {
 #ifdef VECTOR_USE_RECURSIVE_OPERATIONS
 #define BIN_VV_OPERATOR_H(hname, op)                              \
 template<size_t index = 0, typename T1, typename T2, typename T3, \
-size_t size, _enable_if(index == size)>                            \
+size_t size, p_enable_if(index == size)>                          \
 constexpr inline void hname(const Vector<T1, size> &v1,           \
         const Vector<T2, size> &v2, Vector<T3, size> &out) { }    \
 template<size_t index = 0, typename T1, typename T2, typename T3, \
-size_t size, _enable_if(index != size)>                            \
+size_t size, p_enable_if(index != size)>                          \
 constexpr inline void hname(const Vector<T1, size> &v1,           \
         const Vector<T2, size> &v2, Vector<T3, size> &out) {      \
     out[index] = v1[index] op v2[index];                          \
@@ -147,23 +147,23 @@ template<typename T1, typename T2, size_t size>                   \
 constexpr inline Vector<OP_TYPE(op, T1, T2), size> operator op(   \
         const Vector<T1, size> &v1,                               \
         const Vector<T2, size> &v2) {                             \
-    Vector<OP_TYPE(op, T1, T2), size> out((__unused()));          \
+    Vector<OP_TYPE(op, T1, T2), size> out((p_unused()));          \
     hname(v1, v2, out);                                           \
     return out;                                                   \
 }
 
-    BIN_VV_OPERATOR(_plus_h, +)
-    BIN_VV_OPERATOR(_sub_h, -)
-    BIN_VV_OPERATOR(_mul_h, *)
-    BIN_VV_OPERATOR(_div_h, /)
-    BIN_VV_OPERATOR(_rem_h, %)
-    BIN_VV_OPERATOR(_or_h, |)
-    BIN_VV_OPERATOR(_and_h, &)
-    BIN_VV_OPERATOR(_xor_h, ^)
-    BIN_VV_OPERATOR(_l_and_h, &&)
-    BIN_VV_OPERATOR(_l_or_h, ||)
-    BIN_VV_OPERATOR(_shl_h, <<)
-    BIN_VV_OPERATOR(_shr_h, >>)
+    BIN_VV_OPERATOR(p_plus_h, +)
+    BIN_VV_OPERATOR(p_sub_h, -)
+    BIN_VV_OPERATOR(p_mul_h, *)
+    BIN_VV_OPERATOR(p_div_h, /)
+    BIN_VV_OPERATOR(p_rem_h, %)
+    BIN_VV_OPERATOR(p_or_h, |)
+    BIN_VV_OPERATOR(p_and_h, &)
+    BIN_VV_OPERATOR(p_xor_h, ^)
+    BIN_VV_OPERATOR(p_l_and_h, &&)
+    BIN_VV_OPERATOR(p_l_or_h, ||)
+    BIN_VV_OPERATOR(p_shl_h, <<)
+    BIN_VV_OPERATOR(p_shr_h, >>)
 
 #undef BIN_VV_OPERATOR_H
 #undef BIN_VV_OPERATOR
@@ -171,11 +171,11 @@ constexpr inline Vector<OP_TYPE(op, T1, T2), size> operator op(   \
 #ifdef VECTOR_USE_RECURSIVE_OPERATIONS
 #define BIN_VT_OPERATOR_H(hname, op)                              \
 template<size_t index = 0, typename T1, typename T2, typename T3, \
-size_t size, _enable_if(index == size)>                            \
+size_t size, p_enable_if(index == size)>                          \
 constexpr inline void hname(const Vector<T1, size> &v1,           \
         const T2 v2, Vector<T3, size> &out) { }                   \
 template<size_t index = 0, typename T1, typename T2, typename T3, \
-size_t size, _enable_if(index != size)>                            \
+size_t size, p_enable_if(index != size)>                          \
 constexpr inline void hname(const Vector<T1, size> &v1,           \
         const T2 v2, Vector<T3, size> &out) {                     \
     out[index] = v1[index] op v2;                                 \
@@ -197,23 +197,23 @@ BIN_VT_OPERATOR_H(hname, op)                                      \
 template<typename T1, typename T2, size_t size>                   \
 constexpr inline Vector<OP_TYPE(op, T1, T2), size> operator op(   \
         const Vector<T1, size> &v1, const T2 v2) {                \
-    Vector<OP_TYPE(op, T1, T2), size> out((__unused()));          \
+    Vector<OP_TYPE(op, T1, T2), size> out((p_unused()));          \
     hname(v1, v2, out);                                           \
     return out;                                                   \
 }
 
-    BIN_VT_OPERATOR(_plus_h, +)
-    BIN_VT_OPERATOR(_sub_h, -)
-    BIN_VT_OPERATOR(_mul_h, *)
-    BIN_VT_OPERATOR(_div_h, /)
-    BIN_VT_OPERATOR(_rem_h, %)
-    BIN_VT_OPERATOR(_or_h, |)
-    BIN_VT_OPERATOR(_and_h, &)
-    BIN_VT_OPERATOR(_xor_h, ^)
-    BIN_VT_OPERATOR(_l_and_h, &&)
-    BIN_VT_OPERATOR(_l_or_h, ||)
-    BIN_VT_OPERATOR(_shl_h, <<)
-    BIN_VT_OPERATOR(_shr_h, >>)
+    BIN_VT_OPERATOR(p_plus_h, +)
+    BIN_VT_OPERATOR(p_sub_h, -)
+    BIN_VT_OPERATOR(p_mul_h, *)
+    BIN_VT_OPERATOR(p_div_h, /)
+    BIN_VT_OPERATOR(p_rem_h, %)
+    BIN_VT_OPERATOR(p_or_h, |)
+    BIN_VT_OPERATOR(p_and_h, &)
+    BIN_VT_OPERATOR(p_xor_h, ^)
+    BIN_VT_OPERATOR(p_l_and_h, &&)
+    BIN_VT_OPERATOR(p_l_or_h, ||)
+    BIN_VT_OPERATOR(p_shl_h, <<)
+    BIN_VT_OPERATOR(p_shr_h, >>)
 
 #undef BIN_VT_OPERATOR_H
 #undef BIN_VT_OPERATOR
@@ -221,11 +221,11 @@ constexpr inline Vector<OP_TYPE(op, T1, T2), size> operator op(   \
 #ifdef VECTOR_USE_RECURSIVE_OPERATIONS
 #define BIN_TV_OPERATOR_H(hname, op)                              \
 template<size_t index = 0, typename T1, typename T2, typename T3, \
-size_t size, _enable_if(index == size)>                            \
+size_t size, p_enable_if(index == size)>                          \
 constexpr inline void hname(const T1 v1,                          \
         const Vector<T2, size> &v2, Vector<T3, size> &out) { }    \
 template<size_t index = 0, typename T1, typename T2, typename T3, \
-size_t size, _enable_if(index != size)>                            \
+size_t size, p_enable_if(index != size)>                          \
 constexpr inline void hname(const T1 v1,                          \
         const Vector<T2, size> &v2, Vector<T3, size> &out) {      \
     out[index] = v1 op v2[index];                                 \
@@ -247,23 +247,23 @@ BIN_TV_OPERATOR_H(hname, op)                                      \
 template<typename T1, typename T2, size_t size>                   \
 constexpr inline Vector<OP_TYPE(op, T1, T2), size> operator op(   \
         const T1 v1, const Vector<T2, size> &v2) {                \
-    Vector<OP_TYPE(op, T1, T2), size> out((__unused()));          \
+    Vector<OP_TYPE(op, T1, T2), size> out((p_unused()));          \
     hname(v1, v2, out);                                           \
     return out;                                                   \
 }
 
-    BIN_TV_OPERATOR(_plus_h, +)
-    BIN_TV_OPERATOR(_sub_h, -)
-    BIN_TV_OPERATOR(_mul_h, *)
-    BIN_TV_OPERATOR(_div_h, /)
-    BIN_TV_OPERATOR(_rem_h, %)
-    BIN_TV_OPERATOR(_or_h, |)
-    BIN_TV_OPERATOR(_and_h, &)
-    BIN_TV_OPERATOR(_xor_h, ^)
-    BIN_TV_OPERATOR(_l_and_h, &&)
-    BIN_TV_OPERATOR(_l_or_h, ||)
-    BIN_TV_OPERATOR(_shl_h, <<)
-    BIN_TV_OPERATOR(_shr_h, >>)
+    BIN_TV_OPERATOR(p_plus_h, +)
+    BIN_TV_OPERATOR(p_sub_h, -)
+    BIN_TV_OPERATOR(p_mul_h, *)
+    BIN_TV_OPERATOR(p_div_h, /)
+    BIN_TV_OPERATOR(p_rem_h, %)
+    BIN_TV_OPERATOR(p_or_h, |)
+    BIN_TV_OPERATOR(p_and_h, &)
+    BIN_TV_OPERATOR(p_xor_h, ^)
+    BIN_TV_OPERATOR(p_l_and_h, &&)
+    BIN_TV_OPERATOR(p_l_or_h, ||)
+    BIN_TV_OPERATOR(p_shl_h, <<)
+    BIN_TV_OPERATOR(p_shr_h, >>)
 
 #undef BIN_TV_OPERATOR_H
 #undef BIN_TV_OPERATOR
@@ -271,11 +271,11 @@ constexpr inline Vector<OP_TYPE(op, T1, T2), size> operator op(   \
 #ifdef VECTOR_USE_RECURSIVE_OPERATIONS
 #define UNARY_V_OPERATOR_H(hname, op)                             \
 template<size_t index = 0, typename T1, typename T2,              \
-size_t size, _enable_if(index == size)>                            \
+size_t size, p_enable_if(index == size)>                          \
 constexpr inline void hname(const Vector<T1, size> &v1,           \
         Vector<T2, size> &out) { }                                \
 template<size_t index = 0, typename T1, typename T2,              \
-size_t size, _enable_if(index != size)>                            \
+size_t size, p_enable_if(index != size)>                          \
 constexpr inline void hname(const Vector<T1, size> &v1,           \
         Vector<T2, size> &out) {                                  \
     out[index] = op v1[index];                                    \
@@ -297,7 +297,7 @@ UNARY_V_OPERATOR_H(hname, op)                                     \
 template<typename T, size_t size>                                 \
 constexpr inline Vector<T, size> operator op(                     \
         const Vector<T, size> &v1) {                              \
-    Vector<T, size> out((__unused()));                            \
+    Vector<T, size> out((p_unused()));                            \
     hname(v1, out);                                               \
     return out;                                                   \
 }
@@ -308,9 +308,9 @@ constexpr inline Vector<T, size> operator op(                     \
         return v1;
     }
 
-    UNARY_V_OPERATOR(_sub_h, -)
-    UNARY_V_OPERATOR(_neg_h, ~)
-    UNARY_V_OPERATOR(_not_h, !)
+    UNARY_V_OPERATOR(p_sub_h, -)
+    UNARY_V_OPERATOR(p_neg_h, ~)
+    UNARY_V_OPERATOR(p_not_h, !)
 
 #undef UNARY_V_OPERATOR_H
 #undef UNARY_V_OPERATOR
@@ -318,11 +318,11 @@ constexpr inline Vector<T, size> operator op(                     \
 #ifdef VECTOR_USE_RECURSIVE_OPERATIONS
 #define ASSIGN_VV_OPERATOR_H(hname, op)                           \
 template<size_t index = 0, typename T1, typename T2,              \
-size_t size, _enable_if(index == size)>                            \
+size_t size, p_enable_if(index == size)>                          \
 constexpr inline void hname(Vector<T1, size> &v1,                 \
         const Vector<T2, size> &v2) { }                           \
 template<size_t index = 0, typename T1, typename T2,              \
-size_t size, _enable_if(index != size)>                            \
+size_t size, p_enable_if(index != size)>                          \
 constexpr inline void hname(Vector<T1, size> &v1,                 \
         const Vector<T2, size> &v2) {                             \
     v1[index] op v2[index];                                       \
@@ -348,16 +348,16 @@ constexpr inline Vector<T1, size>& operator op(                   \
     return v1;                                                    \
 }
 
-    ASSIGN_VV_OPERATOR(_a_plus_h, +=)
-    ASSIGN_VV_OPERATOR(_a_sub_h, -=)
-    ASSIGN_VV_OPERATOR(_a_mul_h, *=)
-    ASSIGN_VV_OPERATOR(_a_div_h, /=)
-    ASSIGN_VV_OPERATOR(_a_rem_h, %=)
-    ASSIGN_VV_OPERATOR(_a_or_h, |=)
-    ASSIGN_VV_OPERATOR(_a_and_h, &=)
-    ASSIGN_VV_OPERATOR(_a_xor_h, ^=)
-    ASSIGN_VV_OPERATOR(_a_shl_h, <<=)
-    ASSIGN_VV_OPERATOR(_a_shr_h, >>=)
+    ASSIGN_VV_OPERATOR(p_a_plus_h, +=)
+    ASSIGN_VV_OPERATOR(p_a_sub_h, -=)
+    ASSIGN_VV_OPERATOR(p_a_mul_h, *=)
+    ASSIGN_VV_OPERATOR(p_a_div_h, /=)
+    ASSIGN_VV_OPERATOR(p_a_rem_h, %=)
+    ASSIGN_VV_OPERATOR(p_a_or_h, |=)
+    ASSIGN_VV_OPERATOR(p_a_and_h, &=)
+    ASSIGN_VV_OPERATOR(p_a_xor_h, ^=)
+    ASSIGN_VV_OPERATOR(p_a_shl_h, <<=)
+    ASSIGN_VV_OPERATOR(p_a_shr_h, >>=)
 
 #undef ASSIGN_VV_OPERATOR_H
 #undef ASSIGN_VV_OPERATOR
@@ -365,10 +365,10 @@ constexpr inline Vector<T1, size>& operator op(                   \
 #ifdef VECTOR_USE_RECURSIVE_OPERATIONS
 #define ASSIGN_VT_OPERATOR_H(hname, op)                           \
 template<size_t index = 0, typename T1, typename T2,              \
-size_t size, _enable_if(index == size)>                            \
+size_t size, p_enable_if(index == size)>                          \
 constexpr inline void hname(Vector<T1, size> &v1, const T2 v2) { }\
 template<size_t index = 0, typename T1, typename T2,              \
-size_t size, _enable_if(index != size)>                            \
+size_t size, p_enable_if(index != size)>                          \
 constexpr inline void hname(Vector<T1, size> &v1, const T2 v2) {  \
     v1[index] op v2;                                              \
     hname < index + 1 > (v1, v2);                                 \
@@ -393,16 +393,16 @@ constexpr inline Vector<T1, size>& operator op(                   \
     return v1;                                                    \
 }
 
-    ASSIGN_VT_OPERATOR(_a_plus_h, +=)
-    ASSIGN_VT_OPERATOR(_a_sub_h, -=)
-    ASSIGN_VT_OPERATOR(_a_mul_h, *=)
-    ASSIGN_VT_OPERATOR(_a_div_h, /=)
-    ASSIGN_VT_OPERATOR(_a_rem_h, %=)
-    ASSIGN_VT_OPERATOR(_a_or_h, |=)
-    ASSIGN_VT_OPERATOR(_a_and_h, &=)
-    ASSIGN_VT_OPERATOR(_a_xor_h, ^=)
-    ASSIGN_VT_OPERATOR(_a_shl_h, <<=)
-    ASSIGN_VT_OPERATOR(_a_shr_h, >>=)
+    ASSIGN_VT_OPERATOR(p_a_plus_h, +=)
+    ASSIGN_VT_OPERATOR(p_a_sub_h, -=)
+    ASSIGN_VT_OPERATOR(p_a_mul_h, *=)
+    ASSIGN_VT_OPERATOR(p_a_div_h, /=)
+    ASSIGN_VT_OPERATOR(p_a_rem_h, %=)
+    ASSIGN_VT_OPERATOR(p_a_or_h, |=)
+    ASSIGN_VT_OPERATOR(p_a_and_h, &=)
+    ASSIGN_VT_OPERATOR(p_a_xor_h, ^=)
+    ASSIGN_VT_OPERATOR(p_a_shl_h, <<=)
+    ASSIGN_VT_OPERATOR(p_a_shr_h, >>=)
 
 #undef ASSIGN_VT_OPERATOR_H
 #undef ASSIGN_VT_OPERATOR
@@ -427,7 +427,7 @@ constexpr inline Vector<T1, size>& operator op(                   \
 #define SIMPLE_V_FUNCTION(fname, std_fname)                       \
 template<typename T, size_t size>                                 \
 constexpr inline Vector<T, size> fname(const Vector<T, size> &v) {\
-    Vector<T, size> out((__unused()));                            \
+    Vector<T, size> out((p_unused()));                            \
     for (size_t i = 0; i < size; i++) {                           \
         out[i] = std_fname(v[i]);                                 \
     }                                                             \
@@ -463,8 +463,7 @@ constexpr inline Vector<T, size> fname(const Vector<T, size> &v) {\
 
 #undef SIMPLE_V_FUNCTION
 
-#undef _enable_if
-
+#undef p_enable_if
 }
 
 #ifdef VECTOR_USE_RECURSIVE_OPERATIONS

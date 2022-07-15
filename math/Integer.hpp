@@ -9,9 +9,9 @@
 namespace JIO {
 
     template<bool A>
-    using _enable_if_t = typename std::enable_if<A, bool>::type;
+    using p_enable_if_t = typename std::enable_if<A, bool>::type;
 
-#define _enable_if(B) _enable_if_t<(B)> = false
+#define p_enable_if(B) p_enable_if_t<(B)> = false
 
     template<typename T>
     constexpr inline T lowestOneBit(const T i) {
@@ -29,65 +29,65 @@ namespace JIO {
         return v1 < v2 ? v2 : v1;
     }
 
-    constexpr inline size_t _numberOfLeadingZeros2Bit_h(uint8_t i) {
+    constexpr inline size_t p_numberOfLeadingZeros2Bit_h(uint8_t i) {
         return i ? (1 - (i >> 1)) : 2;
     }
 
-    constexpr inline size_t _numberOfLeadingZeros4Bit_h(uint8_t i) {
-        return (i >= 1 << 2) ? _numberOfLeadingZeros2Bit_h(i >> 2) :
-                _numberOfLeadingZeros2Bit_h(i) + 2;
+    constexpr inline size_t p_numberOfLeadingZeros4Bit_h(uint8_t i) {
+        return (i >= 1 << 2) ? p_numberOfLeadingZeros2Bit_h(i >> 2) :
+                p_numberOfLeadingZeros2Bit_h(i) + 2;
     }
 
-    constexpr inline size_t _numberOfLeadingZeros_h(uint8_t i) {
-        return (i >= 1 << 4) ? _numberOfLeadingZeros4Bit_h(i >> 4) :
-                _numberOfLeadingZeros4Bit_h(i) + 4;
+    constexpr inline size_t p_numberOfLeadingZeros_h(uint8_t i) {
+        return (i >= 1 << 4) ? p_numberOfLeadingZeros4Bit_h(i >> 4) :
+                p_numberOfLeadingZeros4Bit_h(i) + 4;
     }
 
-    constexpr inline size_t _numberOfLeadingZeros_h(uint16_t i) {
-        return (i >= 1 << 8) ? _numberOfLeadingZeros_h(uint8_t(i >> 8)) :
-                _numberOfLeadingZeros_h(uint8_t(i)) + 8;
+    constexpr inline size_t p_numberOfLeadingZeros_h(uint16_t i) {
+        return (i >= 1 << 8) ? p_numberOfLeadingZeros_h(uint8_t(i >> 8)) :
+                p_numberOfLeadingZeros_h(uint8_t(i)) + 8;
     }
 
-    constexpr inline size_t _numberOfLeadingZeros_h(uint32_t i) {
-        return (i >= 1 << 16) ? _numberOfLeadingZeros_h(uint16_t(i >> 16)) :
-                _numberOfLeadingZeros_h(uint16_t(i)) + 16;
+    constexpr inline size_t p_numberOfLeadingZeros_h(uint32_t i) {
+        return (i >= 1 << 16) ? p_numberOfLeadingZeros_h(uint16_t(i >> 16)) :
+                p_numberOfLeadingZeros_h(uint16_t(i)) + 16;
     }
 
-    constexpr inline size_t _numberOfLeadingZeros_h(uint64_t i) {
-        return (i >= uint64_t(1) << 32) ? _numberOfLeadingZeros_h(uint32_t(i >> 32)) :
-                _numberOfLeadingZeros_h(uint32_t(i)) + 32;
+    constexpr inline size_t p_numberOfLeadingZeros_h(uint64_t i) {
+        return (i >= uint64_t(1) << 32) ? p_numberOfLeadingZeros_h(uint32_t(i >> 32)) :
+                p_numberOfLeadingZeros_h(uint32_t(i)) + 32;
     }
 
-    constexpr inline size_t _numberOfTrailingZeros2Bit_h(uint8_t i) {
+    constexpr inline size_t p_numberOfTrailingZeros2Bit_h(uint8_t i) {
         return i ? (1 - (i & 1)) : 2;
     }
 
-    constexpr inline size_t _numberOfTrailingZeros4Bit_h(uint8_t i) {
-        return (i & 0x3) ? _numberOfTrailingZeros2Bit_h(i) :
-                _numberOfTrailingZeros2Bit_h(i >> 2) + 2;
+    constexpr inline size_t p_numberOfTrailingZeros4Bit_h(uint8_t i) {
+        return (i & 0x3) ? p_numberOfTrailingZeros2Bit_h(i) :
+                p_numberOfTrailingZeros2Bit_h(i >> 2) + 2;
     }
 
-    constexpr inline size_t _numberOfTrailingZeros_h(uint8_t i) {
-        return (i & 0xf) ? _numberOfTrailingZeros4Bit_h(i) :
-                _numberOfTrailingZeros4Bit_h(i >> 4) + 4;
+    constexpr inline size_t p_numberOfTrailingZeros_h(uint8_t i) {
+        return (i & 0xf) ? p_numberOfTrailingZeros4Bit_h(i) :
+                p_numberOfTrailingZeros4Bit_h(i >> 4) + 4;
     }
 
-    constexpr inline size_t _numberOfTrailingZeros_h(uint16_t i) {
-        return (uint8_t(i)) ? _numberOfTrailingZeros_h(uint8_t(i)) :
-                _numberOfTrailingZeros_h(uint8_t(i >> 8)) + 8;
+    constexpr inline size_t p_numberOfTrailingZeros_h(uint16_t i) {
+        return (uint8_t(i)) ? p_numberOfTrailingZeros_h(uint8_t(i)) :
+                p_numberOfTrailingZeros_h(uint8_t(i >> 8)) + 8;
     }
 
-    constexpr inline size_t _numberOfTrailingZeros_h(uint32_t i) {
-        return (uint16_t(i)) ? _numberOfTrailingZeros_h(uint16_t(i)) :
-                _numberOfTrailingZeros_h(uint16_t(i >> 16)) + 16;
+    constexpr inline size_t p_numberOfTrailingZeros_h(uint32_t i) {
+        return (uint16_t(i)) ? p_numberOfTrailingZeros_h(uint16_t(i)) :
+                p_numberOfTrailingZeros_h(uint16_t(i >> 16)) + 16;
     }
 
-    constexpr inline size_t _numberOfTrailingZeros_h(uint64_t i) {
-        return (uint32_t(i)) ? _numberOfTrailingZeros_h(uint32_t(i)) :
-                _numberOfTrailingZeros_h(uint32_t(i >> 32)) + 32;
+    constexpr inline size_t p_numberOfTrailingZeros_h(uint64_t i) {
+        return (uint32_t(i)) ? p_numberOfTrailingZeros_h(uint32_t(i)) :
+                p_numberOfTrailingZeros_h(uint32_t(i >> 32)) + 32;
     }
 
-    enum _IType {
+    enum p_IType {
         illegal = 0,
         native,
         pow2,
@@ -95,7 +95,7 @@ namespace JIO {
         other
     };
 
-    constexpr _IType _getIntegerType(size_t size) {
+    constexpr p_IType p_getIntegerType(size_t size) {
         return (size == 1 || size == 2 || size == 4 || size == 8) ? native :
                 (size == 0 ? illegal :
                 (isOneBit(size) ? pow2 :
@@ -103,43 +103,43 @@ namespace JIO {
     }
 
     template<size_t size, bool = (size > sizeof (unsigned int))>
-    struct _SHValue {
+    struct p_SHValue {
         typedef unsigned int type;
     };
 
     template<size_t size>
-    struct _SHValue<size, true> {
+    struct p_SHValue<size, true> {
         typedef size_t type;
     };
 
     template<size_t size>
-    using _SHType = typename _SHValue<size>::type;
+    using p_SHType = typename p_SHValue<size>::type;
 
     template<size_t size, bool sig>
     class Integer;
 
-    template<size_t size, bool sig, _IType = _getIntegerType(size)>
-    struct _Integer_Impl;
+    template<size_t size, bool sig, p_IType = p_getIntegerType(size)>
+    struct p_Integer_Impl;
 
     template<typename T>
-    struct _Operators_Impl;
+    struct p_Operators_Impl;
 
     template<typename U, typename S>
-    class _Integer_S;
+    class p_Integer_S;
 
     template<typename UT, typename ST>
-    class _Integer_U {
+    class p_Integer_U {
     private:
         typedef ST S;
         typedef UT U;
-        typedef _SHType<sizeof (U) > M;
+        typedef p_SHType<sizeof (U) > M;
         const static M shmask = sizeof (U) * 8 - 1;
         U value;
     public:
 
-        explicit constexpr inline _Integer_U() : value(0) { }
+        explicit constexpr inline p_Integer_U() : value(0) { }
 
-        explicit constexpr inline _Integer_U(const U n) : value(n) { }
+        explicit constexpr inline p_Integer_U(const U n) : value(n) { }
 
         constexpr inline bool isNegative() const {
             return false;
@@ -149,53 +149,53 @@ namespace JIO {
             return S(value) < 0;
         };
 
-        constexpr inline _Integer_U operator/(const _Integer_U &other) const {
-            return _Integer_U(value / other.value);
+        constexpr inline p_Integer_U operator/(const p_Integer_U &other) const {
+            return p_Integer_U(value / other.value);
         }
 
-        constexpr inline _Integer_U operator%(const _Integer_U &other) const {
-            return _Integer_U(value % other.value);
+        constexpr inline p_Integer_U operator%(const p_Integer_U &other) const {
+            return p_Integer_U(value % other.value);
         }
 
-        constexpr inline _Integer_U operator>>(const M other) const {
-            return _Integer_U(value >> (other & shmask));
+        constexpr inline p_Integer_U operator>>(const M other) const {
+            return p_Integer_U(value >> (other & shmask));
         }
 
-        constexpr inline bool operator>(const _Integer_U &other) const {
+        constexpr inline bool operator>(const p_Integer_U &other) const {
             return value > other.value;
         }
 
-        constexpr inline bool operator<(const _Integer_U &other) const {
+        constexpr inline bool operator<(const p_Integer_U &other) const {
             return value < other.value;
         }
 
-        constexpr inline bool operator>=(const _Integer_U &other) const {
+        constexpr inline bool operator>=(const p_Integer_U &other) const {
             return value >= other.value;
         }
 
-        constexpr inline bool operator<=(const _Integer_U &other) const {
+        constexpr inline bool operator<=(const p_Integer_U &other) const {
             return value <= other.value;
         }
 
         template<size_t size, bool sig>
         friend class Integer;
 
-        friend _Operators_Impl<_Integer_U<U, S>>;
+        friend p_Operators_Impl<p_Integer_U<U, S>>;
     };
 
     template<typename UT, typename ST>
-    class _Integer_S {
+    class p_Integer_S {
     private:
         typedef ST S;
         typedef UT U;
-        typedef _SHType<sizeof (U) > M;
+        typedef p_SHType<sizeof (U) > M;
         static const M shmask = sizeof (U) * 8 - 1;
         U value;
     public:
 
-        constexpr explicit inline _Integer_S() : value(0) { }
+        constexpr explicit inline p_Integer_S() : value(0) { }
 
-        constexpr explicit inline _Integer_S(const S n) : value(n) { }
+        constexpr explicit inline p_Integer_S(const S n) : value(n) { }
 
         constexpr inline bool isNegative() const {
             return S(value) < 0;
@@ -208,82 +208,82 @@ namespace JIO {
         template<size_t size, bool = (size == 4), bool = (size == 8)>
         struct divrem_h {
 
-            constexpr inline static _Integer_S div(const _Integer_S &a, const _Integer_S &b) {
-                return _Integer_S(S(a.value) / S(b.value));
+            constexpr inline static p_Integer_S div(const p_Integer_S &a, const p_Integer_S &b) {
+                return p_Integer_S(S(a.value) / S(b.value));
             }
 
-            constexpr inline static _Integer_S rem(const _Integer_S &a, const _Integer_S &b) {
-                return _Integer_S(S(a.value) % S(b.value));
+            constexpr inline static p_Integer_S rem(const p_Integer_S &a, const p_Integer_S &b) {
+                return p_Integer_S(S(a.value) % S(b.value));
             }
         };
 
         template<size_t size>
         struct divrem_h<size, true, false> {
 
-            constexpr inline static _Integer_S div(const _Integer_S &a, const _Integer_S &b) {
+            constexpr inline static p_Integer_S div(const p_Integer_S &a, const p_Integer_S &b) {
                 return ((a.value == 0x80000000) && (b.value == -1)) ?
-                        _Integer_S(0x80000000) : _Integer_S(S(a.value) / S(b.value));
+                        p_Integer_S(0x80000000) : p_Integer_S(S(a.value) / S(b.value));
             }
 
-            constexpr inline static _Integer_S rem(const _Integer_S &a, const _Integer_S &b) {
+            constexpr inline static p_Integer_S rem(const p_Integer_S &a, const p_Integer_S &b) {
                 return ((a.value == 0x80000000) && (b.value == -1)) ?
-                        _Integer_S(0) : _Integer_S(S(a.value) % S(b.value));
+                        p_Integer_S(0) : p_Integer_S(S(a.value) % S(b.value));
             }
         };
 
         template<size_t size>
         struct divrem_h<size, false, true> {
 
-            constexpr inline static _Integer_S div(const _Integer_S &a, const _Integer_S &b) {
+            constexpr inline static p_Integer_S div(const p_Integer_S &a, const p_Integer_S &b) {
                 return ((a.value == 0x8000000000000000LL) && (b.value == -1LL)) ?
-                        _Integer_S(0x8000000000000000LL) : _Integer_S(S(a.value) / S(b.value));
+                        p_Integer_S(0x8000000000000000LL) : p_Integer_S(S(a.value) / S(b.value));
             }
 
-            constexpr inline static _Integer_S rem(const _Integer_S &a, const _Integer_S &b) {
+            constexpr inline static p_Integer_S rem(const p_Integer_S &a, const p_Integer_S &b) {
                 return ((a.value == 0x8000000000000000LL) && (b.value == -1LL)) ?
-                        _Integer_S(0) : _Integer_S(S(a.value) % S(b.value));
+                        p_Integer_S(0) : p_Integer_S(S(a.value) % S(b.value));
             }
         };
 
-        constexpr inline _Integer_S operator/(const _Integer_S &other) const {
+        constexpr inline p_Integer_S operator/(const p_Integer_S &other) const {
             return divrem_h<sizeof (U)>::div(*this, other);
         }
 
-        constexpr inline _Integer_S operator%(const _Integer_S &other) const {
+        constexpr inline p_Integer_S operator%(const p_Integer_S &other) const {
             return divrem_h<sizeof (U)>::rem(*this, other);
         }
 
-        constexpr inline _Integer_S operator>>(const M other) const {
-            return _Integer_S(S(value) >> (other & shmask));
+        constexpr inline p_Integer_S operator>>(const M other) const {
+            return p_Integer_S(S(value) >> (other & shmask));
         }
 
-        constexpr inline bool operator>(const _Integer_S &other) const {
+        constexpr inline bool operator>(const p_Integer_S &other) const {
             return S(value) > S(other.value);
         }
 
-        constexpr inline bool operator<(const _Integer_S &other) const {
+        constexpr inline bool operator<(const p_Integer_S &other) const {
             return S(value) < S(other.value);
         }
 
-        constexpr inline bool operator>=(const _Integer_S &other) const {
+        constexpr inline bool operator>=(const p_Integer_S &other) const {
             return S(value) >= S(other.value);
         }
 
-        constexpr inline bool operator<=(const _Integer_S &other) const {
+        constexpr inline bool operator<=(const p_Integer_S &other) const {
             return S(value) <= S(other.value);
         }
 
         template<size_t size, bool sig>
         friend class Integer;
 
-        friend _Operators_Impl<_Integer_S<U, S>>;
+        friend p_Operators_Impl<p_Integer_S<U, S>>;
     };
 
     template<typename T>
-    struct _Operators_Impl : public T {
+    struct p_Operators_Impl : public T {
         using T::T;
 
-        constexpr inline _Operators_Impl(const T &obj) : T(obj) { }
+        constexpr inline p_Operators_Impl(const T &obj) : T(obj) { }
 
         constexpr inline bool isZero() const {
             return T::value == 0;
@@ -294,69 +294,69 @@ namespace JIO {
         }
 
         constexpr inline size_t numberOfLeadingZeros() const {
-            return _numberOfLeadingZeros_h(T::value);
+            return p_numberOfLeadingZeros_h(T::value);
         }
 
         constexpr inline size_t numberOfTrailingZeros() const {
-            return _numberOfTrailingZeros_h(T::value);
+            return p_numberOfTrailingZeros_h(T::value);
         }
 
-        constexpr inline _Operators_Impl operator+() const {
+        constexpr inline p_Operators_Impl operator+() const {
             return *this;
         }
 
-        constexpr inline _Operators_Impl operator-() const {
-            return _Operators_Impl(-T::value);
+        constexpr inline p_Operators_Impl operator-() const {
+            return p_Operators_Impl(-T::value);
         }
 
-        constexpr inline _Operators_Impl operator+(const _Operators_Impl &other) const {
-            return _Operators_Impl(T::value + other.value);
+        constexpr inline p_Operators_Impl operator+(const p_Operators_Impl &other) const {
+            return p_Operators_Impl(T::value + other.value);
         }
 
-        constexpr inline _Operators_Impl operator-(const _Operators_Impl &other) const {
-            return _Operators_Impl(T::value - other.value);
+        constexpr inline p_Operators_Impl operator-(const p_Operators_Impl &other) const {
+            return p_Operators_Impl(T::value - other.value);
         }
 
-        constexpr inline _Operators_Impl operator*(const _Operators_Impl &other) const {
-            return _Operators_Impl(T::value * other.value);
+        constexpr inline p_Operators_Impl operator*(const p_Operators_Impl &other) const {
+            return p_Operators_Impl(T::value * other.value);
         }
 
-        constexpr inline _Operators_Impl operator|(const _Operators_Impl &other) const {
-            return _Operators_Impl(T::value | other.value);
+        constexpr inline p_Operators_Impl operator|(const p_Operators_Impl &other) const {
+            return p_Operators_Impl(T::value | other.value);
         }
 
-        constexpr inline _Operators_Impl operator&(const _Operators_Impl &other) const {
-            return _Operators_Impl(T::value & other.value);
+        constexpr inline p_Operators_Impl operator&(const p_Operators_Impl &other) const {
+            return p_Operators_Impl(T::value & other.value);
         }
 
-        constexpr inline _Operators_Impl operator^(const _Operators_Impl &other) const {
-            return _Operators_Impl(T::value ^ other.value);
+        constexpr inline p_Operators_Impl operator^(const p_Operators_Impl &other) const {
+            return p_Operators_Impl(T::value ^ other.value);
         }
 
-        constexpr inline _Operators_Impl operator<<(const typename T::M other) const {
-            return _Operators_Impl(T::value << (other & T::shmask));
+        constexpr inline p_Operators_Impl operator<<(const typename T::M other) const {
+            return p_Operators_Impl(T::value << (other & T::shmask));
         }
 
-        constexpr inline bool operator==(const _Operators_Impl &other) const {
+        constexpr inline bool operator==(const p_Operators_Impl &other) const {
             return T::value == other.value;
         }
 
-        constexpr inline bool operator!=(const _Operators_Impl &other) const {
+        constexpr inline bool operator!=(const p_Operators_Impl &other) const {
             return T::value != other.value;
         }
 
-        constexpr inline _Operators_Impl operator~() const {
-            return _Operators_Impl(~T::value);
+        constexpr inline p_Operators_Impl operator~() const {
+            return p_Operators_Impl(~T::value);
         }
 
     private:
 
-        constexpr inline _Operators_Impl p1() const {
-            return _Operators_Impl(T::value + 1);
+        constexpr inline p_Operators_Impl p1() const {
+            return p_Operators_Impl(T::value + 1);
         }
 
-        constexpr inline _Operators_Impl m1() const {
-            return _Operators_Impl(T::value - 1);
+        constexpr inline p_Operators_Impl m1() const {
+            return p_Operators_Impl(T::value - 1);
         }
 
         template<size_t size, bool sig>
@@ -370,93 +370,93 @@ namespace JIO {
     };
 
     template<>
-    struct _Integer_Impl<1, false> {
-        typedef _Operators_Impl<_Integer_U<uint8_t, int8_t>> type;
+    struct p_Integer_Impl<1, false> {
+        typedef p_Operators_Impl<p_Integer_U<uint8_t, int8_t>> type;
     };
 
     template<>
-    struct _Integer_Impl<1, true> {
-        typedef _Operators_Impl<_Integer_S<uint8_t, int8_t>> type;
+    struct p_Integer_Impl<1, true> {
+        typedef p_Operators_Impl<p_Integer_S<uint8_t, int8_t>> type;
     };
 
     template<>
-    struct _Integer_Impl<2, false> {
-        typedef _Operators_Impl<_Integer_U<uint16_t, int16_t>> type;
+    struct p_Integer_Impl<2, false> {
+        typedef p_Operators_Impl<p_Integer_U<uint16_t, int16_t>> type;
     };
 
     template<>
-    struct _Integer_Impl<2, true> {
-        typedef _Operators_Impl<_Integer_S<uint16_t, int16_t>> type;
+    struct p_Integer_Impl<2, true> {
+        typedef p_Operators_Impl<p_Integer_S<uint16_t, int16_t>> type;
     };
 
     template<>
-    struct _Integer_Impl<4, false> {
-        typedef _Operators_Impl<_Integer_U<uint32_t, int32_t>> type;
+    struct p_Integer_Impl<4, false> {
+        typedef p_Operators_Impl<p_Integer_U<uint32_t, int32_t>> type;
     };
 
     template<>
-    struct _Integer_Impl<4, true> {
-        typedef _Operators_Impl<_Integer_S<uint32_t, int32_t>> type;
+    struct p_Integer_Impl<4, true> {
+        typedef p_Operators_Impl<p_Integer_S<uint32_t, int32_t>> type;
     };
 
     template<>
-    struct _Integer_Impl<8, false> {
-        typedef _Operators_Impl<_Integer_U<uint64_t, int64_t>> type;
+    struct p_Integer_Impl<8, false> {
+        typedef p_Operators_Impl<p_Integer_U<uint64_t, int64_t>> type;
     };
 
     template<>
-    struct _Integer_Impl<8, true> {
-        typedef _Operators_Impl<_Integer_S<uint64_t, int64_t>> type;
+    struct p_Integer_Impl<8, true> {
+        typedef p_Operators_Impl<p_Integer_S<uint64_t, int64_t>> type;
     };
 
     template<size_t half, bool sig>
-    class _Pow2_Integer_Impl;
+    class p_Pow2_Integer_Impl;
 
     template<size_t size, bool sig>
-    struct _Integer_Impl <size, sig, _IType::pow2> {
-        typedef _Pow2_Integer_Impl<size / 2, sig> type;
+    struct p_Integer_Impl <size, sig, p_IType::pow2> {
+        typedef p_Pow2_Integer_Impl<size / 2, sig> type;
     };
 
     template<size_t half, bool sig>
-    class _Pow2_Integer_Base;
+    class p_Pow2_Integer_Base;
 
     template<size_t half>
-    class _Pow2_Integer_Base<half, false> {
+    class p_Pow2_Integer_Base<half, false> {
     private:
         typedef Integer<half, true> S;
         typedef Integer<half, false> U;
-        typedef _SHType<half * 2> M;
+        typedef p_SHType<half * 2> M;
         static const M shmask = half * 2 * 8 - 1;
         U low, high;
 
-        constexpr inline static _Pow2_Integer_Base rightShift2(
-                const _Pow2_Integer_Base &value, const M shiftDistance) {
-            return _Pow2_Integer_Base((value.low >> shiftDistance) |
+        constexpr inline static p_Pow2_Integer_Base rightShift2(
+                const p_Pow2_Integer_Base &value, const M shiftDistance) {
+            return p_Pow2_Integer_Base((value.low >> shiftDistance) |
                     (value.high << (half * 8 - shiftDistance)),
                     value.high >> shiftDistance);
         }
 
-        constexpr inline static _Pow2_Integer_Base rightShift3(
-                const _Pow2_Integer_Base &value, const M shiftDistance) {
-            return _Pow2_Integer_Base(value.high >> (shiftDistance - half * 8), U());
+        constexpr inline static p_Pow2_Integer_Base rightShift3(
+                const p_Pow2_Integer_Base &value, const M shiftDistance) {
+            return p_Pow2_Integer_Base(value.high >> (shiftDistance - half * 8), U());
         }
 
-        constexpr inline static _Pow2_Integer_Base rightShift(
-                const _Pow2_Integer_Base &value, const M shiftDistance) {
+        constexpr inline static p_Pow2_Integer_Base rightShift(
+                const p_Pow2_Integer_Base &value, const M shiftDistance) {
             return shiftDistance == 0 ? value :
                     ((shiftDistance < (half * 8)) ? rightShift2(value, shiftDistance) :
                     rightShift3(value, shiftDistance));
         }
     public:
 
-        constexpr explicit inline _Pow2_Integer_Base() : low(), high() { }
+        constexpr explicit inline p_Pow2_Integer_Base() : low(), high() { }
 
-        constexpr explicit inline _Pow2_Integer_Base(const U &low) : low(low), high() { }
+        constexpr explicit inline p_Pow2_Integer_Base(const U &low) : low(low), high() { }
 
-        constexpr explicit inline _Pow2_Integer_Base(const S &low) :
+        constexpr explicit inline p_Pow2_Integer_Base(const S &low) :
         low(low), high(low.isSNegative() ? ~U() : U()) { }
 
-        constexpr explicit inline _Pow2_Integer_Base(const U &low, const U &high) :
+        constexpr explicit inline p_Pow2_Integer_Base(const U &low, const U &high) :
         low(low), high(high) { }
 
         constexpr inline bool isNegative() const {
@@ -467,79 +467,79 @@ namespace JIO {
             return high.isSNegative();
         };
 
-        constexpr inline bool operator>(const _Pow2_Integer_Base &other) const {
+        constexpr inline bool operator>(const p_Pow2_Integer_Base &other) const {
             return (high > other.high) ? true :
                     ((high < other.high) ? false :
                     (low > other.low));
         }
 
-        constexpr inline bool operator<(const _Pow2_Integer_Base &other) const {
+        constexpr inline bool operator<(const p_Pow2_Integer_Base &other) const {
             return (high < other.high) ? true :
                     ((high > other.high) ? false :
                     (low < other.low));
         }
 
-        constexpr inline bool operator>=(const _Pow2_Integer_Base &other) const {
+        constexpr inline bool operator>=(const p_Pow2_Integer_Base &other) const {
             return (high > other.high) ? true :
                     ((high < other.high) ? false :
                     (low >= other.low));
         }
 
-        constexpr inline bool operator<=(const _Pow2_Integer_Base &other) const {
+        constexpr inline bool operator<=(const p_Pow2_Integer_Base &other) const {
             return (high < other.high) ? true :
                     ((high > other.high) ? false :
                     (low <= other.low));
         }
 
-        constexpr inline _Pow2_Integer_Base operator>>(const M other) const {
+        constexpr inline p_Pow2_Integer_Base operator>>(const M other) const {
             return rightShift(*this, other & shmask);
         }
 
         template<size_t size2, bool sig2>
-        friend class _Pow2_Integer_Impl;
+        friend class p_Pow2_Integer_Impl;
 
         template<size_t size2, bool sig2>
         friend class Integer;
     };
 
     template<size_t half>
-    class _Pow2_Integer_Base<half, true> {
+    class p_Pow2_Integer_Base<half, true> {
     private:
         typedef Integer<half, true> S;
         typedef Integer<half, false> U;
-        typedef _SHType<half * 2> M;
+        typedef p_SHType<half * 2> M;
         static const M shmask = half * 2 * 8 - 1;
         U low, high;
 
-        constexpr inline static _Pow2_Integer_Base rightShift2(
-                const _Pow2_Integer_Base &value, const M shiftDistance) {
-            return _Pow2_Integer_Base((value.low >> shiftDistance) |
+        constexpr inline static p_Pow2_Integer_Base rightShift2(
+                const p_Pow2_Integer_Base &value, const M shiftDistance) {
+            return p_Pow2_Integer_Base((value.low >> shiftDistance) |
                     (value.high << (half * 8 - shiftDistance)),
                     S(value.high) >> shiftDistance);
         }
 
-        constexpr inline static _Pow2_Integer_Base rightShift3(
-                const _Pow2_Integer_Base &value, const M shiftDistance) {
-            return _Pow2_Integer_Base(S(value.high) >> (shiftDistance - half * 8),
+        constexpr inline static p_Pow2_Integer_Base rightShift3(
+                const p_Pow2_Integer_Base &value, const M shiftDistance) {
+            return p_Pow2_Integer_Base(S(value.high) >> (shiftDistance - half * 8),
                     value.high.isSNegative() ? ~U() : U());
         }
 
-        inline static _Pow2_Integer_Base rightShift(
-                const _Pow2_Integer_Base &value, const M shiftDistance) {
+        inline static p_Pow2_Integer_Base rightShift(
+                const p_Pow2_Integer_Base &value, const M shiftDistance) {
             return shiftDistance == 0 ? value :
                     ((shiftDistance < (half * 8)) ? rightShift2(value, shiftDistance) :
                     rightShift3(value, shiftDistance));
         }
     public:
 
-        constexpr explicit inline _Pow2_Integer_Base() : low(), high() { }
+        constexpr explicit inline p_Pow2_Integer_Base() : low(), high() { }
 
-        constexpr explicit inline _Pow2_Integer_Base(const U &low) : low(low), high() { }
+        constexpr explicit inline p_Pow2_Integer_Base(const U &low) : low(low), high() { }
 
-        constexpr explicit inline _Pow2_Integer_Base(const S &low) :
+        constexpr explicit inline p_Pow2_Integer_Base(const S &low) :
         low(low), high(low.isNegative() ? ~U() : U()) { }
 
-        constexpr explicit inline _Pow2_Integer_Base(const U &low, const U &high) :
+        constexpr explicit inline p_Pow2_Integer_Base(const U &low, const U &high) :
         low(low), high(high) { }
 
         constexpr inline bool isNegative() const {
@@ -550,50 +550,50 @@ namespace JIO {
             return high.isSNegative();
         };
 
-        constexpr inline bool operator>(const _Pow2_Integer_Base &other) const {
+        constexpr inline bool operator>(const p_Pow2_Integer_Base &other) const {
             return (S(high) > S(other.high)) ? true :
                     ((S(high) < S(other.high)) ? false :
                     (low > other.low));
         }
 
-        constexpr inline bool operator<(const _Pow2_Integer_Base &other) const {
+        constexpr inline bool operator<(const p_Pow2_Integer_Base &other) const {
             return (S(high) < S(other.high)) ? true :
                     ((S(high) > S(other.high)) ? false :
                     (low < other.low));
         }
 
-        constexpr inline bool operator>=(const _Pow2_Integer_Base &other) const {
+        constexpr inline bool operator>=(const p_Pow2_Integer_Base &other) const {
             return (S(high) > S(other.high)) ? true :
                     ((S(high) < S(other.high)) ? false :
                     (low >= other.low));
         }
 
-        constexpr inline bool operator<=(const _Pow2_Integer_Base &other) const {
+        constexpr inline bool operator<=(const p_Pow2_Integer_Base &other) const {
             return (S(high) < S(other.high)) ? true :
                     ((S(high) > S(other.high)) ? false :
                     (low <= other.low));
         }
 
-        constexpr inline _Pow2_Integer_Base operator>>(const M other) const {
+        constexpr inline p_Pow2_Integer_Base operator>>(const M other) const {
             return rightShift(*this, other & shmask);
         }
 
         template<size_t size2, bool sig2>
-        friend class _Pow2_Integer_Impl;
+        friend class p_Pow2_Integer_Impl;
 
         template<size_t size2, bool sig2>
         friend class Integer;
     };
 
     template<size_t half, bool sig>
-    class _Pow2_Integer_Impl : public _Pow2_Integer_Base<half, sig> {
+    class p_Pow2_Integer_Impl : public p_Pow2_Integer_Base<half, sig> {
     private:
-        typedef typename _Pow2_Integer_Base<half, sig>::S S;
-        typedef typename _Pow2_Integer_Base<half, sig>::U U;
-        typedef _Pow2_Integer_Base<half, sig> T;
-        typedef _Pow2_Integer_Impl<half, sig> I;
-        typedef _Pow2_Integer_Impl<half, false> UI;
-        typedef _Pow2_Integer_Impl<half, true> SI;
+        typedef typename p_Pow2_Integer_Base<half, sig>::S S;
+        typedef typename p_Pow2_Integer_Base<half, sig>::U U;
+        typedef p_Pow2_Integer_Base<half, sig> T;
+        typedef p_Pow2_Integer_Impl<half, sig> I;
+        typedef p_Pow2_Integer_Impl<half, false> UI;
+        typedef p_Pow2_Integer_Impl<half, true> SI;
 
         constexpr inline static I leftShift2(const I &value,
                 const typename T::M shiftDistance) {
@@ -624,7 +624,7 @@ namespace JIO {
 
         template<bool sig2>
         constexpr inline static I mul_helper2(
-                const _Pow2_Integer_Impl<half, sig2> &other) {
+                const p_Pow2_Integer_Impl<half, sig2> &other) {
             return I(other.low, other.high);
         }
 
@@ -697,7 +697,7 @@ namespace JIO {
     public:
         using T::T;
 
-        constexpr inline _Pow2_Integer_Impl(const T &obj) : T(obj) { }
+        constexpr inline p_Pow2_Integer_Impl(const T &obj) : T(obj) { }
 
         constexpr inline SI s() const {
             return SI(T::low, T::high);
@@ -735,23 +735,23 @@ namespace JIO {
             return (~(*this)).p1();
         }
 
-        template<bool sig2, _enable_if(!(sig || sig2))>
-        constexpr inline I operator/(const _Pow2_Integer_Impl<half, sig2> &other) const {
+        template<bool sig2, p_enable_if(!(sig || sig2))>
+        constexpr inline I operator/(const p_Pow2_Integer_Impl<half, sig2> &other) const {
             return divremUnsigned(*this, other).first;
         }
 
-        template<bool sig2, _enable_if(sig && sig2)>
-        constexpr inline I operator/(const _Pow2_Integer_Impl<half, sig2> &other) const {
+        template<bool sig2, p_enable_if(sig && sig2)>
+        constexpr inline I operator/(const p_Pow2_Integer_Impl<half, sig2> &other) const {
             return divremSigned(*this, other).first;
         }
 
-        template<bool sig2, _enable_if(!(sig || sig2))>
-        constexpr inline I operator%(const _Pow2_Integer_Impl<half, sig2> &other) const {
+        template<bool sig2, p_enable_if(!(sig || sig2))>
+        constexpr inline I operator%(const p_Pow2_Integer_Impl<half, sig2> &other) const {
             return divremUnsigned(*this, other).second;
         }
 
-        template<bool sig2, _enable_if(sig && sig2)>
-        constexpr inline I operator%(const _Pow2_Integer_Impl<half, sig2> &other) const {
+        template<bool sig2, p_enable_if(sig && sig2)>
+        constexpr inline I operator%(const p_Pow2_Integer_Impl<half, sig2> &other) const {
             return divremSigned(*this, other).second;
         }
 
@@ -806,75 +806,75 @@ namespace JIO {
     };
 
     template<typename T1, typename T2>
-    struct _compare_types {
+    struct p_compare_types {
         const static bool value = false;
     };
 
     template<typename T>
-    struct _compare_types <T, T> {
+    struct p_compare_types <T, T> {
         const static bool value = true;
     };
 
     template<typename T1, typename T2>
-    constexpr inline bool _compare_types_cv() {
-        return _compare_types<typename std::remove_cv<T1>::type,
+    constexpr inline bool p_compare_types_cv() {
+        return p_compare_types<typename std::remove_cv<T1>::type,
                 typename std::remove_cv<T2>::type>::value;
     }
 
     template<typename T>
-    constexpr inline bool _is_integral() {
-        return std::is_integral<T>::value && (!_compare_types_cv<T, bool>());
+    constexpr inline bool p_is_integral() {
+        return std::is_integral<T>::value && (!p_compare_types_cv<T, bool>());
     }
 
     template<typename T, size_t size>
-    constexpr inline bool _can_upcast() {
-        return _is_integral<T>() ? size >= sizeof (T) : false;
+    constexpr inline bool p_can_upcast() {
+        return p_is_integral<T>() ? size >= sizeof (T) : false;
     }
 
     template<typename T>
-    constexpr inline bool _is_signed() {
+    constexpr inline bool p_is_signed() {
         return std::is_signed<T>::value;
     }
 
-    template<typename U, typename S, bool sig, typename V, _enable_if(sig)>
-    constexpr inline S _castUS(V value) {
+    template<typename U, typename S, bool sig, typename V, p_enable_if(sig)>
+    constexpr inline S p_castUS(V value) {
         return S(value);
     }
 
-    template<typename U, typename S, bool sig, typename V, _enable_if(!sig)>
-    constexpr inline U _castUS(V value) {
+    template<typename U, typename S, bool sig, typename V, p_enable_if(!sig)>
+    constexpr inline U p_castUS(V value) {
         return U(value);
     }
 
-    template<typename T, bool sig, _enable_if(sig)>
-    constexpr inline T _min_value() {
+    template<typename T, bool sig, p_enable_if(sig)>
+    constexpr inline T p_min_value() {
         return T(1) << (sizeof (T) * 8 - 1);
     }
 
-    template<typename T, bool sig, _enable_if(!sig)>
-    constexpr inline T _min_value() {
+    template<typename T, bool sig, p_enable_if(!sig)>
+    constexpr inline T p_min_value() {
         return T();
     }
 
     template<typename T, bool sig>
-    constexpr inline T _max_value() {
-        return ~_min_value<T, sig>();
+    constexpr inline T p_max_value() {
+        return ~p_min_value<T, sig>();
     }
 
     template<size_t size, bool sig>
     class Integer {
     private:
-        using V = typename _Integer_Impl<size, sig>::type;
+        using V = typename p_Integer_Impl<size, sig>::type;
         V value;
 
         template<size_t size2, bool sig2,
-        bool = (_getIntegerType(size) == native) &&
-        (_getIntegerType(size2) == native),
-        bool = (size == size2) && (_getIntegerType(size) == pow2),
+        bool = (p_getIntegerType(size) == native) &&
+        (p_getIntegerType(size2) == native),
+        bool = (size == size2) && (p_getIntegerType(size) == pow2),
         bool = (size != size2) &&
-        ((_getIntegerType(size) == native) ||
-                (_getIntegerType(size) == pow2)) &&
-        (_getIntegerType(size2) == pow2)>
+        ((p_getIntegerType(size) == native) ||
+                (p_getIntegerType(size) == pow2)) &&
+        (p_getIntegerType(size2) == pow2)>
         struct upcast_h {
         };
 
@@ -883,7 +883,7 @@ namespace JIO {
 
             constexpr inline static Integer<size2, sig2> upcast(const Integer &v) {
                 using I = Integer<size2, sig2>;
-                return typename I::V(_castUS<typename V::U,
+                return typename I::V(p_castUS<typename V::U,
                         typename V::S, sig > (v.value.value));
             }
         };
@@ -902,7 +902,7 @@ namespace JIO {
 
             constexpr inline static Integer<size2, sig2> upcast(const Integer &v) {
                 using I = Integer<size2, sig2>;
-                return typename I::V(_castUS<typename I::V::U,
+                return typename I::V(p_castUS<typename I::V::U,
                         typename I::V::S, sig > (v));
             }
         };
@@ -913,11 +913,11 @@ namespace JIO {
         }
 
         template<size_t size2, bool sig2,
-        bool = (_getIntegerType(size) == native) &&
-        (_getIntegerType(size2) == native),
-        bool = (_getIntegerType(size) == pow2) &&
-        ((_getIntegerType(size2) == pow2) ||
-                (_getIntegerType(size2) == native))>
+        bool = (p_getIntegerType(size) == native) &&
+        (p_getIntegerType(size2) == native),
+        bool = (p_getIntegerType(size) == pow2) &&
+        ((p_getIntegerType(size2) == pow2) ||
+                (p_getIntegerType(size2) == native))>
         struct downcast_h {
         };
 
@@ -972,11 +972,11 @@ namespace JIO {
         };
 
         constexpr inline static Integer MAX_VALUE() {
-            return _max_value<Integer, sig>();
+            return p_max_value<Integer, sig>();
         };
 
         constexpr inline static Integer MIN_VALUE() {
-            return _min_value<Integer, sig>();
+            return p_min_value<Integer, sig>();
         };
 
         constexpr inline Integer() : value() { }
@@ -1020,25 +1020,25 @@ namespace JIO {
         }
 
         template<size_t size1, bool sig1, size_t size2, bool sig2,
-        _enable_if((_getIntegerType(size) == pow2) &&
+        p_enable_if((p_getIntegerType(size) == pow2) &&
                 (size1 <= size / 2) && (size2 <= size / 2))>
         constexpr inline Integer(const Integer<size1, sig1> &low,
                 const Integer<size2, sig2> &high) : value(low, high) { }
 
         template<typename T1, typename T2,
-        _enable_if((_getIntegerType(size) == pow2) &&
-                (_is_integral<T1>()) && (_is_integral<T2>())&&
+        p_enable_if((p_getIntegerType(size) == pow2) &&
+                (p_is_integral<T1>()) && (p_is_integral<T2>())&&
                 (sizeof (T1) <= size / 2) && (sizeof (T2) <= size / 2))>
         constexpr inline Integer(const T1 low, const T2 high) : value(low, high) { }
 
         template<typename T1, size_t size2, bool sig2,
-        _enable_if((_getIntegerType(size) == pow2) &&
+        p_enable_if((p_getIntegerType(size) == pow2) &&
                 (sizeof (T1) <= size / 2) && (size2 <= size / 2))>
         constexpr inline Integer(const T1 low,
                 const Integer<size2, sig2> &high) : value(low, high) { }
 
         template<size_t size1, bool sig1, typename T2,
-        _enable_if((_getIntegerType(size) == pow2) &&
+        p_enable_if((p_getIntegerType(size) == pow2) &&
                 (size1 <= size / 2) && (sizeof (T2) <= size / 2))>
         constexpr inline Integer(const Integer<size1, sig1> &low,
                 const T2 high) : value(low, high) { }
@@ -1046,8 +1046,8 @@ namespace JIO {
     private:
 
         template<typename T,
-        bool = (_getIntegerType(size) == native),
-        bool = (_getIntegerType(size) != native) && (size >= sizeof (T))>
+        bool = (p_getIntegerType(size) == native),
+        bool = (p_getIntegerType(size) != native) && (size >= sizeof (T))>
         struct tcast_h {
         };
 
@@ -1063,26 +1063,26 @@ namespace JIO {
         struct tcast_h<T, false, true> {
 
             constexpr inline static V tcast(const T n) {
-                return Integer(Integer<sizeof (T), JIO::_is_signed<T>()>(n)).value;
+                return Integer(Integer<sizeof (T), JIO::p_is_signed<T>()>(n)).value;
             }
         };
 
     public:
 
-        template<typename T, _enable_if((_is_integral<T>()) && (size >= sizeof (T)))>
+        template<typename T, p_enable_if((p_is_integral<T>()) && (size >= sizeof (T)))>
         constexpr inline Integer(const T n) : value(tcast_h<T>::tcast(n)) { }
 
-        template<typename T, _enable_if((_is_integral<T>()) && (size < sizeof (T)))>
+        template<typename T, p_enable_if((p_is_integral<T>()) && (size < sizeof (T)))>
         constexpr explicit inline Integer(const T n) : value(tcast_h<T>::tcast(n)) { }
 
         template<size_t size2, bool sig2,
-        _enable_if(size2 >= size)>
+        p_enable_if(size2 >= size)>
         constexpr inline operator Integer<size2, sig2>() const {
             return upcast<size2, sig2>();
         }
 
         template<size_t size2, bool sig2,
-        _enable_if(size2 < size)>
+        p_enable_if(size2 < size)>
         constexpr explicit inline operator Integer<size2, sig2>() const {
             return downcast<size2, sig2>();
         }
@@ -1090,9 +1090,9 @@ namespace JIO {
     private:
 
         template<typename T,
-        bool = (_getIntegerType(size) == native) && (sizeof (T) >= size),
-        bool = (_getIntegerType(size) == native) && (sizeof (T) < size),
-        bool = (_getIntegerType(size) != native) && (sizeof (T) < size)>
+        bool = (p_getIntegerType(size) == native) && (sizeof (T) >= size),
+        bool = (p_getIntegerType(size) == native) && (sizeof (T) < size),
+        bool = (p_getIntegerType(size) != native) && (sizeof (T) < size)>
         struct pcast_h {
         };
 
@@ -1100,7 +1100,7 @@ namespace JIO {
         struct pcast_h<T, true, false, false> {
 
             constexpr inline static T pcast(const Integer& v) {
-                return T(_castUS<typename V::U, typename V::S,
+                return T(p_castUS<typename V::U, typename V::S,
                         sig, typename V::U > (v.value.value));
             }
         };
@@ -1117,18 +1117,18 @@ namespace JIO {
         struct pcast_h<T, false, false, true> {
 
             constexpr inline static T pcast(const Integer& v) {
-                return T(Integer<sizeof (T), JIO::_is_signed<T>()>(v));
+                return T(Integer<sizeof (T), JIO::p_is_signed<T>()>(v));
             }
         };
 
     public:
 
-        template<typename T, _enable_if((_is_integral<T>()) && (sizeof (T) >= size))>
+        template<typename T, p_enable_if((p_is_integral<T>()) && (sizeof (T) >= size))>
         constexpr inline operator T() const {
             return pcast_h<T>::pcast(*this);
         }
 
-        template<typename T, _enable_if((_is_integral<T>()) && (sizeof (T) < size))>
+        template<typename T, p_enable_if((p_is_integral<T>()) && (sizeof (T) < size))>
         constexpr explicit inline operator T() const {
             return pcast_h<T>::pcast(*this);
         }
@@ -1212,9 +1212,9 @@ namespace JIO {
                 const Integer<size1, sig1> &v1,
                 const Integer<size2, sig2> &v2);
 
-        template<typename T, _enable_if((_is_integral<T>()))>
+        template<typename T, p_enable_if((p_is_integral<T>()))>
         constexpr inline Integer operator<<(const T v2) const {
-            return value << _SHType<size>(v2);
+            return value << p_SHType<size>(v2);
         }
 
         template<size_t size1, bool sig1, size_t size2, bool sig2>
@@ -1222,9 +1222,9 @@ namespace JIO {
                 const Integer<size1, sig1> &v1,
                 const Integer<size2, sig2> &v2);
 
-        template<typename T, _enable_if((_is_integral<T>()))>
+        template<typename T, p_enable_if((p_is_integral<T>()))>
         constexpr inline Integer operator>>(const T v2) const {
-            return V(value >> _SHType<size>(v2));
+            return V(value >> p_SHType<size>(v2));
         }
 
         constexpr inline Integer operator~() const {
@@ -1257,15 +1257,15 @@ namespace JIO {
         friend class Integer;
 
         template<size_t size2, bool sig2>
-        friend class _Pow2_Integer_Impl;
+        friend class p_Pow2_Integer_Impl;
 
         template<typename T>
-        friend struct _Operators_Impl;
+        friend struct p_Operators_Impl;
     };
 
     template <typename T>
     constexpr inline size_t logb2(T value) {
-        return sizeof (T) * 8 - _numberOfLeadingZeros_h(value);
+        return sizeof (T) * 8 - p_numberOfLeadingZeros_h(value);
     }
 
     template <size_t size, bool sig>
@@ -1292,27 +1292,27 @@ namespace JIO {
     }
 
     template<size_t size1, bool sig1>
-    constexpr inline Integer<size1, sig1>& __pp_mm_helper2(
+    constexpr inline Integer<size1, sig1>& p__pp_mm_helper2(
             Integer<size1, sig1> &v1, const Integer<size1, sig1> &v2) {
         return v1;
     }
 
     template<size_t size1, bool sig1>
-    constexpr inline Integer<size1, sig1>& __pp_mm_helper(Integer<size1, sig1> &v1,
+    constexpr inline Integer<size1, sig1>& p__pp_mm_helper(Integer<size1, sig1> &v1,
             const Integer<size1, sig1> &v2, Integer<size1, sig1> v3) {
-        return __pp_mm_helper2(v3, (v1 = v2));
+        return p__pp_mm_helper2(v3, (v1 = v2));
     }
 
     template<size_t size1, bool sig1>
     constexpr inline Integer<size1, sig1> operator++(
             Integer<size1, sig1> &v1, int) {
-        return __pp_mm_helper(v1, v1.p1(), v1);
+        return p__pp_mm_helper(v1, v1.p1(), v1);
     }
 
     template<size_t size1, bool sig1>
     constexpr inline Integer<size1, sig1> operator--(
             Integer<size1, sig1> &v1, int) {
-        return __pp_mm_helper(v1, v1.m1(), v1);
+        return p__pp_mm_helper(v1, v1.m1(), v1);
     }
 
     template<size_t size1, bool sig1, size_t size2, bool sig2>
@@ -1324,23 +1324,23 @@ namespace JIO {
     }
 
     template<size_t size1, bool sig1, typename T,
-    _enable_if((_is_integral<T>()))>
-    constexpr inline Integer<max(size1, sizeof (T)), sig1 && (_is_signed<T>())>
+    p_enable_if((p_is_integral<T>()))>
+    constexpr inline Integer<max(size1, sizeof (T)), sig1 && (p_is_signed<T>())>
     operator+(const Integer<size1, sig1> &v1, const T v2) {
-        using R = Integer < max(size1, sizeof (T)), sig1 && (_is_signed<T>())>;
+        using R = Integer < max(size1, sizeof (T)), sig1 && (p_is_signed<T>())>;
         return R(v1) + R(v2);
     }
 
     template<size_t size1, bool sig1, typename T,
-    _enable_if((_is_integral<T>()))>
-    constexpr inline Integer<max(size1, sizeof (T)), sig1 && (_is_signed<T>())>
+    p_enable_if((p_is_integral<T>()))>
+    constexpr inline Integer<max(size1, sizeof (T)), sig1 && (p_is_signed<T>())>
     operator+(const T v1, const Integer<size1, sig1> &v2) {
-        using R = Integer < max(size1, sizeof (T)), sig1 && (_is_signed<T>())>;
+        using R = Integer < max(size1, sizeof (T)), sig1 && (p_is_signed<T>())>;
         return R(v1) + R(v2);
     }
 
     template<size_t size1, bool sig1, size_t size2, bool sig2,
-    _enable_if(size2 <= size1)>
+    p_enable_if(size2 <= size1)>
     constexpr inline Integer<size1, sig1>& operator+=(
             Integer<size1, sig1> &v1,
             const Integer<size2, sig2> &v2) {
@@ -1348,16 +1348,16 @@ namespace JIO {
     }
 
     template<size_t size1, bool sig1, typename T,
-    _enable_if((_is_integral<T>()) && (sizeof (T) <= size1))>
+    p_enable_if((p_is_integral<T>()) && (sizeof (T) <= size1))>
     constexpr inline Integer<size1, sig1>& operator+=(
             Integer<size1, sig1> &v1, const T v2) {
         return v1 = (v1 + Integer<size1, sig1>(v2));
     }
 
     template<size_t size1, bool sig1, typename T,
-    _enable_if((_is_integral<T>()) && (size1 <= sizeof (T)))>
+    p_enable_if((p_is_integral<T>()) && (size1 <= sizeof (T)))>
     constexpr inline T& operator+=(T &v1, const Integer<size1, sig1> &v2) {
-        using R = Integer<sizeof (T), _is_signed<T>()>;
+        using R = Integer<sizeof (T), p_is_signed<T>()>;
         return v1 = T(R(v1) + R(v2));
     }
 
@@ -1370,23 +1370,23 @@ namespace JIO {
     }
 
     template<size_t size1, bool sig1, typename T,
-    _enable_if((_is_integral<T>()))>
-    constexpr inline Integer<max(size1, sizeof (T)), sig1 && (_is_signed<T>())>
+    p_enable_if((p_is_integral<T>()))>
+    constexpr inline Integer<max(size1, sizeof (T)), sig1 && (p_is_signed<T>())>
     operator-(const Integer<size1, sig1> &v1, const T v2) {
-        using R = Integer < max(size1, sizeof (T)), sig1 && (_is_signed<T>())>;
+        using R = Integer < max(size1, sizeof (T)), sig1 && (p_is_signed<T>())>;
         return R(v1) - R(v2);
     }
 
     template<size_t size1, bool sig1, typename T,
-    _enable_if((_is_integral<T>()))>
-    constexpr inline Integer<max(size1, sizeof (T)), sig1 && (_is_signed<T>())>
+    p_enable_if((p_is_integral<T>()))>
+    constexpr inline Integer<max(size1, sizeof (T)), sig1 && (p_is_signed<T>())>
     operator-(const T v1, const Integer<size1, sig1> &v2) {
-        using R = Integer < max(size1, sizeof (T)), sig1 && (_is_signed<T>())>;
+        using R = Integer < max(size1, sizeof (T)), sig1 && (p_is_signed<T>())>;
         return R(v1) - R(v2);
     }
 
     template<size_t size1, bool sig1, size_t size2, bool sig2,
-    _enable_if(size2 <= size1)>
+    p_enable_if(size2 <= size1)>
     constexpr inline Integer<size1, sig1>& operator-=(
             Integer<size1, sig1> &v1,
             const Integer<size2, sig2> &v2) {
@@ -1394,20 +1394,20 @@ namespace JIO {
     }
 
     template<size_t size1, bool sig1, typename T,
-    _enable_if((_is_integral<T>()) && (sizeof (T) <= size1))>
+    p_enable_if((p_is_integral<T>()) && (sizeof (T) <= size1))>
     constexpr inline Integer<size1, sig1>& operator-=(
             Integer<size1, sig1> &v1, const T v2) {
         return v1 = (v1 - Integer<size1, sig1>(v2));
     }
 
     template<size_t size1, bool sig1, typename T,
-    _enable_if((_is_integral<T>()) && (size1 <= sizeof (T)))>
+    p_enable_if((p_is_integral<T>()) && (size1 <= sizeof (T)))>
     constexpr inline T& operator-=(T &v1, const Integer<size1, sig1> &v2) {
-        using R = Integer<sizeof (T), _is_signed<T>()>;
+        using R = Integer<sizeof (T), p_is_signed<T>()>;
         return v1 = T(R(v1) - R(v2));
     }
 
-    template<size_t size1, _enable_if((size1 == 1) || (size1 == 2) || (size1 == 4))>
+    template<size_t size1, p_enable_if((size1 == 1) || (size1 == 2) || (size1 == 4))>
     constexpr inline Integer<size1 * 2, false> wmultiply(
             const Integer<size1, false> &v1, const Integer<size1, false> &v2) {
         using R = Integer<size1 * 2, false>;
@@ -1415,7 +1415,7 @@ namespace JIO {
     }
 
     template<size_t size1>
-    constexpr inline Integer<size1 * 2, false> __wmultiply_h(
+    constexpr inline Integer<size1 * 2, false> p_wmultiply_h(
             const Integer<size1, false> &ac,
             const Integer<size1, false> &bd,
             const Integer<size1 * 2, false> &abcd) {
@@ -1424,7 +1424,7 @@ namespace JIO {
     }
 
     template<size_t size1>
-    constexpr inline Integer<size1 * 4, false> __wmultiply_h3(
+    constexpr inline Integer<size1 * 4, false> p_wmultiply_h3(
             const Integer<size1, false> &ab,
             const Integer<size1, false> &cd,
             bool o1, bool o2) {
@@ -1436,30 +1436,30 @@ namespace JIO {
     }
 
     template<size_t size1>
-    constexpr inline Integer<size1 * 4, false> __wmultiply_h1(
+    constexpr inline Integer<size1 * 4, false> p_wmultiply_h1(
             const Integer<size1, false> &ab,
             const Integer<size1, false> &cd,
             const Integer<size1, false> &a,
             const Integer<size1, false> &c) {
-        return __wmultiply_h3(ab, cd, ab < a, cd < c);
+        return p_wmultiply_h3(ab, cd, ab < a, cd < c);
     }
 
     template<size_t size1>
-    constexpr inline Integer<size1 * 4, false> __wmultiply_h(
+    constexpr inline Integer<size1 * 4, false> p_wmultiply_h(
             const Integer<size1, false> &a,
             const Integer<size1, false> &b,
             const Integer<size1, false> &c,
             const Integer<size1, false> &d) {
-        return __wmultiply_h(wmultiply(a, c), wmultiply(b, d),
-                __wmultiply_h1(a + b, c + d, a, c));
+        return p_wmultiply_h(wmultiply(a, c), wmultiply(b, d),
+                p_wmultiply_h1(a + b, c + d, a, c));
     }
 
-    template<size_t size1, _enable_if((size1 > 4) && ((size1 & 1) == 0))>
+    template<size_t size1, p_enable_if((size1 > 4) && ((size1 & 1) == 0))>
     constexpr inline Integer<size1 * 2, false> wmultiply(
             const Integer<size1, false> &v1,
             const Integer<size1, false> &v2) {
         using U = Integer < size1 / 2, false >;
-        return __wmultiply_h(U(v1 >> (size1 * 4)), U(v1),
+        return p_wmultiply_h(U(v1 >> (size1 * 4)), U(v1),
                 U(v2 >> (size1 * 4)), U(v2));
     }
 
@@ -1472,23 +1472,23 @@ namespace JIO {
     }
 
     template<size_t size1, bool sig1, typename T,
-    _enable_if((_is_integral<T>()))>
-    constexpr inline Integer<max(size1, sizeof (T)), sig1 && (_is_signed<T>())>
+    p_enable_if((p_is_integral<T>()))>
+    constexpr inline Integer<max(size1, sizeof (T)), sig1 && (p_is_signed<T>())>
     operator*(const Integer<size1, sig1> &v1, const T v2) {
-        using R = Integer < max(size1, sizeof (T)), sig1 && (_is_signed<T>())>;
+        using R = Integer < max(size1, sizeof (T)), sig1 && (p_is_signed<T>())>;
         return R(v1) * R(v2);
     }
 
     template<size_t size1, bool sig1, typename T,
-    _enable_if((_is_integral<T>()))>
-    constexpr inline Integer<max(size1, sizeof (T)), sig1 && (_is_signed<T>())>
+    p_enable_if((p_is_integral<T>()))>
+    constexpr inline Integer<max(size1, sizeof (T)), sig1 && (p_is_signed<T>())>
     operator*(const T v1, const Integer<size1, sig1> &v2) {
-        using R = Integer < max(size1, sizeof (T)), sig1 && (_is_signed<T>())>;
+        using R = Integer < max(size1, sizeof (T)), sig1 && (p_is_signed<T>())>;
         return R(v1) * R(v2);
     }
 
     template<size_t size1, bool sig1, size_t size2, bool sig2,
-    _enable_if(size2 <= size1)>
+    p_enable_if(size2 <= size1)>
     constexpr inline Integer<size1, sig1>& operator*=(
             Integer<size1, sig1> &v1,
             const Integer<size2, sig2> &v2) {
@@ -1496,16 +1496,16 @@ namespace JIO {
     }
 
     template<size_t size1, bool sig1, typename T,
-    _enable_if((_is_integral<T>()) && (sizeof (T) <= size1))>
+    p_enable_if((p_is_integral<T>()) && (sizeof (T) <= size1))>
     constexpr inline Integer<size1, sig1>& operator*=(
             Integer<size1, sig1> &v1, const T v2) {
         return v1 = (v1 * Integer<size1, sig1>(v2));
     }
 
     template<size_t size1, bool sig1, typename T,
-    _enable_if((_is_integral<T>()) && (size1 <= sizeof (T)))>
+    p_enable_if((p_is_integral<T>()) && (size1 <= sizeof (T)))>
     constexpr inline T& operator*=(T &v1, const Integer<size1, sig1> &v2) {
-        using R = Integer<sizeof (T), _is_signed<T>()>;
+        using R = Integer<sizeof (T), p_is_signed<T>()>;
         return v1 = T(R(v1) * R(v2));
     }
 
@@ -1518,23 +1518,23 @@ namespace JIO {
     }
 
     template<size_t size1, bool sig1, typename T,
-    _enable_if((_is_integral<T>()))>
-    constexpr inline Integer<max(size1, sizeof (T)), sig1 && (_is_signed<T>())>
+    p_enable_if((p_is_integral<T>()))>
+    constexpr inline Integer<max(size1, sizeof (T)), sig1 && (p_is_signed<T>())>
     operator/(const Integer<size1, sig1> &v1, const T v2) {
-        using R = Integer < max(size1, sizeof (T)), sig1 && (_is_signed<T>())>;
+        using R = Integer < max(size1, sizeof (T)), sig1 && (p_is_signed<T>())>;
         return R(v1) / R(v2);
     }
 
     template<size_t size1, bool sig1, typename T,
-    _enable_if((_is_integral<T>()))>
-    constexpr inline Integer<max(size1, sizeof (T)), sig1 && (_is_signed<T>())>
+    p_enable_if((p_is_integral<T>()))>
+    constexpr inline Integer<max(size1, sizeof (T)), sig1 && (p_is_signed<T>())>
     operator/(const T v1, const Integer<size1, sig1> &v2) {
-        using R = Integer < max(size1, sizeof (T)), sig1 && (_is_signed<T>())>;
+        using R = Integer < max(size1, sizeof (T)), sig1 && (p_is_signed<T>())>;
         return R(v1) / R(v2);
     }
 
     template<size_t size1, bool sig1, size_t size2, bool sig2,
-    _enable_if(size2 <= size1)>
+    p_enable_if(size2 <= size1)>
     constexpr inline Integer<size1, sig1>& operator/=(
             Integer<size1, sig1> &v1,
             const Integer<size2, sig2> &v2) {
@@ -1542,16 +1542,16 @@ namespace JIO {
     }
 
     template<size_t size1, bool sig1, typename T,
-    _enable_if((_is_integral<T>()) && (sizeof (T) <= size1))>
+    p_enable_if((p_is_integral<T>()) && (sizeof (T) <= size1))>
     constexpr inline Integer<size1, sig1>& operator/=(
             Integer<size1, sig1> &v1, const T v2) {
         return v1 = (v1 / Integer<size1, sig1>(v2));
     }
 
     template<size_t size1, bool sig1, typename T,
-    _enable_if((_is_integral<T>()) && (size1 <= sizeof (T)))>
+    p_enable_if((p_is_integral<T>()) && (size1 <= sizeof (T)))>
     constexpr inline T& operator/=(T &v1, const Integer<size1, sig1> &v2) {
-        using R = Integer<sizeof (T), _is_signed<T>()>;
+        using R = Integer<sizeof (T), p_is_signed<T>()>;
         return v1 = T(R(v1) / R(v2));
     }
 
@@ -1564,23 +1564,23 @@ namespace JIO {
     }
 
     template<size_t size1, bool sig1, typename T,
-    _enable_if((_is_integral<T>()))>
-    constexpr inline Integer<max(size1, sizeof (T)), sig1 && (_is_signed<T>())>
+    p_enable_if((p_is_integral<T>()))>
+    constexpr inline Integer<max(size1, sizeof (T)), sig1 && (p_is_signed<T>())>
     operator%(const Integer<size1, sig1> &v1, const T v2) {
-        using R = Integer < max(size1, sizeof (T)), sig1 && (_is_signed<T>())>;
+        using R = Integer < max(size1, sizeof (T)), sig1 && (p_is_signed<T>())>;
         return R(v1) % R(v2);
     }
 
     template<size_t size1, bool sig1, typename T,
-    _enable_if((_is_integral<T>()))>
-    constexpr inline Integer<max(size1, sizeof (T)), sig1 && (_is_signed<T>())>
+    p_enable_if((p_is_integral<T>()))>
+    constexpr inline Integer<max(size1, sizeof (T)), sig1 && (p_is_signed<T>())>
     operator%(const T v1, const Integer<size1, sig1> &v2) {
-        using R = Integer < max(size1, sizeof (T)), sig1 && (_is_signed<T>())>;
+        using R = Integer < max(size1, sizeof (T)), sig1 && (p_is_signed<T>())>;
         return R(v1) % R(v2);
     }
 
     template<size_t size1, bool sig1, size_t size2, bool sig2,
-    _enable_if(size2 <= size1)>
+    p_enable_if(size2 <= size1)>
     constexpr inline Integer<size1, sig1>& operator%=(
             Integer<size1, sig1> &v1,
             const Integer<size2, sig2> &v2) {
@@ -1588,16 +1588,16 @@ namespace JIO {
     }
 
     template<size_t size1, bool sig1, typename T,
-    _enable_if((_is_integral<T>()) && (sizeof (T) <= size1))>
+    p_enable_if((p_is_integral<T>()) && (sizeof (T) <= size1))>
     constexpr inline Integer<size1, sig1>& operator%=(
             Integer<size1, sig1> &v1, const T v2) {
         return v1 = (v1 % Integer<size1, sig1>(v2));
     }
 
     template<size_t size1, bool sig1, typename T,
-    _enable_if((_is_integral<T>()) && (size1 <= sizeof (T)))>
+    p_enable_if((p_is_integral<T>()) && (size1 <= sizeof (T)))>
     constexpr inline T& operator%=(T &v1, const Integer<size1, sig1> &v2) {
-        using R = Integer<sizeof (T), _is_signed<T>()>;
+        using R = Integer<sizeof (T), p_is_signed<T>()>;
         return v1 = T(R(v1) % R(v2));
     }
 
@@ -1610,23 +1610,23 @@ namespace JIO {
     }
 
     template<size_t size1, bool sig1, typename T,
-    _enable_if((_is_integral<T>()))>
-    constexpr inline Integer<max(size1, sizeof (T)), sig1 && (_is_signed<T>())>
+    p_enable_if((p_is_integral<T>()))>
+    constexpr inline Integer<max(size1, sizeof (T)), sig1 && (p_is_signed<T>())>
     operator|(const Integer<size1, sig1> &v1, const T v2) {
-        using R = Integer < max(size1, sizeof (T)), sig1 && (_is_signed<T>())>;
+        using R = Integer < max(size1, sizeof (T)), sig1 && (p_is_signed<T>())>;
         return R(v1) | R(v2);
     }
 
     template<size_t size1, bool sig1, typename T,
-    _enable_if((_is_integral<T>()))>
-    constexpr inline Integer<max(size1, sizeof (T)), sig1 && (_is_signed<T>())>
+    p_enable_if((p_is_integral<T>()))>
+    constexpr inline Integer<max(size1, sizeof (T)), sig1 && (p_is_signed<T>())>
     operator|(const T v1, const Integer<size1, sig1> &v2) {
-        using R = Integer < max(size1, sizeof (T)), sig1 && (_is_signed<T>())>;
+        using R = Integer < max(size1, sizeof (T)), sig1 && (p_is_signed<T>())>;
         return R(v1) | R(v2);
     }
 
     template<size_t size1, bool sig1, size_t size2, bool sig2,
-    _enable_if(size2 <= size1)>
+    p_enable_if(size2 <= size1)>
     constexpr inline Integer<size1, sig1>& operator|=(
             Integer<size1, sig1> &v1,
             const Integer<size2, sig2> &v2) {
@@ -1634,16 +1634,16 @@ namespace JIO {
     }
 
     template<size_t size1, bool sig1, typename T,
-    _enable_if((_is_integral<T>()) && (sizeof (T) <= size1))>
+    p_enable_if((p_is_integral<T>()) && (sizeof (T) <= size1))>
     constexpr inline Integer<size1, sig1>& operator|=(
             Integer<size1, sig1> &v1, const T v2) {
         return v1 = (v1 | Integer<size1, sig1>(v2));
     }
 
     template<size_t size1, bool sig1, typename T,
-    _enable_if((_is_integral<T>()) && (size1 <= sizeof (T)))>
+    p_enable_if((p_is_integral<T>()) && (size1 <= sizeof (T)))>
     constexpr inline T& operator|=(T &v1, const Integer<size1, sig1> &v2) {
-        using R = Integer<sizeof (T), _is_signed<T>()>;
+        using R = Integer<sizeof (T), p_is_signed<T>()>;
         return v1 = T(R(v1) | R(v2));
     }
 
@@ -1656,23 +1656,23 @@ namespace JIO {
     }
 
     template<size_t size1, bool sig1, typename T,
-    _enable_if((_is_integral<T>()))>
-    constexpr inline Integer<max(size1, sizeof (T)), sig1 && (_is_signed<T>())>
+    p_enable_if((p_is_integral<T>()))>
+    constexpr inline Integer<max(size1, sizeof (T)), sig1 && (p_is_signed<T>())>
     operator&(const Integer<size1, sig1> &v1, const T v2) {
-        using R = Integer < max(size1, sizeof (T)), sig1 && (_is_signed<T>())>;
+        using R = Integer < max(size1, sizeof (T)), sig1 && (p_is_signed<T>())>;
         return R(v1) & R(v2);
     }
 
     template<size_t size1, bool sig1, typename T,
-    _enable_if((_is_integral<T>()))>
-    constexpr inline Integer<max(size1, sizeof (T)), sig1 && (_is_signed<T>())>
+    p_enable_if((p_is_integral<T>()))>
+    constexpr inline Integer<max(size1, sizeof (T)), sig1 && (p_is_signed<T>())>
     operator&(const T v1, const Integer<size1, sig1> &v2) {
-        using R = Integer < max(size1, sizeof (T)), sig1 && (_is_signed<T>())>;
+        using R = Integer < max(size1, sizeof (T)), sig1 && (p_is_signed<T>())>;
         return R(v1) & R(v2);
     }
 
     template<size_t size1, bool sig1, size_t size2, bool sig2,
-    _enable_if(size2 <= size1)>
+    p_enable_if(size2 <= size1)>
     constexpr inline Integer<size1, sig1>& operator&=(
             Integer<size1, sig1> &v1,
             const Integer<size2, sig2> &v2) {
@@ -1680,16 +1680,16 @@ namespace JIO {
     }
 
     template<size_t size1, bool sig1, typename T,
-    _enable_if((_is_integral<T>()) && (sizeof (T) <= size1))>
+    p_enable_if((p_is_integral<T>()) && (sizeof (T) <= size1))>
     constexpr inline Integer<size1, sig1>& operator&=(
             Integer<size1, sig1> &v1, const T v2) {
         return v1 = (v1 & Integer<size1, sig1>(v2));
     }
 
     template<size_t size1, bool sig1, typename T,
-    _enable_if((_is_integral<T>()) && (size1 <= sizeof (T)))>
+    p_enable_if((p_is_integral<T>()) && (size1 <= sizeof (T)))>
     constexpr inline T& operator&=(T &v1, const Integer<size1, sig1> &v2) {
-        using R = Integer<sizeof (T), _is_signed<T>()>;
+        using R = Integer<sizeof (T), p_is_signed<T>()>;
         return v1 = T(R(v1) & R(v2));
     }
 
@@ -1702,23 +1702,23 @@ namespace JIO {
     }
 
     template<size_t size1, bool sig1, typename T,
-    _enable_if((_is_integral<T>()))>
-    constexpr inline Integer<max(size1, sizeof (T)), sig1 && (_is_signed<T>())>
+    p_enable_if((p_is_integral<T>()))>
+    constexpr inline Integer<max(size1, sizeof (T)), sig1 && (p_is_signed<T>())>
     operator^(const Integer<size1, sig1> &v1, const T v2) {
-        using R = Integer < max(size1, sizeof (T)), sig1 && (_is_signed<T>())>;
+        using R = Integer < max(size1, sizeof (T)), sig1 && (p_is_signed<T>())>;
         return R(v1) ^ R(v2);
     }
 
     template<size_t size1, bool sig1, typename T,
-    _enable_if((_is_integral<T>()))>
-    constexpr inline Integer<max(size1, sizeof (T)), sig1 && (_is_signed<T>())>
+    p_enable_if((p_is_integral<T>()))>
+    constexpr inline Integer<max(size1, sizeof (T)), sig1 && (p_is_signed<T>())>
     operator^(const T v1, const Integer<size1, sig1> &v2) {
-        using R = Integer < max(size1, sizeof (T)), sig1 && (_is_signed<T>())>;
+        using R = Integer < max(size1, sizeof (T)), sig1 && (p_is_signed<T>())>;
         return R(v1) ^ R(v2);
     }
 
     template<size_t size1, bool sig1, size_t size2, bool sig2,
-    _enable_if(size2 <= size1)>
+    p_enable_if(size2 <= size1)>
     constexpr inline Integer<size1, sig1>& operator^=(
             Integer<size1, sig1> &v1,
             const Integer<size2, sig2> &v2) {
@@ -1726,16 +1726,16 @@ namespace JIO {
     }
 
     template<size_t size1, bool sig1, typename T,
-    _enable_if((_is_integral<T>()) && (sizeof (T) <= size1))>
+    p_enable_if((p_is_integral<T>()) && (sizeof (T) <= size1))>
     constexpr inline Integer<size1, sig1>& operator^=(
             Integer<size1, sig1> &v1, const T v2) {
         return v1 = (v1 ^ Integer<size1, sig1>(v2));
     }
 
     template<size_t size1, bool sig1, typename T,
-    _enable_if((_is_integral<T>()) && (size1 <= sizeof (T)))>
+    p_enable_if((p_is_integral<T>()) && (size1 <= sizeof (T)))>
     constexpr inline T& operator^=(T &v1, const Integer<size1, sig1> &v2) {
-        using R = Integer<sizeof (T), _is_signed<T>()>;
+        using R = Integer<sizeof (T), p_is_signed<T>()>;
         return v1 = T(R(v1) ^ R(v2));
     }
 
@@ -1748,16 +1748,16 @@ namespace JIO {
     }
 
     template<size_t size1, bool sig1, typename T,
-    _enable_if((_is_integral<T>()))>
+    p_enable_if((p_is_integral<T>()))>
     constexpr inline bool operator==(const Integer<size1, sig1> &v1, const T v2) {
-        using R = Integer < max(size1, sizeof (T)), sig1 && (_is_signed<T>())>;
+        using R = Integer < max(size1, sizeof (T)), sig1 && (p_is_signed<T>())>;
         return R(v1) == R(v2);
     }
 
     template<size_t size1, bool sig1, typename T,
-    _enable_if((_is_integral<T>()))>
+    p_enable_if((p_is_integral<T>()))>
     constexpr inline bool operator==(const T v1, const Integer<size1, sig1> &v2) {
-        using R = Integer < max(size1, sizeof (T)), sig1 && (_is_signed<T>())>;
+        using R = Integer < max(size1, sizeof (T)), sig1 && (p_is_signed<T>())>;
         return R(v1) == R(v2);
     }
 
@@ -1770,16 +1770,16 @@ namespace JIO {
     }
 
     template<size_t size1, bool sig1, typename T,
-    _enable_if((_is_integral<T>()))>
+    p_enable_if((p_is_integral<T>()))>
     constexpr inline bool operator!=(const Integer<size1, sig1> &v1, const T v2) {
-        using R = Integer < max(size1, sizeof (T)), sig1 && (_is_signed<T>())>;
+        using R = Integer < max(size1, sizeof (T)), sig1 && (p_is_signed<T>())>;
         return R(v1) != R(v2);
     }
 
     template<size_t size1, bool sig1, typename T,
-    _enable_if((_is_integral<T>()))>
+    p_enable_if((p_is_integral<T>()))>
     constexpr inline bool operator!=(const T v1, const Integer<size1, sig1> &v2) {
-        using R = Integer < max(size1, sizeof (T)), sig1 && (_is_signed<T>())>;
+        using R = Integer < max(size1, sizeof (T)), sig1 && (p_is_signed<T>())>;
         return R(v1) != R(v2);
     }
 
@@ -1792,16 +1792,16 @@ namespace JIO {
     }
 
     template<size_t size1, bool sig1, typename T,
-    _enable_if((_is_integral<T>()))>
+    p_enable_if((p_is_integral<T>()))>
     constexpr inline bool operator<=(const Integer<size1, sig1> &v1, const T v2) {
-        using R = Integer < max(size1, sizeof (T)), sig1 && (_is_signed<T>())>;
+        using R = Integer < max(size1, sizeof (T)), sig1 && (p_is_signed<T>())>;
         return R(v1) <= R(v2);
     }
 
     template<size_t size1, bool sig1, typename T,
-    _enable_if((_is_integral<T>()))>
+    p_enable_if((p_is_integral<T>()))>
     constexpr inline bool operator<=(const T v1, const Integer<size1, sig1> &v2) {
-        using R = Integer < max(size1, sizeof (T)), sig1 && (_is_signed<T>())>;
+        using R = Integer < max(size1, sizeof (T)), sig1 && (p_is_signed<T>())>;
         return R(v1) <= R(v2);
     }
 
@@ -1814,16 +1814,16 @@ namespace JIO {
     }
 
     template<size_t size1, bool sig1, typename T,
-    _enable_if((_is_integral<T>()))>
+    p_enable_if((p_is_integral<T>()))>
     constexpr inline bool operator>=(const Integer<size1, sig1> &v1, const T v2) {
-        using R = Integer < max(size1, sizeof (T)), sig1 && (_is_signed<T>())>;
+        using R = Integer < max(size1, sizeof (T)), sig1 && (p_is_signed<T>())>;
         return R(v1) >= R(v2);
     }
 
     template<size_t size1, bool sig1, typename T,
-    _enable_if((_is_integral<T>()))>
+    p_enable_if((p_is_integral<T>()))>
     constexpr inline bool operator>=(const T v1, const Integer<size1, sig1> &v2) {
-        using R = Integer < max(size1, sizeof (T)), sig1 && (_is_signed<T>())>;
+        using R = Integer < max(size1, sizeof (T)), sig1 && (p_is_signed<T>())>;
         return R(v1) >= R(v2);
     }
 
@@ -1836,16 +1836,16 @@ namespace JIO {
     }
 
     template<size_t size1, bool sig1, typename T,
-    _enable_if((_is_integral<T>()))>
+    p_enable_if((p_is_integral<T>()))>
     constexpr inline bool operator<(const Integer<size1, sig1> &v1, const T v2) {
-        using R = Integer < max(size1, sizeof (T)), sig1 && (_is_signed<T>())>;
+        using R = Integer < max(size1, sizeof (T)), sig1 && (p_is_signed<T>())>;
         return R(v1) < R(v2);
     }
 
     template<size_t size1, bool sig1, typename T,
-    _enable_if((_is_integral<T>()))>
+    p_enable_if((p_is_integral<T>()))>
     constexpr inline bool operator<(const T v1, const Integer<size1, sig1> &v2) {
-        using R = Integer < max(size1, sizeof (T)), sig1 && (_is_signed<T>())>;
+        using R = Integer < max(size1, sizeof (T)), sig1 && (p_is_signed<T>())>;
         return R(v1) < R(v2);
     }
 
@@ -1858,16 +1858,16 @@ namespace JIO {
     }
 
     template<size_t size1, bool sig1, typename T,
-    _enable_if((_is_integral<T>()))>
+    p_enable_if((p_is_integral<T>()))>
     constexpr inline bool operator>(const Integer<size1, sig1> &v1, const T v2) {
-        using R = Integer < max(size1, sizeof (T)), sig1 && (_is_signed<T>())>;
+        using R = Integer < max(size1, sizeof (T)), sig1 && (p_is_signed<T>())>;
         return R(v1) > R(v2);
     }
 
     template<size_t size1, bool sig1, typename T,
-    _enable_if((_is_integral<T>()))>
+    p_enable_if((p_is_integral<T>()))>
     constexpr inline bool operator>(const T v1, const Integer<size1, sig1> &v2) {
-        using R = Integer < max(size1, sizeof (T)), sig1 && (_is_signed<T>())>;
+        using R = Integer < max(size1, sizeof (T)), sig1 && (p_is_signed<T>())>;
         return R(v1) > R(v2);
     }
 
@@ -1875,13 +1875,13 @@ namespace JIO {
     constexpr inline Integer<size1, sig1> operator<<(
             const Integer<size1, sig1> &v1,
             const Integer<size2, sig2> &v2) {
-        return v1.value << _SHType<size1>(v2);
+        return v1.value << p_SHType<size1>(v2);
     }
 
     template<size_t size1, bool sig1, typename T,
-    _enable_if((_is_integral<T>()))>
+    p_enable_if((p_is_integral<T>()))>
     constexpr inline T operator<<(const T v1, const Integer<size1, sig1> &v2) {
-        using R = Integer <sizeof (T), (_is_signed<T>())>;
+        using R = Integer <sizeof (T), (p_is_signed<T>())>;
         return T(R(v1) << v2);
     }
 
@@ -1893,29 +1893,29 @@ namespace JIO {
     }
 
     template<size_t size1, bool sig1, typename T,
-    _enable_if((_is_integral<T>()))>
+    p_enable_if((p_is_integral<T>()))>
     constexpr inline Integer<size1, sig1>& operator<<=(
             Integer<size1, sig1> &v1, const T v2) {
         return v1 = (v1 << v2);
     }
 
     template<size_t size1, bool sig1, typename T,
-    _enable_if((_is_integral<T>()))>
+    p_enable_if((p_is_integral<T>()))>
     constexpr inline T& operator<<=(T &v1, const Integer<size1, sig1> &v2) {
-        return v1 = T(Integer<sizeof (T), _is_signed<T>()>(v1) << v2);
+        return v1 = T(Integer<sizeof (T), p_is_signed<T>()>(v1) << v2);
     }
 
     template<size_t size1, bool sig1, size_t size2, bool sig2>
     constexpr inline Integer<size1, sig1> operator>>(
             const Integer<size1, sig1> &v1,
             const Integer<size2, sig2> &v2) {
-        return typename Integer<size1, sig1>::V(v1.value >> _SHType<size1>(v2));
+        return typename Integer<size1, sig1>::V(v1.value >> p_SHType<size1>(v2));
     }
 
     template<size_t size1, bool sig1, typename T,
-    _enable_if((_is_integral<T>()))>
+    p_enable_if((p_is_integral<T>()))>
     constexpr inline T operator>>(const T v1, const Integer<size1, sig1> &v2) {
-        using R = Integer <sizeof (T), (_is_signed<T>())>;
+        using R = Integer <sizeof (T), (p_is_signed<T>())>;
         return T(R(v1) >> v2);
     }
 
@@ -1927,17 +1927,19 @@ namespace JIO {
     }
 
     template<size_t size1, bool sig1, typename T,
-    _enable_if((_is_integral<T>()))>
+    p_enable_if((p_is_integral<T>()))>
     constexpr inline Integer<size1, sig1>& operator>>=(
             Integer<size1, sig1> &v1, const T v2) {
         return v1 = (v1 >> v2);
     }
 
     template<size_t size1, bool sig1, typename T,
-    _enable_if((_is_integral<T>()))>
+    p_enable_if((p_is_integral<T>()))>
     constexpr inline T& operator>>=(T &v1, const Integer<size1, sig1> &v2) {
-        return v1 = T(Integer<sizeof (T), _is_signed<T>()>(v1) >> v2);
+        return v1 = T(Integer<sizeof (T), p_is_signed<T>()>(v1) >> v2);
     }
+
+#undef p_enable_if
 }
 
 #endif /* INTEGER_HPP */
