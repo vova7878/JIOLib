@@ -216,7 +216,7 @@ namespace JIO {
         }
 
         template<typename T>
-        ByteBuffer<true>& operator<<(T &obj) {
+        ByteBuffer<true>& operator<<(T obj) {
             putObject(obj);
             return *this;
         }
