@@ -91,15 +91,13 @@ namespace JIO {
         illegal = 0,
         native,
         pow2,
-        u4array,
-        other
+        array
     };
 
     constexpr p_IType p_getIntegerType(size_t size) {
         return (size == 1 || size == 2 || size == 4 || size == 8) ? native :
                 (size == 0 ? illegal :
-                (isOneBit(size) ? pow2 :
-                ((size & 3) == 0 ? u4array : other)));
+                (isOneBit(size) ? pow2 : array));
     }
 
     template<size_t size, bool = (size > sizeof (unsigned int))>
@@ -221,12 +219,12 @@ namespace JIO {
         struct divrem_h<size, true, false> {
 
             constexpr inline static p_Integer_S div(const p_Integer_S &a, const p_Integer_S &b) {
-                return ((a.value == 0x80000000) && (b.value == -1)) ?
+                return ((a.value == U(0x80000000)) && (b.value == U(-1))) ?
                         p_Integer_S(0x80000000) : p_Integer_S(S(a.value) / S(b.value));
             }
 
             constexpr inline static p_Integer_S rem(const p_Integer_S &a, const p_Integer_S &b) {
-                return ((a.value == 0x80000000) && (b.value == -1)) ?
+                return ((a.value == U(0x80000000)) && (b.value == U(-1))) ?
                         p_Integer_S(0) : p_Integer_S(S(a.value) % S(b.value));
             }
         };
@@ -235,12 +233,12 @@ namespace JIO {
         struct divrem_h<size, false, true> {
 
             constexpr inline static p_Integer_S div(const p_Integer_S &a, const p_Integer_S &b) {
-                return ((a.value == 0x8000000000000000LL) && (b.value == -1LL)) ?
+                return ((a.value == U(0x8000000000000000LL)) && (b.value == U(-1LL))) ?
                         p_Integer_S(0x8000000000000000LL) : p_Integer_S(S(a.value) / S(b.value));
             }
 
             constexpr inline static p_Integer_S rem(const p_Integer_S &a, const p_Integer_S &b) {
-                return ((a.value == 0x8000000000000000LL) && (b.value == -1LL)) ?
+                return ((a.value == U(0x8000000000000000LL)) && (b.value == U(-1LL))) ?
                         p_Integer_S(0) : p_Integer_S(S(a.value) % S(b.value));
             }
         };
