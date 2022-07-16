@@ -34,7 +34,7 @@ namespace JIO {
          * байт, чтение прекращается. При достижении конца данных до начала
          * чтения, будет возвращено специальное знаение -1
          */
-        virtual s8 read(void *buf, s8 offset, s8 length) {
+        inline virtual s8 read(void *buf, s8 offset, s8 length) {
             if (length == 0) {
                 return 0;
             }
@@ -62,7 +62,7 @@ namespace JIO {
             readFully(buf, 0, length);
         }
 
-        virtual void readFully(void *buf, s8 offset, s8 length) {
+        inline virtual void readFully(void *buf, s8 offset, s8 length) {
             s8 n = 0;
             do {
                 s8 count = read(buf, offset + n, length - n);
@@ -72,7 +72,7 @@ namespace JIO {
             } while (n < length);
         }
 
-        virtual s8 skip(s8 count) {
+        inline virtual s8 skip(s8 count) {
             constexpr s8 SKIP_BUFFER_SIZE = 2048;
             static u1 SKIP_BUFFER[SKIP_BUFFER_SIZE];
             if (count <= 0) {
@@ -108,7 +108,7 @@ namespace JIO {
             write(buf, 0, length);
         }
 
-        virtual void write(const void *buf, s8 offset, s8 length) {
+        inline virtual void write(const void *buf, s8 offset, s8 length) {
             const u1 *data = checkSBounds<const u1*>(buf, offset, length);
 
             for (s8 i = 0; i < length; i++) {
