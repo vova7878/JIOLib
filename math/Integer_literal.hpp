@@ -1,5 +1,5 @@
-#ifndef INTEGER_COMMON_HPP
-#define INTEGER_COMMON_HPP
+#ifndef INTEGER_LITERAL_HPP
+#define INTEGER_LITERAL_HPP
 
 #include "Integer.hpp"
 
@@ -183,5 +183,5 @@ namespace JIO {
 #undef p_enable_if
 }
 
-#endif /* INTEGER_COMMON_HPP */
+#endif /* INTEGER_LITERAL_HPP */
 
