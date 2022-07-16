@@ -15,8 +15,10 @@ namespace JIO {
     }
 
     inline void checkRange(u8 offset, u8 length, u8 capacity) {
-        if ((offset | length | (offset + length)) > capacity
-                || (offset + length < offset)) {
+        if ((offset > capacity)
+                || (length > capacity)
+                || ((offset + length) > capacity)
+                || ((offset + length) < offset)) {
             throw JIO::IndexOutOfBoundsException("Range [",
                     offset, ", ", offset, " + ", length,
                     ") out of bounds for capacity ", capacity);
