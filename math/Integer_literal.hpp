@@ -66,7 +66,7 @@ namespace JIO {
     template<bool sig, int... nums, size_t bytes = p_get_bytes<sig, 4, nums...>()>
     constexpr inline auto p_parseHex(p_array_t<int, nums...> arr) {
         using I = Integer<bytes, sig>;
-        I out;
+        I out = I::ZERO();
         for (size_t i = 0; i<sizeof...(nums); i++) {
             out <<= 4;
             out |= I(arr[i]);
@@ -77,7 +77,7 @@ namespace JIO {
     template<bool sig, size_t bytes, int... nums>
     constexpr inline auto p_parseDec_h(p_array_t<int, nums...> arr) {
         using I = Integer<bytes, sig>;
-        I out;
+        I out = I::ZERO();
         for (size_t i = 0; i<sizeof...(nums); i++) {
             out *= I(10);
             out += I(arr[i]);
@@ -97,7 +97,7 @@ namespace JIO {
     template<bool sig, int... nums, size_t bytes = p_get_bytes<sig, 3, nums...>()>
     constexpr inline auto p_parseOct(p_array_t<int, nums...> arr) {
         using I = Integer<bytes, sig>;
-        I out;
+        I out = I::ZERO();
         for (size_t i = 0; i<sizeof...(nums); i++) {
             out <<= 3;
             out |= I(arr[i]);
@@ -108,7 +108,7 @@ namespace JIO {
     template<bool sig, int... nums, size_t bytes = p_get_bytes<sig, 1, nums...>()>
     constexpr inline auto p_parseBin(p_array_t<int, nums...> arr) {
         using I = Integer<bytes, sig>;
-        I out;
+        I out = I::ZERO();
         for (size_t i = 0; i<sizeof...(nums); i++) {
             out <<= 1;
             out |= I(arr[i]);
