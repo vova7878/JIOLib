@@ -131,11 +131,11 @@ namespace JIO {
         typedef ST S;
         typedef UT U;
         typedef p_SHType<sizeof (U) > M;
-        const static M shmask = sizeof (U) * 8 - 1;
+        constexpr static M shmask = sizeof (U) * 8 - 1;
         U value;
     public:
 
-        explicit constexpr inline p_Integer_U() : value(0) { }
+        explicit constexpr inline p_Integer_U() = default;
 
         explicit constexpr inline p_Integer_U(const U n) : value(n) { }
 
@@ -187,11 +187,11 @@ namespace JIO {
         typedef ST S;
         typedef UT U;
         typedef p_SHType<sizeof (U) > M;
-        static const M shmask = sizeof (U) * 8 - 1;
+        constexpr static M shmask = sizeof (U) * 8 - 1;
         U value;
     public:
 
-        constexpr explicit inline p_Integer_S() : value(0) { }
+        constexpr explicit inline p_Integer_S() = default;
 
         constexpr explicit inline p_Integer_S(const S n) : value(n) { }
 
@@ -225,7 +225,7 @@ namespace JIO {
 
             constexpr inline static p_Integer_S rem(const p_Integer_S &a, const p_Integer_S &b) {
                 return ((a.value == U(0x80000000)) && (b.value == U(-1))) ?
-                        p_Integer_S(0) : p_Integer_S(S(a.value) % S(b.value));
+                        p_Integer_S::ZERO() : p_Integer_S(S(a.value) % S(b.value));
             }
         };
 
@@ -239,7 +239,7 @@ namespace JIO {
 
             constexpr inline static p_Integer_S rem(const p_Integer_S &a, const p_Integer_S &b) {
                 return ((a.value == U(0x8000000000000000LL)) && (b.value == U(-1LL))) ?
-                        p_Integer_S(0) : p_Integer_S(S(a.value) % S(b.value));
+                        p_Integer_S::ZERO() : p_Integer_S(S(a.value) % S(b.value));
             }
         };
 
@@ -279,9 +279,19 @@ namespace JIO {
 
     template<typename T>
     struct p_Operators_Impl : public T {
+    private:
+
+        typedef p_Operators_Impl I;
+
+    public:
+
         using T::T;
 
         constexpr inline p_Operators_Impl(const T &obj) : T(obj) { }
+
+        constexpr inline static I ZERO() {
+            return T(0);
+        };
 
         constexpr inline bool isZero() const {
             return T::value == 0;
@@ -299,62 +309,62 @@ namespace JIO {
             return p_numberOfTrailingZeros_h(T::value);
         }
 
-        constexpr inline p_Operators_Impl operator+() const {
+        constexpr inline I operator+() const {
             return *this;
         }
 
-        constexpr inline p_Operators_Impl operator-() const {
-            return p_Operators_Impl(-T::value);
+        constexpr inline I operator-() const {
+            return I(-T::value);
         }
 
-        constexpr inline p_Operators_Impl operator+(const p_Operators_Impl &other) const {
-            return p_Operators_Impl(T::value + other.value);
+        constexpr inline I operator+(const I &other) const {
+            return I(T::value + other.value);
         }
 
-        constexpr inline p_Operators_Impl operator-(const p_Operators_Impl &other) const {
-            return p_Operators_Impl(T::value - other.value);
+        constexpr inline I operator-(const I &other) const {
+            return I(T::value - other.value);
         }
 
-        constexpr inline p_Operators_Impl operator*(const p_Operators_Impl &other) const {
-            return p_Operators_Impl(T::value * other.value);
+        constexpr inline I operator*(const I &other) const {
+            return I(T::value * other.value);
         }
 
-        constexpr inline p_Operators_Impl operator|(const p_Operators_Impl &other) const {
-            return p_Operators_Impl(T::value | other.value);
+        constexpr inline I operator|(const I &other) const {
+            return I(T::value | other.value);
         }
 
-        constexpr inline p_Operators_Impl operator&(const p_Operators_Impl &other) const {
-            return p_Operators_Impl(T::value & other.value);
+        constexpr inline I operator&(const I &other) const {
+            return I(T::value & other.value);
         }
 
-        constexpr inline p_Operators_Impl operator^(const p_Operators_Impl &other) const {
-            return p_Operators_Impl(T::value ^ other.value);
+        constexpr inline I operator^(const I &other) const {
+            return I(T::value ^ other.value);
         }
 
-        constexpr inline p_Operators_Impl operator<<(const typename T::M other) const {
-            return p_Operators_Impl(T::value << (other & T::shmask));
+        constexpr inline I operator<<(const typename T::M other) const {
+            return I(T::value << (other & T::shmask));
         }
 
-        constexpr inline bool operator==(const p_Operators_Impl &other) const {
+        constexpr inline bool operator==(const I &other) const {
             return T::value == other.value;
         }
 
-        constexpr inline bool operator!=(const p_Operators_Impl &other) const {
+        constexpr inline bool operator!=(const I &other) const {
             return T::value != other.value;
         }
 
-        constexpr inline p_Operators_Impl operator~() const {
-            return p_Operators_Impl(~T::value);
+        constexpr inline I operator~() const {
+            return I(~T::value);
         }
 
     private:
 
-        constexpr inline p_Operators_Impl p1() const {
-            return p_Operators_Impl(T::value + 1);
+        constexpr inline I p1() const {
+            return I(T::value + 1);
         }
 
-        constexpr inline p_Operators_Impl m1() const {
-            return p_Operators_Impl(T::value - 1);
+        constexpr inline I m1() const {
+            return I(T::value - 1);
         }
 
         template<size_t size, bool sig>
@@ -424,7 +434,7 @@ namespace JIO {
         typedef Integer<half, true> S;
         typedef Integer<half, false> U;
         typedef p_SHType<half * 2> M;
-        static const M shmask = half * 2 * 8 - 1;
+        constexpr static M shmask = half * 2 * 8 - 1;
         U low, high;
 
         constexpr inline static p_Pow2_Integer_Base rightShift2(
@@ -436,7 +446,7 @@ namespace JIO {
 
         constexpr inline static p_Pow2_Integer_Base rightShift3(
                 const p_Pow2_Integer_Base &value, const M shiftDistance) {
-            return p_Pow2_Integer_Base(value.high >> (shiftDistance - half * 8), U());
+            return p_Pow2_Integer_Base(value.high >> (shiftDistance - half * 8), U::ZERO());
         }
 
         constexpr inline static p_Pow2_Integer_Base rightShift(
@@ -447,12 +457,12 @@ namespace JIO {
         }
     public:
 
-        constexpr explicit inline p_Pow2_Integer_Base() : low(), high() { }
+        constexpr explicit inline p_Pow2_Integer_Base() = default;
 
-        constexpr explicit inline p_Pow2_Integer_Base(const U &low) : low(low), high() { }
+        constexpr explicit inline p_Pow2_Integer_Base(const U &low) : low(low), high(U::ZERO()) { }
 
         constexpr explicit inline p_Pow2_Integer_Base(const S &low) :
-        low(low), high(low.isSNegative() ? ~U() : U()) { }
+        low(low), high(low.isSNegative() ? ~U::ZERO() : U::ZERO()) { }
 
         constexpr explicit inline p_Pow2_Integer_Base(const U &low, const U &high) :
         low(low), high(high) { }
@@ -506,7 +516,7 @@ namespace JIO {
         typedef Integer<half, true> S;
         typedef Integer<half, false> U;
         typedef p_SHType<half * 2> M;
-        static const M shmask = half * 2 * 8 - 1;
+        constexpr static M shmask = half * 2 * 8 - 1;
         U low, high;
 
         constexpr inline static p_Pow2_Integer_Base rightShift2(
@@ -519,7 +529,7 @@ namespace JIO {
         constexpr inline static p_Pow2_Integer_Base rightShift3(
                 const p_Pow2_Integer_Base &value, const M shiftDistance) {
             return p_Pow2_Integer_Base(S(value.high) >> (shiftDistance - half * 8),
-                    value.high.isSNegative() ? ~U() : U());
+                    value.high.isSNegative() ? ~U::ZERO() : U::ZERO());
         }
 
         inline static p_Pow2_Integer_Base rightShift(
@@ -530,12 +540,12 @@ namespace JIO {
         }
     public:
 
-        constexpr explicit inline p_Pow2_Integer_Base() : low(), high() { }
+        constexpr explicit inline p_Pow2_Integer_Base() = default;
 
-        constexpr explicit inline p_Pow2_Integer_Base(const U &low) : low(low), high() { }
+        constexpr explicit inline p_Pow2_Integer_Base(const U &low) : low(low), high(U::ZERO()) { }
 
         constexpr explicit inline p_Pow2_Integer_Base(const S &low) :
-        low(low), high(low.isNegative() ? ~U() : U()) { }
+        low(low), high(low.isNegative() ? ~U::ZERO() : U::ZERO()) { }
 
         constexpr explicit inline p_Pow2_Integer_Base(const U &low, const U &high) :
         low(low), high(high) { }
@@ -588,6 +598,7 @@ namespace JIO {
     private:
         typedef typename p_Pow2_Integer_Base<half, sig>::S S;
         typedef typename p_Pow2_Integer_Base<half, sig>::U U;
+        typedef typename p_Pow2_Integer_Base<half, sig>::M M;
         typedef p_Pow2_Integer_Base<half, sig> T;
         typedef p_Pow2_Integer_Impl<half, sig> I;
         typedef p_Pow2_Integer_Impl<half, false> UI;
@@ -601,7 +612,7 @@ namespace JIO {
 
         constexpr inline static I leftShift3(const I &value,
                 const typename T::M shiftDistance) {
-            return I(U(), value.low << (shiftDistance - half * 8));
+            return I(U::ZERO(), value.low << (shiftDistance - half * 8));
         }
 
         constexpr inline static I leftShift(const I &value,
@@ -612,7 +623,7 @@ namespace JIO {
         }
 
         constexpr inline static I p1_helper(const U &low, const U &high) {
-            return I(low, low == U() ? high.p1() : high);
+            return I(low, low == U::ZERO() ? high.p1() : high);
         }
 
         constexpr inline static I plus_helper(
@@ -633,7 +644,7 @@ namespace JIO {
 
         constexpr inline static UI divremUnsigned_h5(
                 const UI &out, bool bit) {
-            return (out << 1) | (bit ? UI(U(1)) : UI());
+            return (out << 1) | (bit ? UI(U(1)) : UI::ZERO());
         }
 
         constexpr inline static std::pair<UI, UI> divremUnsigned_h4(
@@ -655,9 +666,9 @@ namespace JIO {
 
         constexpr inline static std::pair<UI, UI> divremUnsigned_h1(
                 const UI &x, const UI &y, size_t xZeros, size_t yZeros) {
-            return yZeros < xZeros ? std::pair<UI, UI>(UI(), x) :
+            return yZeros < xZeros ? std::pair<UI, UI>(UI::ZERO(), x) :
                     divremUnsigned_h2(x, y << (yZeros - xZeros),
-                    yZeros - xZeros, UI());
+                    yZeros - xZeros, UI::ZERO());
         }
 
         constexpr inline static std::pair<UI, UI> divremUnsigned(
@@ -704,6 +715,10 @@ namespace JIO {
         constexpr inline UI u() const {
             return UI(T::low, T::high);
         }
+
+        constexpr inline static I ZERO() {
+            return I(U::ZERO());
+        };
 
         constexpr inline bool isZero() const {
             return T::low.isZero() && T::high.isZero();
@@ -765,7 +780,7 @@ namespace JIO {
             return mul_helper(T::high, T::low, other.high, other.low);
         }
 
-        constexpr inline I operator<<(const typename T::M other) const {
+        constexpr inline I operator<<(const M other) const {
             return leftShift(*this, other & T::shmask);
         }
 
@@ -851,7 +866,7 @@ namespace JIO {
 
     template<typename T, bool sig, p_enable_if(!sig)>
     constexpr inline T p_min_value() {
-        return T();
+        return T::ZERO();
     }
 
     template<typename T, bool sig>
@@ -962,7 +977,7 @@ namespace JIO {
         };
 
         constexpr inline static Integer ZERO() {
-            return Integer();
+            return V::ZERO();
         };
 
         constexpr inline static Integer ONE() {
@@ -977,7 +992,7 @@ namespace JIO {
             return p_min_value<Integer, sig>();
         };
 
-        constexpr inline Integer() : value() { }
+        constexpr inline Integer() = default;
 
         constexpr inline bool isZero() const {
             return value.isZero();
@@ -1257,6 +1272,9 @@ namespace JIO {
         template<size_t size2, bool sig2>
         friend class p_Pow2_Integer_Impl;
 
+        template<size_t size2, bool sig2>
+        friend class p_Array_Integer_Impl;
+
         template<typename T>
         friend struct p_Operators_Impl;
     };
@@ -1428,9 +1446,9 @@ namespace JIO {
             bool o1, bool o2) {
         using U1 = Integer<size1 * 2, false>;
         using U2 = Integer<size1 * 4, false>;
-        return U2(wmultiply(ab, cd)) + ((o1 && o2) ? U2(1) << (size1 * 16) : U2()) +
-                (o1 ? (U1(cd) << (size1 * 8)) : U1()) +
-                (o2 ? (U1(ab) << (size1 * 8)) : U1());
+        return U2(wmultiply(ab, cd)) + ((o1 && o2) ? U2(1) << (size1 * 16) : U2::ZERO()) +
+                (o1 ? (U1(cd) << (size1 * 8)) : U1::ZERO()) +
+                (o2 ? (U1(ab) << (size1 * 8)) : U1::ZERO());
     }
 
     template<size_t size1>
