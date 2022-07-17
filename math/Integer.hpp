@@ -639,7 +639,7 @@ namespace JIO {
 
         constexpr inline static I mul_helper(
                 const U &a, const U &b, const U &c, const U &d) {
-            return I(U(), a * d + b * c) + mul_helper2(wmultiply(b, d).value);
+            return I(U::ZERO(), a * d + b * c) + mul_helper2(wmultiply(b, d).value);
         }
 
         constexpr inline static UI divremUnsigned_h5(
@@ -701,7 +701,7 @@ namespace JIO {
         }
 
         constexpr inline I m1() const {
-            return I(T::low.m1(), (T::low == U()) ? T::high.m1() : T::high);
+            return I(T::low.m1(), (T::low == U::ZERO()) ? T::high.m1() : T::high);
         }
     public:
         using T::T;
