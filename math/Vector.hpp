@@ -16,7 +16,7 @@ namespace JIO {
 
 #define p_enable_if(B) p_enable_if_t<(B)> = false
 
-    struct p_unused {
+    struct p_v_unused {
     };
 
     template<size_t size1, size_t size2, size_t index1, size_t index2,
@@ -67,7 +67,7 @@ namespace JIO {
         }
     public:
 
-        constexpr inline Vector(p_unused) { }
+        constexpr inline Vector(p_v_unused) { }
 
         constexpr inline Vector() {
             assignOne<0>(T());
@@ -147,7 +147,7 @@ template<typename T1, typename T2, size_t size>                   \
 constexpr inline Vector<OP_TYPE(op, T1, T2), size> operator op(   \
         const Vector<T1, size> &v1,                               \
         const Vector<T2, size> &v2) {                             \
-    Vector<OP_TYPE(op, T1, T2), size> out((p_unused()));          \
+    Vector<OP_TYPE(op, T1, T2), size> out(p_v_unused());          \
     hname(v1, v2, out);                                           \
     return out;                                                   \
 }
@@ -197,7 +197,7 @@ BIN_VT_OPERATOR_H(hname, op)                                      \
 template<typename T1, typename T2, size_t size>                   \
 constexpr inline Vector<OP_TYPE(op, T1, T2), size> operator op(   \
         const Vector<T1, size> &v1, const T2 v2) {                \
-    Vector<OP_TYPE(op, T1, T2), size> out((p_unused()));          \
+    Vector<OP_TYPE(op, T1, T2), size> out(p_v_unused());          \
     hname(v1, v2, out);                                           \
     return out;                                                   \
 }
@@ -247,7 +247,7 @@ BIN_TV_OPERATOR_H(hname, op)                                      \
 template<typename T1, typename T2, size_t size>                   \
 constexpr inline Vector<OP_TYPE(op, T1, T2), size> operator op(   \
         const T1 v1, const Vector<T2, size> &v2) {                \
-    Vector<OP_TYPE(op, T1, T2), size> out((p_unused()));          \
+    Vector<OP_TYPE(op, T1, T2), size> out(p_v_unused());          \
     hname(v1, v2, out);                                           \
     return out;                                                   \
 }
@@ -297,7 +297,7 @@ UNARY_V_OPERATOR_H(hname, op)                                     \
 template<typename T, size_t size>                                 \
 constexpr inline Vector<T, size> operator op(                     \
         const Vector<T, size> &v1) {                              \
-    Vector<T, size> out((p_unused()));                            \
+    Vector<T, size> out(p_v_unused());                            \
     hname(v1, out);                                               \
     return out;                                                   \
 }
@@ -427,7 +427,7 @@ constexpr inline Vector<T1, size>& operator op(                   \
 #define SIMPLE_V_FUNCTION(fname, std_fname)                       \
 template<typename T, size_t size>                                 \
 constexpr inline Vector<T, size> fname(const Vector<T, size> &v) {\
-    Vector<T, size> out((p_unused()));                            \
+    Vector<T, size> out(p_v_unused());                            \
     for (size_t i = 0; i < size; i++) {                           \
         out[i] = std_fname(v[i]);                                 \
     }                                                             \
