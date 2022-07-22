@@ -1152,45 +1152,53 @@ namespace JIO {
             return !(this->isZero());
         }
 
-        template<size_t size1, bool sig1, size_t size2, bool sig2>
-        friend constexpr Integer<max(size1, size2), sig1 && sig2> operator+(
-                const Integer<size1, sig1> &v1,
-                const Integer<size2, sig2> &v2);
+        template<size_t size2, bool sig2,
+        typename R = Integer<max(size, size2), sig && sig2>>
+        constexpr inline R operator+(const Integer<size2, sig2> &v2) const {
+            return R(*this).value + R(v2).value;
+        }
 
-        template<size_t size1, bool sig1, size_t size2, bool sig2>
-        friend constexpr Integer<max(size1, size2), sig1 && sig2> operator-(
-                const Integer<size1, sig1> &v1,
-                const Integer<size2, sig2> &v2);
+        template<size_t size2, bool sig2,
+        typename R = Integer<max(size, size2), sig && sig2>>
+        constexpr inline R operator-(const Integer<size2, sig2> &v2) const {
+            return R(*this).value - R(v2).value;
+        }
 
-        template<size_t size1, bool sig1, size_t size2, bool sig2>
-        friend constexpr Integer<max(size1, size2), sig1 && sig2> operator*(
-                const Integer<size1, sig1> &v1,
-                const Integer<size2, sig2> &v2);
+        template<size_t size2, bool sig2,
+        typename R = Integer<max(size, size2), sig && sig2>>
+        constexpr inline R operator*(const Integer<size2, sig2> &v2) const {
+            return R(*this).value * R(v2).value;
+        }
 
-        template<size_t size1, bool sig1, size_t size2, bool sig2>
-        friend constexpr Integer<max(size1, size2), sig1 && sig2> operator/(
-                const Integer<size1, sig1> &v1,
-                const Integer<size2, sig2> &v2);
+        template<size_t size2, bool sig2,
+        typename R = Integer<max(size, size2), sig && sig2>>
+        constexpr inline R operator/(const Integer<size2, sig2> &v2) const {
+            return typename R::V(R(*this).value / R(v2).value);
+        }
 
-        template<size_t size1, bool sig1, size_t size2, bool sig2>
-        friend constexpr Integer<max(size1, size2), sig1 && sig2> operator%(
-                const Integer<size1, sig1> &v1,
-                const Integer<size2, sig2> &v2);
+        template<size_t size2, bool sig2,
+        typename R = Integer<max(size, size2), sig && sig2>>
+        constexpr inline R operator%(const Integer<size2, sig2> &v2) const {
+            return typename R::V(R(*this).value % R(v2).value);
+        }
 
-        template<size_t size1, bool sig1, size_t size2, bool sig2>
-        friend constexpr Integer<max(size1, size2), sig1 && sig2> operator|(
-                const Integer<size1, sig1> &v1,
-                const Integer<size2, sig2> &v2);
+        template<size_t size2, bool sig2,
+        typename R = Integer<max(size, size2), sig && sig2>>
+        constexpr inline R operator|(const Integer<size2, sig2> &v2) const {
+            return R(*this).value | R(v2).value;
+        }
 
-        template<size_t size1, bool sig1, size_t size2, bool sig2>
-        friend constexpr Integer<max(size1, size2), sig1 && sig2> operator&(
-                const Integer<size1, sig1> &v1,
-                const Integer<size2, sig2> &v2);
+        template<size_t size2, bool sig2,
+        typename R = Integer<max(size, size2), sig && sig2>>
+        constexpr inline R operator&(const Integer<size2, sig2> &v2) const {
+            return R(*this).value & R(v2).value;
+        }
 
-        template<size_t size1, bool sig1, size_t size2, bool sig2>
-        friend constexpr Integer<max(size1, size2), sig1 && sig2> operator^(
-                const Integer<size1, sig1> &v1,
-                const Integer<size2, sig2> &v2);
+        template<size_t size2, bool sig2,
+        typename R = Integer<max(size, size2), sig && sig2>>
+        constexpr inline R operator^(const Integer<size2, sig2> &v2) const {
+            return R(*this).value ^ R(v2).value;
+        }
 
         template<size_t size1, bool sig1, size_t size2, bool sig2>
         friend constexpr bool operator==(
@@ -1222,20 +1230,20 @@ namespace JIO {
                 const Integer<size1, sig1> &v1,
                 const Integer<size2, sig2> &v2);
 
-        template<size_t size1, bool sig1, size_t size2, bool sig2>
-        friend constexpr Integer<size1, sig1> operator<<(
-                const Integer<size1, sig1> &v1,
-                const Integer<size2, sig2> &v2);
+        template<size_t size2, bool sig2>
+        constexpr inline Integer operator<<(const Integer<size2, sig2> &v2) const {
+            return value << p_SHType<size>(v2);
+        }
 
         template<typename T, p_enable_if((p_is_integral<T>()))>
         constexpr inline Integer operator<<(const T v2) const {
             return value << p_SHType<size>(v2);
         }
 
-        template<size_t size1, bool sig1, size_t size2, bool sig2>
-        friend constexpr Integer<size1, sig1> operator>>(
-                const Integer<size1, sig1> &v1,
-                const Integer<size2, sig2> &v2);
+        template<size_t size2, bool sig2>
+        constexpr inline Integer operator>>(const Integer<size2, sig2> &v2) const {
+            return V(value >> p_SHType<size>(v2));
+        }
 
         template<typename T, p_enable_if((p_is_integral<T>()))>
         constexpr inline Integer operator>>(const T v2) const {
@@ -1255,10 +1263,12 @@ namespace JIO {
         }
 
         template<size_t size1, bool sig1>
-        friend constexpr Integer<size1, sig1>& operator++(Integer<size1, sig1>&);
+        friend constexpr Integer<size1, sig1>&
+        operator++(Integer<size1, sig1>&);
 
         template<size_t size1, bool sig1>
-        friend constexpr Integer<size1, sig1>& operator--(Integer<size1, sig1>&);
+        friend constexpr Integer<size1, sig1>&
+        operator--(Integer<size1, sig1>&);
 
         template<size_t size1, bool sig1>
         friend constexpr Integer<size1, sig1>
@@ -1333,14 +1343,6 @@ namespace JIO {
         return p__pp_mm_helper(v1, v1.m1(), v1);
     }
 
-    template<size_t size1, bool sig1, size_t size2, bool sig2>
-    constexpr inline Integer<max(size1, size2), sig1 && sig2> operator+(
-            const Integer<size1, sig1> &v1,
-            const Integer<size2, sig2> &v2) {
-        using R = Integer < max(size1, size2), sig1 && sig2>;
-        return R(v1).value + R(v2).value;
-    }
-
     template<size_t size1, bool sig1, typename T,
     p_enable_if((p_is_integral<T>()))>
     constexpr inline Integer<max(size1, sizeof (T)), sig1 && (p_is_signed<T>())>
@@ -1377,14 +1379,6 @@ namespace JIO {
     constexpr inline T& operator+=(T &v1, const Integer<size1, sig1> &v2) {
         using R = Integer<sizeof (T), p_is_signed<T>()>;
         return v1 = T(R(v1) + R(v2));
-    }
-
-    template<size_t size1, bool sig1, size_t size2, bool sig2>
-    constexpr inline Integer<max(size1, size2), sig1 && sig2> operator-(
-            const Integer<size1, sig1> &v1,
-            const Integer<size2, sig2> &v2) {
-        using R = Integer < max(size1, size2), sig1 && sig2>;
-        return R(v1).value - R(v2).value;
     }
 
     template<size_t size1, bool sig1, typename T,
@@ -1481,14 +1475,6 @@ namespace JIO {
                 U(v2 >> (size1 * 4)), U(v2));
     }
 
-    template<size_t size1, bool sig1, size_t size2, bool sig2>
-    constexpr inline Integer<max(size1, size2), sig1 && sig2> operator*(
-            const Integer<size1, sig1> &v1,
-            const Integer<size2, sig2> &v2) {
-        using R = Integer < max(size1, size2), sig1 && sig2>;
-        return R(v1).value * R(v2).value;
-    }
-
     template<size_t size1, bool sig1, typename T,
     p_enable_if((p_is_integral<T>()))>
     constexpr inline Integer<max(size1, sizeof (T)), sig1 && (p_is_signed<T>())>
@@ -1525,14 +1511,6 @@ namespace JIO {
     constexpr inline T& operator*=(T &v1, const Integer<size1, sig1> &v2) {
         using R = Integer<sizeof (T), p_is_signed<T>()>;
         return v1 = T(R(v1) * R(v2));
-    }
-
-    template<size_t size1, bool sig1, size_t size2, bool sig2>
-    constexpr inline Integer<max(size1, size2), sig1 && sig2> operator/(
-            const Integer<size1, sig1> &v1,
-            const Integer<size2, sig2> &v2) {
-        using R = Integer < max(size1, size2), sig1 && sig2>;
-        return typename R::V(R(v1).value / R(v2).value);
     }
 
     template<size_t size1, bool sig1, typename T,
@@ -1573,14 +1551,6 @@ namespace JIO {
         return v1 = T(R(v1) / R(v2));
     }
 
-    template<size_t size1, bool sig1, size_t size2, bool sig2>
-    constexpr inline Integer<max(size1, size2), sig1 && sig2> operator%(
-            const Integer<size1, sig1> &v1,
-            const Integer<size2, sig2> &v2) {
-        using R = Integer < max(size1, size2), sig1 && sig2>;
-        return typename R::V(R(v1).value % R(v2).value);
-    }
-
     template<size_t size1, bool sig1, typename T,
     p_enable_if((p_is_integral<T>()))>
     constexpr inline Integer<max(size1, sizeof (T)), sig1 && (p_is_signed<T>())>
@@ -1617,14 +1587,6 @@ namespace JIO {
     constexpr inline T& operator%=(T &v1, const Integer<size1, sig1> &v2) {
         using R = Integer<sizeof (T), p_is_signed<T>()>;
         return v1 = T(R(v1) % R(v2));
-    }
-
-    template<size_t size1, bool sig1, size_t size2, bool sig2>
-    constexpr inline Integer<max(size1, size2), sig1 && sig2> operator|(
-            const Integer<size1, sig1> &v1,
-            const Integer<size2, sig2> &v2) {
-        using R = Integer < max(size1, size2), sig1 && sig2>;
-        return R(v1).value | R(v2).value;
     }
 
     template<size_t size1, bool sig1, typename T,
@@ -1665,14 +1627,6 @@ namespace JIO {
         return v1 = T(R(v1) | R(v2));
     }
 
-    template<size_t size1, bool sig1, size_t size2, bool sig2>
-    constexpr inline Integer<max(size1, size2), sig1 && sig2> operator&(
-            const Integer<size1, sig1> &v1,
-            const Integer<size2, sig2> &v2) {
-        using R = Integer < max(size1, size2), sig1 && sig2>;
-        return R(v1).value & R(v2).value;
-    }
-
     template<size_t size1, bool sig1, typename T,
     p_enable_if((p_is_integral<T>()))>
     constexpr inline Integer<max(size1, sizeof (T)), sig1 && (p_is_signed<T>())>
@@ -1709,14 +1663,6 @@ namespace JIO {
     constexpr inline T& operator&=(T &v1, const Integer<size1, sig1> &v2) {
         using R = Integer<sizeof (T), p_is_signed<T>()>;
         return v1 = T(R(v1) & R(v2));
-    }
-
-    template<size_t size1, bool sig1, size_t size2, bool sig2>
-    constexpr inline Integer<max(size1, size2), sig1 && sig2> operator^(
-            const Integer<size1, sig1> &v1,
-            const Integer<size2, sig2> &v2) {
-        using R = Integer < max(size1, size2), sig1 && sig2>;
-        return R(v1).value ^ R(v2).value;
     }
 
     template<size_t size1, bool sig1, typename T,
@@ -1889,13 +1835,6 @@ namespace JIO {
         return R(v1) > R(v2);
     }
 
-    template<size_t size1, bool sig1, size_t size2, bool sig2>
-    constexpr inline Integer<size1, sig1> operator<<(
-            const Integer<size1, sig1> &v1,
-            const Integer<size2, sig2> &v2) {
-        return v1.value << p_SHType<size1>(v2);
-    }
-
     template<size_t size1, bool sig1, typename T,
     p_enable_if((p_is_integral<T>()))>
     constexpr inline T operator<<(const T v1, const Integer<size1, sig1> &v2) {
@@ -1921,13 +1860,6 @@ namespace JIO {
     p_enable_if((p_is_integral<T>()))>
     constexpr inline T& operator<<=(T &v1, const Integer<size1, sig1> &v2) {
         return v1 = T(Integer<sizeof (T), p_is_signed<T>()>(v1) << v2);
-    }
-
-    template<size_t size1, bool sig1, size_t size2, bool sig2>
-    constexpr inline Integer<size1, sig1> operator>>(
-            const Integer<size1, sig1> &v1,
-            const Integer<size2, sig2> &v2) {
-        return typename Integer<size1, sig1>::V(v1.value >> p_SHType<size1>(v2));
     }
 
     template<size_t size1, bool sig1, typename T,
