@@ -136,9 +136,9 @@ namespace JIO {
         U value;
     public:
 
-        explicit constexpr inline p_Integer_U() = default;
+        constexpr inline p_Integer_U() = default;
 
-        explicit constexpr inline p_Integer_U(const U n) : value(n) { }
+        constexpr explicit inline p_Integer_U(const U n) : value(n) { }
 
         constexpr inline bool isNegative() const {
             return false;
@@ -193,7 +193,7 @@ namespace JIO {
         U value;
     public:
 
-        constexpr explicit inline p_Integer_S() = default;
+        constexpr inline p_Integer_S() = default;
 
         constexpr explicit inline p_Integer_S(const S n) : value(n) { }
 
@@ -459,7 +459,7 @@ namespace JIO {
         }
     public:
 
-        constexpr explicit inline p_Pow2_Integer_Base() = default;
+        constexpr inline p_Pow2_Integer_Base() = default;
 
         constexpr explicit inline p_Pow2_Integer_Base(const U &low) :
         low(low), high(U::ZERO()) { }
@@ -467,7 +467,7 @@ namespace JIO {
         constexpr explicit inline p_Pow2_Integer_Base(const S &low) :
         low(low), high(low.isSNegative() ? ~U::ZERO() : U::ZERO()) { }
 
-        constexpr explicit inline p_Pow2_Integer_Base(const U &low, const U &high) :
+        constexpr inline p_Pow2_Integer_Base(const U &low, const U &high) :
         low(low), high(high) { }
 
         constexpr inline bool isNegative() const {
@@ -543,7 +543,7 @@ namespace JIO {
         }
     public:
 
-        constexpr explicit inline p_Pow2_Integer_Base() = default;
+        constexpr inline p_Pow2_Integer_Base() = default;
 
         constexpr explicit inline p_Pow2_Integer_Base(const U &low) :
         low(low), high(U::ZERO()) { }
@@ -551,7 +551,7 @@ namespace JIO {
         constexpr explicit inline p_Pow2_Integer_Base(const S &low) :
         low(low), high(low.isNegative() ? ~U::ZERO() : U::ZERO()) { }
 
-        constexpr explicit inline p_Pow2_Integer_Base(const U &low, const U &high) :
+        constexpr inline p_Pow2_Integer_Base(const U &low, const U &high) :
         low(low), high(high) { }
 
         constexpr inline bool isNegative() const {
@@ -1062,14 +1062,12 @@ namespace JIO {
 
     private:
 
-        template<typename T,
-        bool = (p_getIntegerType(size) == native),
-        bool = (p_getIntegerType(size) != native) && (size >= sizeof (T))>
+        template<typename T, p_IType = p_getIntegerType(size)>
         struct tcast_h {
         };
 
         template<typename T>
-        struct tcast_h<T, true, false> {
+        struct tcast_h<T, native> {
 
             constexpr inline static V tcast(const T n) {
                 return V(n);
@@ -1077,7 +1075,7 @@ namespace JIO {
         };
 
         template<typename T>
-        struct tcast_h<T, false, true> {
+        struct tcast_h<T, pow2> {
 
             constexpr inline static V tcast(const T n) {
                 return Integer(Integer<sizeof (T), JIO::p_is_signed<T>()>(n)).value;
