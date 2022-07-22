@@ -10,7 +10,7 @@ count(length) { }
 
 int InMemoryInputStream::read() {
     u1 *tmp = reinterpret_cast<u1*> (data);
-    s8 tmp_pos = position + 1;
+    u8 tmp_pos = position + 1;
     if (tmp_pos <= count) {
         position = tmp_pos;
         return tmp[tmp_pos];
@@ -25,12 +25,12 @@ s8 InMemoryInputStream::read(void *buf, s8 offset, s8 length) {
 
     checkSBounds(buf, offset, length);
 
-    s8 tmp_pos = position;
+    u8 tmp_pos = position;
     if (tmp_pos >= count) {
         return -1;
     }
 
-    s8 avail = count - tmp_pos;
+    u8 avail = count - tmp_pos;
     if (avail > length) {
         avail = length;
     }
