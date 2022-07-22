@@ -208,40 +208,40 @@ namespace JIO {
         template<size_t size, bool = (size == 4), bool = (size == 8)>
         struct divrem_h {
 
-            constexpr inline static p_Integer_S div(const I &a, const I &b) {
-                return p_Integer_S(S(a.value) / S(b.value));
+            constexpr inline static I div(const I &a, const I &b) {
+                return I(S(a.value) / S(b.value));
             }
 
-            constexpr inline static p_Integer_S rem(const I &a, const I &b) {
-                return p_Integer_S(S(a.value) % S(b.value));
+            constexpr inline static I rem(const I &a, const I &b) {
+                return I(S(a.value) % S(b.value));
             }
         };
 
         template<size_t size>
         struct divrem_h<size, true, false> {
 
-            constexpr inline static p_Integer_S div(const I &a, const I &b) {
+            constexpr inline static I div(const I &a, const I &b) {
                 return ((a.value == U(0x80000000)) && (b.value == U(-1))) ?
-                        p_Integer_S(0x80000000) : p_Integer_S(S(a.value) / S(b.value));
+                        I(0x80000000) : I(S(a.value) / S(b.value));
             }
 
-            constexpr inline static p_Integer_S rem(const I &a, const I &b) {
+            constexpr inline static I rem(const I &a, const I &b) {
                 return ((a.value == U(0x80000000)) && (b.value == U(-1))) ?
-                        I::ZERO() : p_Integer_S(S(a.value) % S(b.value));
+                        I(0) : I(S(a.value) % S(b.value));
             }
         };
 
         template<size_t size>
         struct divrem_h<size, false, true> {
 
-            constexpr inline static p_Integer_S div(const I &a, const I &b) {
+            constexpr inline static I div(const I &a, const I &b) {
                 return ((a.value == U(0x8000000000000000LL)) && (b.value == U(-1LL))) ?
-                        p_Integer_S(0x8000000000000000LL) : p_Integer_S(S(a.value) / S(b.value));
+                        I(0x8000000000000000LL) : I(S(a.value) / S(b.value));
             }
 
-            constexpr inline static p_Integer_S rem(const I &a, const I &b) {
+            constexpr inline static I rem(const I &a, const I &b) {
                 return ((a.value == U(0x8000000000000000LL)) && (b.value == U(-1LL))) ?
-                        I::ZERO() : p_Integer_S(S(a.value) % S(b.value));
+                        I(0) : I(S(a.value) % S(b.value));
             }
         };
 
@@ -254,7 +254,7 @@ namespace JIO {
         }
 
         constexpr inline I operator>>(const M other) const {
-            return p_Integer_S(S(value) >> (other & shmask));
+            return I(S(value) >> (other & shmask));
         }
 
         constexpr inline bool operator>(const I &other) const {
