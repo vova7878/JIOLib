@@ -23,18 +23,16 @@ namespace JIO {
         return p_array_t<T, value, values...>();
     }
 
-    constexpr char p_digits[36] = {
+    constexpr char p_digits[22] = {
         '0', '1', '2', '3', '4', '5',
         '6', '7', '8', '9', 'a', 'b',
-        'c', 'd', 'e', 'f', 'g', 'h',
-        'i', 'j', 'k', 'l', 'm', 'n',
-        'o', 'p', 'q', 'r', 's', 't',
-        'u', 'v', 'w', 'x', 'y', 'z'
+        'c', 'd', 'e', 'f', 'A', 'B',
+        'C', 'D', 'E', 'F'
     };
 
     template<char c, size_t index = 0, p_enable_if(p_digits[index] == c)>
     constexpr inline auto p_indexOfDigit() {
-        return index;
+        return index < 16 ? index : index - 6;
     }
 
     template<char c, size_t index = 0, p_enable_if(p_digits[index] != c)>
