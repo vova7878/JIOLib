@@ -6,6 +6,7 @@
 #include <type_traits>
 #include <iostream>
 
+// -std=c++14
 namespace JIO {
 
     template<typename T, size_t size>
