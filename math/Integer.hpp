@@ -853,6 +853,264 @@ namespace JIO {
         return std::is_signed<T>::value;
     }
 
+    namespace p_i_seq {
+
+        template <typename T, T... values>
+        struct array_t {
+        };
+
+        template <typename T, size_t length>
+        struct v_array_t {
+            T data[length];
+
+            constexpr inline const T& operator[](size_t index) const {
+                return data[index];
+            }
+        };
+
+        template<typename T, T... v1, T... v2>
+        constexpr inline array_t<T, v1..., v2...>
+        append(array_t<T, v1...>, array_t<T, v2...>) {
+            return {};
+        }
+
+        template <typename T, T f, T l,
+        int = (f > l) ? -1 : (l == f ? 0 : ((l - f == 1) ? 1 : 2))>
+        struct seq_h;
+
+        template <typename T, T f, T l>
+        struct seq_h <T, f, l, 0> {
+            typedef array_t<T> type;
+        };
+
+        template <typename T, T f, T l>
+        struct seq_h <T, f, l, 1> {
+            typedef array_t<T, f> type;
+        };
+
+        template <typename T, T f, T l>
+        struct seq_h <T, f, l, 2> {
+            constexpr static T d = l - f;
+            typedef decltype(append<T>(
+                    typename seq_h<T, f, f + d / 2 > ::type(),
+                    typename seq_h<T, f + d / 2, f + d> ::type()
+                    )) type;
+        };
+
+        template<typename T, T f, T l>
+        constexpr inline typename seq_h<T, f, l>::type make_array() {
+            return {};
+        }
+    }
+
+    template<int>
+    struct p_Element_Types;
+
+    template<>
+    struct p_Element_Types<0> {
+        typedef uint32_t U;
+        typedef int32_t S;
+        typedef uint64_t DU;
+        typedef int64_t DS;
+    };
+
+    template<>
+    struct p_Element_Types<1> {
+        typedef uint8_t U;
+        typedef int8_t S;
+        typedef uint16_t DU;
+        typedef int16_t DS;
+    };
+
+    template<>
+    struct p_Element_Types<2> {
+        typedef uint16_t U;
+        typedef int16_t S;
+        typedef uint32_t DU;
+        typedef int32_t DS;
+    };
+
+    template<>
+    struct p_Element_Types<3> {
+        typedef uint8_t U;
+        typedef int8_t S;
+        typedef uint16_t DU;
+        typedef int16_t DS;
+    };
+
+    template<typename U, p_enable_if(std::is_unsigned<U>::value)>
+    constexpr inline U add_o(U &out, U v1, U v2) {
+        return (out = v1 + v2) < v1;
+    }
+
+    template<size_t size, bool sig>
+    class p_Array_Integer_Base;
+
+    template<size_t size, bool sig>
+    class p_Array_Integer_Impl;
+
+    template<size_t size, bool sig>
+    struct p_Integer_Impl <size, sig, p_IType::array> {
+        typedef p_Array_Integer_Impl<size, sig> type;
+    };
+
+    struct p_i_unused {
+        constexpr inline p_i_unused() = default;
+
+        template<typename T>
+        constexpr inline p_i_unused(T) { };
+
+        template<typename... Tp>
+        constexpr inline p_i_unused(Tp...) { };
+    };
+
+    template<size_t size>
+    class p_Array_Integer_Base<size, false> {
+    private:
+        typedef p_Element_Types<size & 3> ET;
+        typedef typename ET::S S;
+        typedef typename ET::U U;
+        typedef typename ET::DS DS;
+        typedef typename ET::DU DU;
+        typedef p_Array_Integer_Base I;
+        typedef p_SHType<size> M;
+        constexpr static M shdivider = size * 8;
+        constexpr static size_t length = size / sizeof (U);
+        template<typename Tp, Tp... values>
+        using A = p_i_seq::array_t<Tp, values...>;
+        template<size_t len>
+        using AT = p_i_seq::v_array_t<U, len>;
+        AT<length> data;
+
+    public:
+
+        constexpr inline p_Array_Integer_Base() = default;
+
+    private:
+
+        template<size_t a_len>
+        constexpr inline static U value_for_index(
+                AT<a_len> arr, size_t index) {
+            return index < a_len ? arr[index] : U(0);
+        }
+
+        template<size_t a_len, size_t... index>
+        constexpr inline static AT< length> set_h(
+                AT< a_len> arr,
+                A<size_t, index...>) {
+            return {value_for_index(arr, index)...};
+        }
+
+    public:
+
+        template<typename... Tp>
+        constexpr explicit inline p_Array_Integer_Base(Tp... arr) :
+        data(set_h((AT<sizeof...(Tp)>){U(arr)...},
+        p_i_seq::make_array<size_t, 0, length>())) { }
+
+        template<size_t size2, bool sig2>
+        friend class p_Array_Integer_Impl;
+
+        template<size_t size2, bool sig2>
+        friend class Integer;
+    };
+
+    template<size_t size, bool sig>
+    class p_Array_Integer_Impl : p_Array_Integer_Base<size, sig> {
+    private:
+        typedef p_Array_Integer_Base<size, sig> T;
+        typedef p_Array_Integer_Impl<size, sig> I;
+        typedef p_Array_Integer_Impl<size, false> UI;
+        typedef p_Array_Integer_Impl<size, true> SI;
+        typedef typename T::S S;
+        typedef typename T::U U;
+        typedef typename T::DS DS;
+        typedef typename T::DU DU;
+        typedef typename T::M M;
+        template<typename Tp, Tp... values>
+        using A = p_i_seq::array_t<Tp, values...>;
+        template<size_t len>
+        using AT = p_i_seq::v_array_t<U, len>;
+
+    public:
+        using T::T;
+
+        constexpr inline p_Array_Integer_Impl(const T &obj) : T(obj) { }
+
+        void printv(std::ostream &out) {
+            out << std::hex;
+            size_t i = T::length;
+            out << uint32_t(T::data[--i]);
+            do {
+                out << ", ";
+                out << uint32_t(T::data[--i]);
+            } while (i > 0);
+        }
+
+    private:
+
+        /*constexpr inline I p1() const {
+            return p1_helper(T::low.p1(), T::high);
+        }*/
+
+    public:
+
+        constexpr inline I operator+() const {
+            return *this;
+        }
+
+        /*constexpr inline I operator-() const {
+            return (~(*this)).p1();
+        }*/
+
+    private:
+
+        template<size_t... index>
+        constexpr inline static I neg_h(const I &v, A<size_t, index...>) {
+            return I((~v.data[index])...);
+        }
+
+    public:
+
+        constexpr inline I operator~() const {
+            return neg_h(*this, p_i_seq::make_array<size_t, 0, T::length>());
+        }
+
+    private:
+
+        template<size_t... index>
+        constexpr inline static I or_h(const I &v1, const I &v2, A<size_t, index...>) {
+            return I((v1.data[index] | v2.data[index])...);
+        }
+
+        template<size_t... index>
+        constexpr inline static I and_h(const I &v1, const I &v2, A<size_t, index...>) {
+            return I((v1.data[index] & v2.data[index])...);
+        }
+
+        template<size_t... index>
+        constexpr inline static I xor_h(const I &v1, const I &v2, A<size_t, index...>) {
+            return I((v1.data[index] ^ v2.data[index])...);
+        }
+
+    public:
+
+        constexpr inline I operator|(const I &v2) const {
+            return or_h(*this, v2, p_i_seq::make_array<size_t, 0, T::length>());
+        }
+
+        constexpr inline I operator&(const I &v2) const {
+            return and_h(*this, v2, p_i_seq::make_array<size_t, 0, T::length>());
+        }
+
+        constexpr inline I operator^(const I &v2) const {
+            return xor_h(*this, v2, p_i_seq::make_array<size_t, 0, T::length>());
+        }
+
+        template<size_t size2, bool sig2>
+        friend class Integer;
+    };
+
     template<typename U, typename S, bool sig, typename V, p_enable_if(sig)>
     constexpr inline S p_castUS(V value) {
         return S(value);
