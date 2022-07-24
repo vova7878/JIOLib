@@ -1,7 +1,6 @@
 #pragma once
 
 #include <cstdint>
-#include "Endian.hpp"
 
 namespace JIO {
 
