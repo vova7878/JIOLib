@@ -7,7 +7,7 @@
 
 namespace JIO {
 
-    inline void print(std::ostringstream &buf) { }
+    inline void print(std::ostringstream&) { }
 
     template<typename One>
     inline void print(std::ostringstream &buf, One value) {
