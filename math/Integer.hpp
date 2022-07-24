@@ -6,6 +6,7 @@
 #include <iostream>
 #include <utility>
 
+// -std=c++14
 namespace JIO {
 
     template<bool A>
@@ -34,27 +35,32 @@ namespace JIO {
     }
 
     constexpr inline size_t p_numberOfLeadingZeros4Bit_h(uint8_t i) {
-        return (i >= 1 << 2) ? p_numberOfLeadingZeros2Bit_h(i >> 2) :
+        return (i >= 1 << 2) ?
+                p_numberOfLeadingZeros2Bit_h(i >> 2) :
                 p_numberOfLeadingZeros2Bit_h(i) + 2;
     }
 
     constexpr inline size_t p_numberOfLeadingZeros_h(uint8_t i) {
-        return (i >= 1 << 4) ? p_numberOfLeadingZeros4Bit_h(i >> 4) :
+        return (i >= 1 << 4) ?
+                p_numberOfLeadingZeros4Bit_h(i >> 4) :
                 p_numberOfLeadingZeros4Bit_h(i) + 4;
     }
 
     constexpr inline size_t p_numberOfLeadingZeros_h(uint16_t i) {
-        return (i >= 1 << 8) ? p_numberOfLeadingZeros_h(uint8_t(i >> 8)) :
+        return (i >= 1 << 8) ?
+                p_numberOfLeadingZeros_h(uint8_t(i >> 8)) :
                 p_numberOfLeadingZeros_h(uint8_t(i)) + 8;
     }
 
     constexpr inline size_t p_numberOfLeadingZeros_h(uint32_t i) {
-        return (i >= 1 << 16) ? p_numberOfLeadingZeros_h(uint16_t(i >> 16)) :
+        return (i >= 1 << 16) ?
+                p_numberOfLeadingZeros_h(uint16_t(i >> 16)) :
                 p_numberOfLeadingZeros_h(uint16_t(i)) + 16;
     }
 
     constexpr inline size_t p_numberOfLeadingZeros_h(uint64_t i) {
-        return (i >= uint64_t(1) << 32) ? p_numberOfLeadingZeros_h(uint32_t(i >> 32)) :
+        return (i >= uint64_t(1) << 32) ?
+                p_numberOfLeadingZeros_h(uint32_t(i >> 32)) :
                 p_numberOfLeadingZeros_h(uint32_t(i)) + 32;
     }
 
@@ -63,27 +69,32 @@ namespace JIO {
     }
 
     constexpr inline size_t p_numberOfTrailingZeros4Bit_h(uint8_t i) {
-        return (i & 0x3) ? p_numberOfTrailingZeros2Bit_h(i) :
+        return (i & 0x3) ?
+                p_numberOfTrailingZeros2Bit_h(i) :
                 p_numberOfTrailingZeros2Bit_h(i >> 2) + 2;
     }
 
     constexpr inline size_t p_numberOfTrailingZeros_h(uint8_t i) {
-        return (i & 0xf) ? p_numberOfTrailingZeros4Bit_h(i) :
+        return (i & 0xf) ?
+                p_numberOfTrailingZeros4Bit_h(i) :
                 p_numberOfTrailingZeros4Bit_h(i >> 4) + 4;
     }
 
     constexpr inline size_t p_numberOfTrailingZeros_h(uint16_t i) {
-        return (uint8_t(i)) ? p_numberOfTrailingZeros_h(uint8_t(i)) :
+        return (uint8_t(i)) ?
+                p_numberOfTrailingZeros_h(uint8_t(i)) :
                 p_numberOfTrailingZeros_h(uint8_t(i >> 8)) + 8;
     }
 
     constexpr inline size_t p_numberOfTrailingZeros_h(uint32_t i) {
-        return (uint16_t(i)) ? p_numberOfTrailingZeros_h(uint16_t(i)) :
+        return (uint16_t(i)) ?
+                p_numberOfTrailingZeros_h(uint16_t(i)) :
                 p_numberOfTrailingZeros_h(uint16_t(i >> 16)) + 16;
     }
 
     constexpr inline size_t p_numberOfTrailingZeros_h(uint64_t i) {
-        return (uint32_t(i)) ? p_numberOfTrailingZeros_h(uint32_t(i)) :
+        return (uint32_t(i)) ?
+                p_numberOfTrailingZeros_h(uint32_t(i)) :
                 p_numberOfTrailingZeros_h(uint32_t(i >> 32)) + 32;
     }
 
@@ -95,9 +106,13 @@ namespace JIO {
     };
 
     constexpr p_IType p_getIntegerType(size_t size) {
-        return (size == 1 || size == 2 || size == 4 || size == 8) ? native :
-                (size == 0 ? illegal :
-                (isOneBit(size) ? pow2 : array));
+        if (!size) {
+            return illegal;
+        }
+        if (size == 1 || size == 2 || size == 4 || size == 8) {
+            return native;
+        }
+        return isOneBit(size) ? pow2 : array;
     }
 
     template<size_t size, bool = (size > sizeof (unsigned int))>
@@ -147,6 +162,17 @@ namespace JIO {
         constexpr inline bool isSNegative() const {
             return S(value) < 0;
         };
+
+        constexpr inline static bool add_overflow(
+                const I &v1, const I &v2, I &out) {
+            U tmp = v1.value + v2.value;
+            out = I(tmp);
+            return tmp < v1.value;
+        }
+
+        constexpr inline static bool increment_overflow(I &value) {
+            return (++value.value) == 0;
+        }
 
         constexpr inline I operator/(const I &other) const {
             return p_Integer_U(value / other.value);
@@ -205,7 +231,7 @@ namespace JIO {
             return S(value) < 0;
         };
 
-        template<size_t size, bool = (size == 4), bool = (size == 8)>
+        template<size_t size, size_t = size>
         struct divrem_h {
 
             constexpr inline static I div(const I &a, const I &b) {
@@ -218,30 +244,38 @@ namespace JIO {
         };
 
         template<size_t size>
-        struct divrem_h<size, true, false> {
+        struct divrem_h<size, 4> {
 
             constexpr inline static I div(const I &a, const I &b) {
-                return ((a.value == U(0x80000000)) && (b.value == U(-1))) ?
-                        I(0x80000000) : I(S(a.value) / S(b.value));
+                if ((a.value == U(0x80000000L)) && (b.value == U(-1L))) {
+                    return I(0x80000000L);
+                }
+                return I(S(a.value) / S(b.value));
             }
 
             constexpr inline static I rem(const I &a, const I &b) {
-                return ((a.value == U(0x80000000)) && (b.value == U(-1))) ?
-                        I(0) : I(S(a.value) % S(b.value));
+                if ((a.value == U(0x80000000L)) && (b.value == U(-1L))) {
+                    return I(0);
+                }
+                return I(S(a.value) % S(b.value));
             }
         };
 
         template<size_t size>
-        struct divrem_h<size, false, true> {
+        struct divrem_h<size, 8> {
 
             constexpr inline static I div(const I &a, const I &b) {
-                return ((a.value == U(0x8000000000000000LL)) && (b.value == U(-1LL))) ?
-                        I(0x8000000000000000LL) : I(S(a.value) / S(b.value));
+                if ((a.value == U(0x8000000000000000LL)) && (b.value == U(-1LL))) {
+                    return I(0x8000000000000000LL);
+                }
+                return I(S(a.value) / S(b.value));
             }
 
             constexpr inline static I rem(const I &a, const I &b) {
-                return ((a.value == U(0x8000000000000000LL)) && (b.value == U(-1LL))) ?
-                        I(0) : I(S(a.value) % S(b.value));
+                if ((a.value == U(0x8000000000000000LL)) && (b.value == U(-1LL))) {
+                    return I(0);
+                }
+                return I(S(a.value) % S(b.value));
             }
         };
 
@@ -298,6 +332,15 @@ namespace JIO {
         constexpr inline bool isZero() const {
             return T::value == 0;
         };
+
+        constexpr inline static bool add_overflow(
+                const I &v1, const I &v2, I &out) {
+            return T::add_overflow(v1, v2, out);
+        }
+
+        constexpr inline static bool increment_overflow(I &value) {
+            return T::increment_overflow(value);
+        }
 
         void printv(std::ostream &out) {
             out << std::hex << uint64_t(T::value) << std::dec;
@@ -371,12 +414,6 @@ namespace JIO {
 
         template<size_t size, bool sig>
         friend class Integer;
-
-        template<size_t size1, bool sig1>
-        friend constexpr Integer<size1, sig1>& operator++(Integer<size1, sig1>&);
-
-        template<size_t size1, bool sig1>
-        friend constexpr Integer<size1, sig1>& operator--(Integer<size1, sig1>&);
     };
 
     template<>
@@ -435,27 +472,22 @@ namespace JIO {
     private:
         typedef Integer<half, true> S;
         typedef Integer<half, false> U;
+        typedef p_Pow2_Integer_Base<half, false> I;
         typedef p_SHType<half * 2> M;
         constexpr static M shmask = half * 2 * 8 - 1;
         U low, high;
 
-        constexpr inline static p_Pow2_Integer_Base rightShift2(
-                const p_Pow2_Integer_Base &value, const M shiftDistance) {
-            return p_Pow2_Integer_Base((value.low >> shiftDistance) |
-                    (value.high << (half * 8 - shiftDistance)),
-                    value.high >> shiftDistance);
-        }
-
-        constexpr inline static p_Pow2_Integer_Base rightShift3(
-                const p_Pow2_Integer_Base &value, const M shiftDistance) {
-            return p_Pow2_Integer_Base(value.high >> (shiftDistance - half * 8), U::ZERO());
-        }
-
-        constexpr inline static p_Pow2_Integer_Base rightShift(
-                const p_Pow2_Integer_Base &value, const M shiftDistance) {
-            return shiftDistance == 0 ? value :
-                    ((shiftDistance < (half * 8)) ? rightShift2(value, shiftDistance) :
-                    rightShift3(value, shiftDistance));
+        constexpr inline static I rightShift(
+                const I &value, const M shiftDistance) {
+            if (shiftDistance == 0) {
+                return value;
+            }
+            if (shiftDistance < (half * 8)) {
+                return I((value.low >> shiftDistance) |
+                        (value.high << (half * 8 - shiftDistance)),
+                        value.high >> shiftDistance);
+            }
+            return I(value.high >> (shiftDistance - half * 8), U::ZERO());
         }
     public:
 
@@ -478,31 +510,47 @@ namespace JIO {
             return high.isSNegative();
         };
 
-        constexpr inline bool operator>(const p_Pow2_Integer_Base &other) const {
+        constexpr inline static bool add_overflow(
+                const I &v1, const I &v2, I &out) {
+            bool tmpo = U::add_overflow(v1.high, v2.high, out.high);
+            if (U::add_overflow(v1.low, v2.low, out.low)) {
+                return U::increment_overflow(out.high) || tmpo;
+            }
+            return tmpo;
+        }
+
+        constexpr inline static bool increment_overflow(I &value) {
+            if (U::increment_overflow(value.low)) {
+                return U::increment_overflow(value.high);
+            }
+            return false;
+        }
+
+        constexpr inline bool operator>(const I &other) const {
             return (high > other.high) ? true :
                     ((high < other.high) ? false :
                     (low > other.low));
         }
 
-        constexpr inline bool operator<(const p_Pow2_Integer_Base &other) const {
+        constexpr inline bool operator<(const I &other) const {
             return (high < other.high) ? true :
                     ((high > other.high) ? false :
                     (low < other.low));
         }
 
-        constexpr inline bool operator>=(const p_Pow2_Integer_Base &other) const {
+        constexpr inline bool operator>=(const I &other) const {
             return (high > other.high) ? true :
                     ((high < other.high) ? false :
                     (low >= other.low));
         }
 
-        constexpr inline bool operator<=(const p_Pow2_Integer_Base &other) const {
+        constexpr inline bool operator<=(const I &other) const {
             return (high < other.high) ? true :
                     ((high > other.high) ? false :
                     (low <= other.low));
         }
 
-        constexpr inline p_Pow2_Integer_Base operator>>(const M other) const {
+        constexpr inline I operator>>(const M other) const {
             return rightShift(*this, other & shmask);
         }
 
@@ -518,28 +566,23 @@ namespace JIO {
     private:
         typedef Integer<half, true> S;
         typedef Integer<half, false> U;
+        typedef p_Pow2_Integer_Base<half, true> I;
         typedef p_SHType<half * 2> M;
         constexpr static M shmask = half * 2 * 8 - 1;
         U low, high;
 
-        constexpr inline static p_Pow2_Integer_Base rightShift2(
-                const p_Pow2_Integer_Base &value, const M shiftDistance) {
-            return p_Pow2_Integer_Base((value.low >> shiftDistance) |
-                    (value.high << (half * 8 - shiftDistance)),
-                    S(value.high) >> shiftDistance);
-        }
-
-        constexpr inline static p_Pow2_Integer_Base rightShift3(
-                const p_Pow2_Integer_Base &value, const M shiftDistance) {
-            return p_Pow2_Integer_Base(S(value.high) >> (shiftDistance - half * 8),
+        inline static I rightShift(
+                const I &value, const M shiftDistance) {
+            if (shiftDistance == 0) {
+                return value;
+            }
+            if (shiftDistance < (half * 8)) {
+                return I((value.low >> shiftDistance) |
+                        (value.high << (half * 8 - shiftDistance)),
+                        S(value.high) >> shiftDistance);
+            }
+            return I(S(value.high) >> (shiftDistance - half * 8),
                     value.high.isSNegative() ? ~U::ZERO() : U::ZERO());
-        }
-
-        inline static p_Pow2_Integer_Base rightShift(
-                const p_Pow2_Integer_Base &value, const M shiftDistance) {
-            return shiftDistance == 0 ? value :
-                    ((shiftDistance < (half * 8)) ? rightShift2(value, shiftDistance) :
-                    rightShift3(value, shiftDistance));
         }
     public:
 
@@ -562,31 +605,31 @@ namespace JIO {
             return high.isSNegative();
         };
 
-        constexpr inline bool operator>(const p_Pow2_Integer_Base &other) const {
+        constexpr inline bool operator>(const I &other) const {
             return (S(high) > S(other.high)) ? true :
                     ((S(high) < S(other.high)) ? false :
                     (low > other.low));
         }
 
-        constexpr inline bool operator<(const p_Pow2_Integer_Base &other) const {
+        constexpr inline bool operator<(const I &other) const {
             return (S(high) < S(other.high)) ? true :
                     ((S(high) > S(other.high)) ? false :
                     (low < other.low));
         }
 
-        constexpr inline bool operator>=(const p_Pow2_Integer_Base &other) const {
+        constexpr inline bool operator>=(const I &other) const {
             return (S(high) > S(other.high)) ? true :
                     ((S(high) < S(other.high)) ? false :
                     (low >= other.low));
         }
 
-        constexpr inline bool operator<=(const p_Pow2_Integer_Base &other) const {
+        constexpr inline bool operator<=(const I &other) const {
             return (S(high) < S(other.high)) ? true :
                     ((S(high) > S(other.high)) ? false :
                     (low <= other.low));
         }
 
-        constexpr inline p_Pow2_Integer_Base operator>>(const M other) const {
+        constexpr inline I operator>>(const M other) const {
             return rightShift(*this, other & shmask);
         }
 
@@ -600,50 +643,25 @@ namespace JIO {
     template<size_t half, bool sig>
     class p_Pow2_Integer_Impl : public p_Pow2_Integer_Base<half, sig> {
     private:
-        typedef typename p_Pow2_Integer_Base<half, sig>::S S;
-        typedef typename p_Pow2_Integer_Base<half, sig>::U U;
-        typedef typename p_Pow2_Integer_Base<half, sig>::M M;
         typedef p_Pow2_Integer_Base<half, sig> T;
         typedef p_Pow2_Integer_Impl<half, sig> I;
         typedef p_Pow2_Integer_Impl<half, false> UI;
         typedef p_Pow2_Integer_Impl<half, true> SI;
-
-        constexpr inline static I leftShift2(const I &value,
-                const typename T::M shiftDistance) {
-            return I(value.low << shiftDistance, (value.high << shiftDistance) |
-                    (value.low >> (half * 8 - shiftDistance)));
-        }
-
-        constexpr inline static I leftShift3(const I &value,
-                const typename T::M shiftDistance) {
-            return I(U::ZERO(), value.low << (shiftDistance - half * 8));
-        }
+        typedef typename T::S S;
+        typedef typename T::U U;
+        typedef typename T::M M;
 
         constexpr inline static I leftShift(const I &value,
                 const typename T::M shiftDistance) {
-            return shiftDistance == 0 ? value :
-                    ((shiftDistance < (half * 8)) ? leftShift2(value, shiftDistance) :
-                    leftShift3(value, shiftDistance));
-        }
-
-        constexpr inline static I p1_helper(const U &low, const U &high) {
-            return I(low, low == U::ZERO() ? high.p1() : high);
-        }
-
-        constexpr inline static I plus_helper(
-                const U &low, const U &oldlow, const U &high) {
-            return I(low, low < oldlow ? high.p1() : high);
-        }
-
-        template<bool sig2>
-        constexpr inline static I mul_helper2(
-                const p_Pow2_Integer_Impl<half, sig2> &other) {
-            return I(other.low, other.high);
-        }
-
-        constexpr inline static I mul_helper(
-                const U &a, const U &b, const U &c, const U &d) {
-            return I(U::ZERO(), a * d + b * c) + mul_helper2(wmultiply(b, d).value);
+            if (shiftDistance == 0) {
+                return value;
+            }
+            if (shiftDistance < (half * 8)) {
+                return I(value.low << shiftDistance,
+                        (value.high << shiftDistance) |
+                        (value.low >> (half * 8 - shiftDistance)));
+            }
+            return I(U::ZERO(), value.low << (shiftDistance - half * 8));
         }
 
         constexpr inline static UI divremUnsigned_h5(
@@ -701,14 +719,23 @@ namespace JIO {
         }
 
         constexpr inline I p1() const {
-            return p1_helper(T::low.p1(), T::high);
+            I tmp = *this;
+            if (U::increment_overflow(tmp.low)) {
+                ++tmp.high;
+            }
+            return tmp;
         }
 
         constexpr inline I m1() const {
-            return I(T::low.m1(), (T::low == U::ZERO()) ? T::high.m1() : T::high);
+            return I(T::low.m1(), T::low.isZero() ? T::high.m1() : T::high);
         }
     public:
         using T::T;
+
+        template<bool sig2>
+        constexpr inline p_Pow2_Integer_Impl(
+                const p_Pow2_Integer_Impl<half, sig2> &other) :
+        T(other.low, other.high) { }
 
         constexpr inline p_Pow2_Integer_Impl(const T &obj) : T(obj) { }
 
@@ -728,6 +755,15 @@ namespace JIO {
             return T::low.isZero() && T::high.isZero();
         };
 
+        constexpr inline static bool add_overflow(
+                const I &v1, const I &v2, I &out) {
+            return T::add_overflow(v1, v2, out);
+        }
+
+        constexpr inline static bool increment_overflow(I &value) {
+            return T::increment_overflow(value);
+        }
+
         void printv(std::ostream &out) {
             T::high.printv(out);
             out << ", ";
@@ -735,13 +771,17 @@ namespace JIO {
         }
 
         constexpr inline size_t numberOfLeadingZeros() const {
-            return (T::high.isZero()) ? T::low.numberOfLeadingZeros() + half * 8 :
-                    T::high.numberOfLeadingZeros();
+            if (T::high.isZero()) {
+                return T::low.numberOfLeadingZeros() + half * 8;
+            }
+            return T::high.numberOfLeadingZeros();
         }
 
         constexpr inline size_t numberOfTrailingZeros() const {
-            return (T::low.isZero()) ? T::high.numberOfTrailingZeros() + half * 8 :
-                    T::low.numberOfTrailingZeros();
+            if (T::low.isZero()) {
+                return T::high.numberOfTrailingZeros() + half * 8;
+            }
+            return T::low.numberOfTrailingZeros();
         }
 
         constexpr inline I operator+() const {
@@ -773,7 +813,12 @@ namespace JIO {
         }
 
         constexpr inline I operator+(const I &other) const {
-            return plus_helper(T::low + other.low, T::low, T::high + other.high);
+            U tmph = T::high + other.high;
+            U tmpl; //unintialized, may give warnings
+            if (U::add_overflow(T::low, other.low, tmpl)) {
+                ++tmph;
+            }
+            return I(tmpl, tmph);
         }
 
         constexpr inline I operator-(const I &other) const {
@@ -781,7 +826,8 @@ namespace JIO {
         }
 
         constexpr inline I operator*(const I &other) const {
-            return mul_helper(T::high, T::low, other.high, other.low);
+            auto tmp = wmultiply(T::low, other.low).value;
+            return I(tmp.low, tmp.high + T::low * other.high + T::high * other.low);
         }
 
         constexpr inline I operator<<(const M other) const {
@@ -814,22 +860,16 @@ namespace JIO {
 
         template<size_t size2, bool sig2>
         friend class Integer;
-
-        template<size_t size1, bool sig1>
-        friend constexpr Integer<size1, sig1>& operator++(Integer<size1, sig1>&);
-
-        template<size_t size1, bool sig1>
-        friend constexpr Integer<size1, sig1>& operator--(Integer<size1, sig1>&);
     };
 
     template<typename T1, typename T2>
     struct p_compare_types {
-        const static bool value = false;
+        constexpr static bool value = false;
     };
 
     template<typename T>
     struct p_compare_types <T, T> {
-        const static bool value = true;
+        constexpr static bool value = true;
     };
 
     template<typename T1, typename T2>
@@ -841,11 +881,6 @@ namespace JIO {
     template<typename T>
     constexpr inline bool p_is_integral() {
         return std::is_integral<T>::value && (!p_compare_types_cv<T, bool>());
-    }
-
-    template<typename T, size_t size>
-    constexpr inline bool p_can_upcast() {
-        return p_is_integral<T>() ? size >= sizeof (T) : false;
     }
 
     template<typename T>
@@ -1009,6 +1044,15 @@ namespace JIO {
         constexpr inline bool isSNegative() const {
             return value.isSNegative();
         };
+
+        constexpr inline static bool add_overflow(
+                const Integer &v1, const Integer &v2, Integer &out) {
+            return V::add_overflow(v1.value, v2.value, out.value);
+        }
+
+        constexpr inline static bool increment_overflow(Integer &value) {
+            return V::increment_overflow(value.value);
+        }
 
         constexpr inline size_t numberOfLeadingZeros() const {
             return value.numberOfLeadingZeros();
@@ -1270,14 +1314,6 @@ namespace JIO {
         friend constexpr Integer<size1, sig1>&
         operator--(Integer<size1, sig1>&);
 
-        template<size_t size1, bool sig1>
-        friend constexpr Integer<size1, sig1>
-        operator++(Integer<size1, sig1>&, int);
-
-        template<size_t size1, bool sig1>
-        friend constexpr Integer<size1, sig1>
-        operator--(Integer<size1, sig1>&, int);
-
         template<size_t size2, bool sig2>
         friend class Integer;
 
@@ -1320,27 +1356,17 @@ namespace JIO {
     }
 
     template<size_t size1, bool sig1>
-    constexpr inline Integer<size1, sig1>& p__pp_mm_helper2(
-            Integer<size1, sig1> &v1, const Integer<size1, sig1> &v2) {
-        return v1;
+    constexpr inline Integer<size1, sig1> operator++(Integer<size1, sig1> &v1, int) {
+        Integer<size1, sig1> tmp = v1;
+        ++v1;
+        return tmp;
     }
 
     template<size_t size1, bool sig1>
-    constexpr inline Integer<size1, sig1>& p__pp_mm_helper(Integer<size1, sig1> &v1,
-            const Integer<size1, sig1> &v2, Integer<size1, sig1> v3) {
-        return p__pp_mm_helper2(v3, (v1 = v2));
-    }
-
-    template<size_t size1, bool sig1>
-    constexpr inline Integer<size1, sig1> operator++(
-            Integer<size1, sig1> &v1, int) {
-        return p__pp_mm_helper(v1, v1.p1(), v1);
-    }
-
-    template<size_t size1, bool sig1>
-    constexpr inline Integer<size1, sig1> operator--(
-            Integer<size1, sig1> &v1, int) {
-        return p__pp_mm_helper(v1, v1.m1(), v1);
+    constexpr inline Integer<size1, sig1> operator--(Integer<size1, sig1> &v1, int) {
+        Integer<size1, sig1> tmp = v1;
+        --v1;
+        return tmp;
     }
 
     template<size_t size1, bool sig1, typename T,
@@ -1422,53 +1448,24 @@ namespace JIO {
         return R(v1) * R(v2);
     }
 
-    template<size_t size1>
-    constexpr inline Integer<size1 * 2, false> p_wmultiply_h(
-            const Integer<size1, false> &ac,
-            const Integer<size1, false> &bd,
-            const Integer<size1 * 2, false> &abcd) {
-        return Integer<size1 * 2, false>(bd, ac)
-                + ((abcd - ac - bd) << (size1 * 4));
-    }
-
-    template<size_t size1>
-    constexpr inline Integer<size1 * 4, false> p_wmultiply_h3(
-            const Integer<size1, false> &ab,
-            const Integer<size1, false> &cd,
-            bool o1, bool o2) {
-        using U1 = Integer<size1 * 2, false>;
-        using U2 = Integer<size1 * 4, false>;
-        return U2(wmultiply(ab, cd)) + ((o1 && o2) ? U2(1) << (size1 * 16) : U2::ZERO()) +
-                (o1 ? (U1(cd) << (size1 * 8)) : U1::ZERO()) +
-                (o2 ? (U1(ab) << (size1 * 8)) : U1::ZERO());
-    }
-
-    template<size_t size1>
-    constexpr inline Integer<size1 * 4, false> p_wmultiply_h1(
-            const Integer<size1, false> &ab,
-            const Integer<size1, false> &cd,
-            const Integer<size1, false> &a,
-            const Integer<size1, false> &c) {
-        return p_wmultiply_h3(ab, cd, ab < a, cd < c);
-    }
-
-    template<size_t size1>
-    constexpr inline Integer<size1 * 4, false> p_wmultiply_h(
-            const Integer<size1, false> &a,
-            const Integer<size1, false> &b,
-            const Integer<size1, false> &c,
-            const Integer<size1, false> &d) {
-        return p_wmultiply_h(wmultiply(a, c), wmultiply(b, d),
-                p_wmultiply_h1(a + b, c + d, a, c));
-    }
-
-    template<size_t size1, p_enable_if((size1 > 4) && ((size1 & 1) == 0))>
+    template<size_t size1, p_enable_if((size1 == 8) || p_getIntegerType(size1) == pow2)>
     constexpr inline Integer<size1 * 2, false> wmultiply(
             const Integer<size1, false> &v1,
             const Integer<size1, false> &v2) {
-        using U = Integer < size1 / 2, false >;
-        return p_wmultiply_h(U(v1 >> (size1 * 4)), U(v1),
-                U(v2 >> (size1 * 4)), U(v2));
+        using U1 = Integer < size1 / 2, false >;
+        using U2 = Integer<size1, false>;
+        using U4 = Integer<size1 * 2, false>;
+        U1 a = U1(v1 >> (size1 * 4)), b = U1(v1);
+        U1 c = U1(v2 >> (size1 * 4)), d = U1(v2);
+        U2 ac = wmultiply(a, c);
+        U2 bd = wmultiply(b, d);
+        U1 ab, cd; //unintialized, may give warnings
+        bool abo = U1::add_overflow(a, b, ab);
+        bool cdo = U1::add_overflow(c, d, cd);
+        U4 abcd = U4(wmultiply(ab, cd)) + ((abo && cdo) ? U4(1) << (size1 * 16) : U4::ZERO()) +
+                (abo ? (U2(cd) << (size1 * 8)) : U2::ZERO()) +
+                (cdo ? (U2(ab) << (size1 * 8)) : U2::ZERO());
+        return U4(bd, ac) + ((abcd - ac - bd) << (size1 * 4));
     }
 
     template<size_t size1, bool sig1, typename T,
