@@ -186,10 +186,16 @@ namespace JIO {
         }
 
         constexpr inline I operator/(const I &other) const {
+            if (other.value == 0) {
+                throw std::runtime_error("Division by zero");
+            }
             return p_Integer_U(value / other.value);
         }
 
         constexpr inline I operator%(const I &other) const {
+            if (other.value == 0) {
+                throw std::runtime_error("Division by zero");
+            }
             return p_Integer_U(value % other.value);
         }
 
@@ -246,10 +252,16 @@ namespace JIO {
         struct divrem_h {
 
             constexpr inline static I div(const I &a, const I &b) {
+                if (b.isZero()) {
+                    throw std::runtime_error("Division by zero");
+                }
                 return I(S(a.value) / S(b.value));
             }
 
             constexpr inline static I rem(const I &a, const I &b) {
+                if (b.isZero()) {
+                    throw std::runtime_error("Division by zero");
+                }
                 return I(S(a.value) % S(b.value));
             }
         };
@@ -261,14 +273,14 @@ namespace JIO {
                 if ((a.value == U(0x80000000L)) && (b.value == U(-1L))) {
                     return I(0x80000000L);
                 }
-                return I(S(a.value) / S(b.value));
+                return divrem_h<size, 0>::div(a, b);
             }
 
             constexpr inline static I rem(const I &a, const I &b) {
                 if ((a.value == U(0x80000000L)) && (b.value == U(-1L))) {
                     return I(0);
                 }
-                return I(S(a.value) % S(b.value));
+                return divrem_h<size, 0>::rem(a, b);
             }
         };
 
@@ -279,14 +291,14 @@ namespace JIO {
                 if ((a.value == U(0x8000000000000000LL)) && (b.value == U(-1LL))) {
                     return I(0x8000000000000000LL);
                 }
-                return I(S(a.value) / S(b.value));
+                return divrem_h<size, 0>::div(a, b);
             }
 
             constexpr inline static I rem(const I &a, const I &b) {
                 if ((a.value == U(0x8000000000000000LL)) && (b.value == U(-1LL))) {
                     return I(0);
                 }
-                return I(S(a.value) % S(b.value));
+                return divrem_h<size, 0>::rem(a, b);
             }
         };
 
@@ -329,12 +341,18 @@ namespace JIO {
     private:
 
         typedef p_Operators_Impl I;
+        typedef typename T::U U;
+        typedef typename T::S S;
 
     public:
 
         using T::T;
 
         constexpr inline p_Operators_Impl(const T &obj) : T(obj) { }
+
+        void printv(std::ostream &out) {
+            out << std::hex << uint64_t(T::value) << std::dec;
+        }
 
         constexpr inline static I ZERO() {
             return T(0);
@@ -362,8 +380,8 @@ namespace JIO {
             return T::decrement_overflow(value);
         }
 
-        void printv(std::ostream &out) {
-            out << std::hex << uint64_t(T::value) << std::dec;
+        constexpr inline static void leftShiftOneBit(I &value, bool bit) {
+            value.value = (value.value << 1) | U(bit);
         }
 
         constexpr inline size_t numberOfLeadingZeros() const {
@@ -700,60 +718,6 @@ namespace JIO {
             return I(U::ZERO(), value.low << (shiftDistance - half * 8));
         }
 
-        constexpr inline static UI divremUnsigned_h5(
-                const UI &out, bool bit) {
-            return (out << 1) | (bit ? UI(U(1)) : UI::ZERO());
-        }
-
-        constexpr inline static std::pair<UI, UI> divremUnsigned_h4(
-                const UI &nx, const UI &ny, size_t i, const UI &out) {
-            return i == 0 ? std::pair<UI, UI>(out, nx) :
-                    (divremUnsigned_h2(nx, ny, i - 1, out));
-        }
-
-        constexpr inline static std::pair<UI, UI> divremUnsigned_h3(
-                const UI &x, const UI &y, bool xmey, size_t i, const UI &out) {
-            return divremUnsigned_h4(xmey ? x - y : x,
-                    y >> 1, i, divremUnsigned_h5(out, xmey));
-        }
-
-        constexpr inline static std::pair<UI, UI> divremUnsigned_h2(
-                const UI &x, const UI &y, size_t i, const UI &out) {
-            return divremUnsigned_h3(x, y, x >= y, i, out);
-        }
-
-        constexpr inline static std::pair<UI, UI> divremUnsigned_h1(
-                const UI &x, const UI &y, size_t xZeros, size_t yZeros) {
-            return yZeros < xZeros ? std::pair<UI, UI>(UI::ZERO(), x) :
-                    divremUnsigned_h2(x, y << (yZeros - xZeros),
-                    yZeros - xZeros, UI::ZERO());
-        }
-
-        constexpr inline static std::pair<UI, UI> divremUnsigned(
-                const UI &x, const UI &y) {
-            return y.isZero() ? throw std::runtime_error("Dividing by zero") :
-                    divremUnsigned_h1(x, y, x.numberOfLeadingZeros(),
-                    y.numberOfLeadingZeros());
-        }
-
-        constexpr inline static std::pair<SI, SI> divremSigned_h2(
-                const std::pair<UI, UI> &tmp, bool neg1, bool neg2) {
-            return std::pair<SI, SI>((neg1 ? -tmp.first : tmp.first).s(),
-                    (neg2 ? -tmp.second : tmp.second).s());
-        }
-
-        constexpr inline static std::pair<SI, SI> divremSigned_h1(
-                const SI &x, const SI &y, bool xNeg, bool yNeg) {
-            return divremSigned_h2(
-                    divremUnsigned((xNeg ? -x : x).u(), (yNeg ? -y : y).u()),
-                    xNeg ^ yNeg, xNeg);
-        }
-
-        constexpr inline static std::pair<SI, SI> divremSigned(
-                const SI &x, const SI &y) {
-            return divremSigned_h1(x, y, x.isNegative(), y.isNegative());
-        }
-
         constexpr inline I p1() const {
             I tmp = *this;
             if (U::increment_overflow(tmp.low)) {
@@ -813,6 +777,11 @@ namespace JIO {
             return T::decrement_overflow(value);
         }
 
+        constexpr inline static void leftShiftOneBit(I &value, bool bit) {
+            U::leftShiftOneBit(value.high, value.low.isSNegative());
+            U::leftShiftOneBit(value.low, bit);
+        }
+
         void printv(std::ostream &out) {
             T::high.printv(out);
             out << ", ";
@@ -841,24 +810,14 @@ namespace JIO {
             return (~(*this)).p1();
         }
 
-        template<bool sig2, p_enable_if(!(sig || sig2))>
-        constexpr inline I operator/(const p_Pow2_Integer_Impl<half, sig2> &other) const {
-            return divremUnsigned(*this, other).first;
+        template<typename II = Integer<half * 2, sig>>
+        constexpr inline I operator/(const I &other) const {
+            return divrem(II(*this), II(other)).first.value;
         }
 
-        template<bool sig2, p_enable_if(sig && sig2)>
-        constexpr inline I operator/(const p_Pow2_Integer_Impl<half, sig2> &other) const {
-            return divremSigned(*this, other).first;
-        }
-
-        template<bool sig2, p_enable_if(!(sig || sig2))>
-        constexpr inline I operator%(const p_Pow2_Integer_Impl<half, sig2> &other) const {
-            return divremUnsigned(*this, other).second;
-        }
-
-        template<bool sig2, p_enable_if(sig && sig2)>
-        constexpr inline I operator%(const p_Pow2_Integer_Impl<half, sig2> &other) const {
-            return divremSigned(*this, other).second;
+        template<typename II = Integer<half * 2, sig>>
+        constexpr inline I operator%(const I &other) const {
+            return divrem(II(*this), II(other)).second.value;
         }
 
         constexpr inline I operator+(const I &other) const {
@@ -1236,6 +1195,85 @@ namespace JIO {
         return ~p_min_value<T, sig>();
     }
 
+    template<size_t size2, typename UI = Integer<size2, false>,
+    p_enable_if(p_getIntegerType(size2) == pow2)>
+    constexpr inline std::pair<UI, UI> p_divremUnsigned(
+            const Integer<size2, false> &x, const Integer<size2, false> &y) {
+        if (y.isZero()) {
+            throw std::runtime_error("Division by zero");
+        }
+        size_t xZeros = x.numberOfLeadingZeros();
+        size_t yZeros = y.numberOfLeadingZeros();
+        if (yZeros < xZeros) {
+            return std::pair<UI, UI>(UI::ZERO(), x);
+        }
+        size_t diff = yZeros - xZeros;
+        UI nx = x, ny = y << diff, out = UI::ZERO();
+        for (size_t i = 0; i <= diff; i++) {
+            bool bit = false;
+            if (nx >= ny) {
+                nx -= ny;
+                bit = true;
+            }
+            ny >>= 1;
+            UI::leftShiftOneBit(out, bit);
+        }
+        return std::pair<UI, UI>(out, nx);
+    }
+
+    template<size_t size2, typename UI = Integer<size2, false>,
+    typename SI = Integer<size2, true>,
+    p_enable_if(p_getIntegerType(size2) == pow2)>
+    constexpr inline std::pair<SI, SI> p_divremSigned(
+            const Integer<size2, true> &x, const Integer<size2, true> &y) {
+        bool xNeg = x.isNegative();
+        bool yNeg = y.isNegative();
+        std::pair<UI, UI> tmp = p_divremUnsigned(xNeg ? -x : x, yNeg ? -y : y);
+        return std::pair<SI, SI>(xNeg ^ yNeg ? -tmp.first : tmp.first,
+                xNeg ? -tmp.second : tmp.second);
+    }
+
+    template<size_t size, bool sig, p_IType = p_getIntegerType(size)>
+    struct p_divrem_h;
+
+    template<size_t size, bool sig>
+    struct p_divrem_h<size, sig, native> {
+
+        template<typename I = Integer<size, sig>>
+        constexpr inline static std::pair<I, I> divrem(
+                const I &x, const I &y) {
+            return std::pair<I, I>(x / y, x % y);
+        }
+    };
+
+    template<size_t size>
+    struct p_divrem_h<size, false, pow2> {
+
+        template<typename UI = Integer<size, false >>
+        constexpr inline static std::pair<UI, UI> divrem(
+                const UI &x, const UI &y) {
+            return p_divremUnsigned(x, y);
+        }
+    };
+
+    template<size_t size>
+    struct p_divrem_h<size, true, pow2> {
+
+        template<typename SI = Integer<size, true >>
+        constexpr inline static std::pair<SI, SI> divrem(
+                const SI &x, const SI &y) {
+            return p_divremSigned(x, y);
+        }
+    };
+
+    template<size_t size1, bool sig1, size_t size2, bool sig2,
+    size_t size = max(size1, size2), bool sig = sig1 && sig2,
+    typename R = Integer<size, sig>>
+    constexpr inline std::pair<R, R> divrem(const Integer<size1, sig1> &v1,
+            const Integer<size2, sig2> &v2) {
+        return p_divrem_h<size, sig>::divrem(R(v1), R(v2));
+    }
+
     template<size_t size, bool sig>
     class Integer {
     private:
@@ -1384,6 +1422,10 @@ namespace JIO {
 
         constexpr inline static bool decrement_overflow(Integer &value) {
             return V::decrement_overflow(value.value);
+        }
+
+        constexpr inline static void leftShiftOneBit(Integer &value, bool bit) {
+            V::leftShiftOneBit(value.value, bit);
         }
 
         constexpr inline size_t numberOfLeadingZeros() const {
