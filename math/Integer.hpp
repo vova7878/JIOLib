@@ -827,7 +827,7 @@ namespace JIO {
 
         constexpr inline I operator+(const I &other) const {
             U tmph = T::high + other.high;
-            U tmpl; //unintialized, may give warnings
+            U tmpl = U::ZERO();
             if (U::add_overflow(T::low, other.low, tmpl)) {
                 ++tmph;
             }
@@ -1569,7 +1569,7 @@ namespace JIO {
         U1 c = U1(v2 >> (size1 * 4)), d = U1(v2);
         U2 ac = wmultiply(a, c);
         U2 bd = wmultiply(b, d);
-        U1 ab, cd; //unintialized, may give warnings
+        U1 ab = U1::ZERO(), cd = U1::ZERO();
         bool abo = U1::add_overflow(a, b, ab);
         bool cdo = U1::add_overflow(c, d, cd);
         U4 abcd = U4(wmultiply(ab, cd)) + ((abo && cdo) ? U4(1) << (size1 * 16) : U4::ZERO()) +
