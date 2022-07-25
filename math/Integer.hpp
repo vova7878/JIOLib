@@ -914,7 +914,7 @@ namespace JIO {
 
         template <typename T, size_t length>
         struct v_array_t {
-            T data[length];
+            T data[max(size_t(1), length)];
 
             constexpr inline const T& operator[](size_t index) const {
                 return data[index];
