@@ -910,6 +910,12 @@ namespace JIO {
 
         template <typename T, T... values>
         struct array_t {
+
+            constexpr inline const T operator[](size_t index) const {
+                static_assert(sizeof...(values) != 0, "zero-size array");
+                constexpr T data[sizeof...(values)] = {values...};
+                return data[index];
+            }
         };
 
         template <typename T, size_t length>
