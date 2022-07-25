@@ -30,6 +30,11 @@ namespace JIO {
         return v1 < v2 ? v2 : v1;
     }
 
+    template<typename T>
+    constexpr const T& min(const T &v1, const T &v2) {
+        return v1 < v2 ? v1 : v2;
+    }
+
     constexpr inline size_t p_numberOfLeadingZeros2Bit_h(uint8_t i) {
         return i ? (1 - (i >> 1)) : 2;
     }
