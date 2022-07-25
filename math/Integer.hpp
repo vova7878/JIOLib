@@ -901,7 +901,14 @@ namespace JIO {
             constexpr inline const T& operator[](size_t index) const {
                 return data[index];
             }
+
+            constexpr inline T& operator[](size_t index) {
+                return data[index];
+            }
         };
+
+        template <typename T, size_t length>
+        constexpr inline void unused_array(v_array_t<T, length>) { }
 
         template<typename T, T... v1, T... v2>
         constexpr inline array_t<T, v1..., v2...>
@@ -989,16 +996,6 @@ namespace JIO {
         typedef p_Array_Integer_Impl<size, sig> type;
     };
 
-    struct p_i_unused {
-        constexpr inline p_i_unused() = default;
-
-        template<typename T>
-        constexpr inline p_i_unused(T) { };
-
-        template<typename... Tp>
-        constexpr inline p_i_unused(Tp...) { };
-    };
-
     template<size_t size>
     class p_Array_Integer_Base<size, false> {
     private:
@@ -1031,8 +1028,7 @@ namespace JIO {
 
         template<size_t a_len, size_t... index>
         constexpr inline static AT< length> set_h(
-                AT< a_len> arr,
-                A<size_t, index...>) {
+                AT< a_len> arr, A<size_t, index...>) {
             return {value_for_index(arr, index)...};
         }
 
@@ -1040,7 +1036,7 @@ namespace JIO {
 
         template<typename... Tp>
         constexpr explicit inline p_Array_Integer_Base(Tp... arr) :
-        data(set_h((AT<sizeof...(Tp)>){U(arr)...},
+        data(set_h(AT<sizeof...(Tp)>{U(arr)...},
         p_i_seq::make_array<size_t, 0, length>())) { }
 
         template<size_t size2, bool sig2>
@@ -1097,6 +1093,21 @@ namespace JIO {
         /*constexpr inline I operator-() const {
             return (~(*this)).p1();
         }*/
+
+    private:
+
+        template<size_t... index>
+        constexpr inline static bool isZero_h(const I &v, A<size_t, index...>) {
+            bool out = true;
+            p_i_seq::unused_array<bool, sizeof...(index)>({(out &= (v.data[index] == 0))...});
+            return out;
+        }
+
+    public:
+
+        constexpr inline bool isZero() const {
+            return isZero_h(*this, p_i_seq::make_array<size_t, 0, T::length>());
+        };
 
     private:
 
