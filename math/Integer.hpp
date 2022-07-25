@@ -174,6 +174,10 @@ namespace JIO {
             return (++value.value) == 0;
         }
 
+        constexpr inline static bool decrement_overflow(I &value) {
+            return (value.value--) == 0;
+        }
+
         constexpr inline I operator/(const I &other) const {
             return p_Integer_U(value / other.value);
         }
@@ -340,6 +344,10 @@ namespace JIO {
 
         constexpr inline static bool increment_overflow(I &value) {
             return T::increment_overflow(value);
+        }
+
+        constexpr inline static bool decrement_overflow(I &value) {
+            return T::decrement_overflow(value);
         }
 
         void printv(std::ostream &out) {
@@ -522,6 +530,13 @@ namespace JIO {
         constexpr inline static bool increment_overflow(I &value) {
             if (U::increment_overflow(value.low)) {
                 return U::increment_overflow(value.high);
+            }
+            return false;
+        }
+
+        constexpr inline static bool decrement_overflow(I &value) {
+            if (U::decrement_overflow(value.low)) {
+                return U::decrement_overflow(value.high);
             }
             return false;
         }
@@ -727,7 +742,11 @@ namespace JIO {
         }
 
         constexpr inline I m1() const {
-            return I(T::low.m1(), T::low.isZero() ? T::high.m1() : T::high);
+            I tmp = *this;
+            if (U::decrement_overflow(tmp.low)) {
+                --tmp.high;
+            }
+            return tmp;
         }
     public:
         using T::T;
@@ -762,6 +781,10 @@ namespace JIO {
 
         constexpr inline static bool increment_overflow(I &value) {
             return T::increment_overflow(value);
+        }
+
+        constexpr inline static bool decrement_overflow(I &value) {
+            return T::decrement_overflow(value);
         }
 
         void printv(std::ostream &out) {
@@ -1321,6 +1344,10 @@ namespace JIO {
 
         constexpr inline static bool increment_overflow(Integer &value) {
             return V::increment_overflow(value.value);
+        }
+
+        constexpr inline static bool decrement_overflow(Integer &value) {
+            return V::decrement_overflow(value.value);
         }
 
         constexpr inline size_t numberOfLeadingZeros() const {
