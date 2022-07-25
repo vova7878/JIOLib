@@ -174,6 +174,13 @@ namespace JIO {
             return (++value.value) == 0;
         }
 
+        constexpr inline static bool sub_overflow(
+                const I &v1, const I &v2, I &out) {
+            U tmp = v1.value - v2.value;
+            out = I(tmp);
+            return tmp > v1.value;
+        }
+
         constexpr inline static bool decrement_overflow(I &value) {
             return (value.value--) == 0;
         }
@@ -344,6 +351,11 @@ namespace JIO {
 
         constexpr inline static bool increment_overflow(I &value) {
             return T::increment_overflow(value);
+        }
+
+        constexpr inline static bool sub_overflow(
+                const I &v1, const I &v2, I &out) {
+            return T::sub_overflow(v1, v2, out);
         }
 
         constexpr inline static bool decrement_overflow(I &value) {
@@ -532,6 +544,15 @@ namespace JIO {
                 return U::increment_overflow(value.high);
             }
             return false;
+        }
+
+        constexpr inline static bool sub_overflow(
+                const I &v1, const I &v2, I &out) {
+            bool tmpo = U::sub_overflow(v1.high, v2.high, out.high);
+            if (U::sub_overflow(v1.low, v2.low, out.low)) {
+                return U::decrement_overflow(out.high) || tmpo;
+            }
+            return tmpo;
         }
 
         constexpr inline static bool decrement_overflow(I &value) {
@@ -783,6 +804,11 @@ namespace JIO {
             return T::increment_overflow(value);
         }
 
+        constexpr inline static bool sub_overflow(
+                const I &v1, const I &v2, I &out) {
+            return T::sub_overflow(v1, v2, out);
+        }
+
         constexpr inline static bool decrement_overflow(I &value) {
             return T::decrement_overflow(value);
         }
@@ -845,7 +871,12 @@ namespace JIO {
         }
 
         constexpr inline I operator-(const I &other) const {
-            return *this +(-other);
+            U tmph = T::high - other.high;
+            U tmpl = U::ZERO();
+            if (U::sub_overflow(T::low, other.low, tmpl)) {
+                --tmph;
+            }
+            return I(tmpl, tmph);
         }
 
         constexpr inline I operator*(const I &other) const {
@@ -1075,6 +1106,11 @@ namespace JIO {
 
         constexpr inline static bool increment_overflow(Integer &value) {
             return V::increment_overflow(value.value);
+        }
+
+        constexpr inline static bool sub_overflow(
+                const Integer &v1, const Integer &v2, Integer &out) {
+            return V::sub_overflow(v1.value, v2.value, out.value);
         }
 
         constexpr inline static bool decrement_overflow(Integer &value) {
