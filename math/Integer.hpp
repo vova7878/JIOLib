@@ -1844,13 +1844,30 @@ namespace JIO {
         U1 c = U1(v2 >> (size1 * 4)), d = U1(v2);
         U2 ac = wmultiply(a, c);
         U2 bd = wmultiply(b, d);
+#if 1 //The Karatsuba algorithm
         U1 ab = U1::ZERO(), cd = U1::ZERO();
         bool abo = U1::add_overflow(a, b, ab);
         bool cdo = U1::add_overflow(c, d, cd);
-        U4 abcd = U4(wmultiply(ab, cd)) + ((abo && cdo) ? U4(1) << (size1 * 16) : U4::ZERO()) +
-                (abo ? (U2(cd) << (size1 * 8)) : U2::ZERO()) +
-                (cdo ? (U2(ab) << (size1 * 8)) : U2::ZERO());
-        return U4(bd, ac) + ((abcd - ac - bd) << (size1 * 4));
+        U2 abcd_low = wmultiply(ab, cd);
+        unsigned int abcd_high = abo && cdo;
+        if (abo && U2::add_overflow(abcd_low, U2(cd) << (size1 * 4), abcd_low)) {
+            ++abcd_high;
+        }
+        if (cdo && U2::add_overflow(abcd_low, U2(ab) << (size1 * 4), abcd_low)) {
+            ++abcd_high;
+        }
+        if (U2::sub_overflow(abcd_low, ac, abcd_low)) {
+            --abcd_high;
+        }
+        if (U2::sub_overflow(abcd_low, bd, abcd_low)) {
+            --abcd_high;
+        }
+        return U4(bd, ac) + (U4(abcd_low, abcd_high) << (size1 * 4));
+#else
+        U2 ad = wmultiply(a, d);
+        U2 bc = wmultiply(b, c);
+        return U4(bd, ac) + ((U4(ad) + U4(bc)) << (size1 * 4));
+#endif
     }
 
     template<size_t size1, bool sig1, typename T,
