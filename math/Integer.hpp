@@ -1004,11 +1004,6 @@ namespace JIO {
         typedef int16_t DS;
     };
 
-    template<typename U, p_enable_if(std::is_unsigned<U>::value)>
-    constexpr inline U add_o(U &out, U v1, U v2) {
-        return (out = v1 + v2) < v1;
-    }
-
     template<size_t size, bool sig>
     class p_Array_Integer_Base;
 
