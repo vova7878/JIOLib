@@ -257,14 +257,14 @@ namespace JIO {
         struct divrem_h {
 
             constexpr inline static I div(const I &a, const I &b) {
-                if (b.isZero()) {
+                if (b.value == 0) {
                     throw std::runtime_error("Division by zero");
                 }
                 return I(S(a.value) / S(b.value));
             }
 
             constexpr inline static I rem(const I &a, const I &b) {
-                if (b.isZero()) {
+                if (b.value == 0) {
                     throw std::runtime_error("Division by zero");
                 }
                 return I(S(a.value) % S(b.value));
