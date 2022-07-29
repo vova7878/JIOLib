@@ -1234,7 +1234,7 @@ namespace JIO {
             const Integer<size2, true> &x, const Integer<size2, true> &y) {
         bool xNeg = x.isNegative();
         bool yNeg = y.isNegative();
-        std::pair<UI, UI> tmp = p_divremUnsigned(xNeg ? -x : x, yNeg ? -y : y);
+        std::pair<UI, UI> tmp = p_divremUnsigned((xNeg ? -x : x).u(), (yNeg ? -y : y).u());
         return std::pair<SI, SI>(xNeg ^ yNeg ? -tmp.first : tmp.first,
                 xNeg ? -tmp.second : tmp.second);
     }
