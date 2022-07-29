@@ -1180,6 +1180,30 @@ namespace JIO {
             return *this;
         }
 
+        constexpr inline const typename V::U& ulow() const {
+            return value.low;
+        }
+
+        constexpr inline typename V::U& ulow() {
+            return value.low;
+        }
+
+        constexpr inline const typename V::U& uhigh() const {
+            return value.high;
+        }
+
+        constexpr inline typename V::U& uhigh() {
+            return value.high;
+        }
+
+        constexpr inline typename V::U& uvalue() {
+            return value.value;
+        }
+
+        constexpr inline const typename V::U& uvalue() const {
+            return value.value;
+        }
+
         void print(std::ostream &out) {
             out << "I<" << std::dec << size << ", " << (sig ? "t" : "f") << ">{";
             value.printv(out);
