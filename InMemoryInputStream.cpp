@@ -31,7 +31,7 @@ s8 InMemoryInputStream::read(void *buf, s8 offset, s8 length) {
     }
 
     u8 avail = count - tmp_pos;
-    if (avail > length) {
+    if (avail > u8(length)) {
         avail = length;
     }
 
