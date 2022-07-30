@@ -353,6 +353,8 @@ namespace JIO {
 
         using T::T;
 
+        constexpr inline p_Operators_Impl() = default;
+
         constexpr inline p_Operators_Impl(const T &obj) : T(obj) { }
 
         void printv(std::ostream &out) {
@@ -740,6 +742,8 @@ namespace JIO {
         }
     public:
         using T::T;
+
+        constexpr inline p_Pow2_Integer_Impl() = default;
 
         template<bool sig2>
         constexpr inline p_Pow2_Integer_Impl(
