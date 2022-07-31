@@ -1,0 +1,4 @@
+[submodule "math/Integer"]
+	path = math/Integer
+	url = https://github.com/vova7878/Integer
+	branch = master
