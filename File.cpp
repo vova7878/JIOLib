@@ -69,7 +69,7 @@ u8 File::length() const noexcept {
 
 std::vector<File> File::listFiles() const {
     std::vector<File> out;
-    for (const fs::directory_entry child : fs::directory_iterator(path)) {
+    for (const fs::directory_entry &child : fs::directory_iterator(path)) {
         out.push_back(File(child.path()));
     }
     return out;
