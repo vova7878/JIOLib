@@ -12,17 +12,17 @@ namespace JIO {
     template<typename T, size_t size>
     class Vector;
 
-    template<bool A>
-    using p_enable_if_t = typename std::enable_if<A, bool>::type;
+    template<typename R, bool v>
+    using p_enable_if_t = typename std::enable_if<v, R>::type;
 
-#define p_enable_if(B) p_enable_if_t<(B)> = false
+#define p_enable_if(B) p_enable_if_t<bool, (B)> = false
 
     struct p_v_unused {
     };
 
     template<size_t size1, size_t size2, size_t index1, size_t index2,
     size_t length, size_t counter, typename T1, typename T2, p_enable_if(counter == length)>
-    constexpr inline void p_copy_array(T1 *array1, const T2 *array2) { }
+    constexpr inline void p_copy_array(T1*, const T2*) { }
 
     template<size_t size1, size_t size2, size_t index1, size_t index2,
     size_t length, size_t counter, typename T1, typename T2, p_enable_if(counter != length)>
@@ -59,7 +59,7 @@ namespace JIO {
         }
 
         template<size_t index, p_enable_if(index == size)>
-        constexpr inline void assignOne(T e) { }
+        constexpr inline void assignOne(T) { }
 
         template<size_t index, p_enable_if(index != size)>
         constexpr inline void assignOne(T e) {
@@ -108,7 +108,7 @@ namespace JIO {
         out << "{";
         if (size > 0) {
             out << v[0];
-            for (int i = 1; i < size; i++) {
+            for (size_t i = 1; i < size; i++) {
                 out << ", " << v[i];
             }
         }
@@ -148,7 +148,7 @@ template<typename T1, typename T2, size_t size>                   \
 constexpr inline Vector<OP_TYPE(op, T1, T2), size> operator op(   \
         const Vector<T1, size> &v1,                               \
         const Vector<T2, size> &v2) {                             \
-    Vector<OP_TYPE(op, T1, T2), size> out(p_v_unused());          \
+    Vector<OP_TYPE(op, T1, T2), size> out((p_v_unused()));        \
     hname(v1, v2, out);                                           \
     return out;                                                   \
 }
@@ -198,7 +198,7 @@ BIN_VT_OPERATOR_H(hname, op)                                      \
 template<typename T1, typename T2, size_t size>                   \
 constexpr inline Vector<OP_TYPE(op, T1, T2), size> operator op(   \
         const Vector<T1, size> &v1, const T2 v2) {                \
-    Vector<OP_TYPE(op, T1, T2), size> out(p_v_unused());          \
+    Vector<OP_TYPE(op, T1, T2), size> out((p_v_unused()));        \
     hname(v1, v2, out);                                           \
     return out;                                                   \
 }
@@ -248,7 +248,7 @@ BIN_TV_OPERATOR_H(hname, op)                                      \
 template<typename T1, typename T2, size_t size>                   \
 constexpr inline Vector<OP_TYPE(op, T1, T2), size> operator op(   \
         const T1 v1, const Vector<T2, size> &v2) {                \
-    Vector<OP_TYPE(op, T1, T2), size> out(p_v_unused());          \
+    Vector<OP_TYPE(op, T1, T2), size> out((p_v_unused()));        \
     hname(v1, v2, out);                                           \
     return out;                                                   \
 }
@@ -298,7 +298,7 @@ UNARY_V_OPERATOR_H(hname, op)                                     \
 template<typename T, size_t size>                                 \
 constexpr inline Vector<T, size> operator op(                     \
         const Vector<T, size> &v1) {                              \
-    Vector<T, size> out(p_v_unused());                            \
+    Vector<T, size> out((p_v_unused()));                          \
     hname(v1, out);                                               \
     return out;                                                   \
 }
@@ -422,7 +422,7 @@ constexpr inline Vector<T1, size>& operator op(                   \
 
     template<typename T, size_t size>
     constexpr inline Vector<T, size> clamp(const Vector<T, size> &v, T lo, T hi) {
-        Vector<T, size> out(p_v_unused());
+        Vector<T, size> out((p_v_unused()));
         for (size_t i = 0; i < size; i++) {
             T value = v[i];
             out[i] = value < lo ? lo : (value > hi ? hi : value);
@@ -433,8 +433,8 @@ constexpr inline Vector<T1, size>& operator op(                   \
     template<typename T1, size_t size, typename T2>
     constexpr inline Vector<T1, size> mix(
             const Vector<T1, size> &v1, const Vector<T1, size> &v2, T2 m) {
-        T1 k1 = std::clamp(T1(m), T1(0), T1(1)), k2 = T1(1) - k1;
-        Vector<T1, size> out(p_v_unused());
+        T1 k1 = clamp(T1(m), T1(0), T1(1)), k2 = T1(1) - k1;
+        Vector<T1, size> out((p_v_unused()));
         for (size_t i = 0; i < size; i++) {
             out[i] = v1[i] * k2 + v2[i] * k1;
         }
@@ -456,7 +456,7 @@ constexpr inline Vector<T1, size>& operator op(                   \
 #define SIMPLE_V_FUNCTION(fname, std_fname)                       \
 template<typename T, size_t size>                                 \
 constexpr inline Vector<T, size> fname(const Vector<T, size> &v) {\
-    Vector<T, size> out(p_v_unused());                            \
+    Vector<T, size> out((p_v_unused()));                            \
     for (size_t i = 0; i < size; i++) {                           \
         out[i] = std_fname(v[i]);                                 \
     }                                                             \
