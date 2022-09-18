@@ -434,7 +434,7 @@ constexpr inline Vector<T1, size>& operator op(                   \
     template<typename T1, size_t size, typename T2>
     constexpr inline Vector<T1, size> mix(
             const Vector<T1, size> &v1, const Vector<T1, size> &v2, T2 m) {
-        T1 k1 = clamp(T1(m), T1(0), T1(1)), k2 = T1(1) - k1;
+        T1 k1 = T1(m), k2 = T1(1) - k1;
         Vector<T1, size> out((p_v_unused()));
         for (size_t i = 0; i < size; i++) {
             out[i] = v1[i] * k2 + v2[i] * k1;
