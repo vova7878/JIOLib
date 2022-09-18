@@ -420,11 +420,12 @@ constexpr inline Vector<T1, size>& operator op(                   \
         return out;
     }
 
-    template<typename T, size_t size>
-    constexpr inline Vector<T, size> clamp(const Vector<T, size> &v, T lo, T hi) {
-        Vector<T, size> out((p_v_unused()));
+    template<typename T1, size_t size, typename T2, typename T3>
+    constexpr inline Vector<T1, size> clamp(const Vector<T1, size> &v, T2 lo2, T3 hi2) {
+        T1 lo = T1(lo2), hi = T1(hi2);
+        Vector<T1, size> out((p_v_unused()));
         for (size_t i = 0; i < size; i++) {
-            T value = v[i];
+            T1 value = v[i];
             out[i] = value < lo ? lo : (value > hi ? hi : value);
         }
         return out;
@@ -471,6 +472,8 @@ constexpr inline Vector<T, size> fname(const Vector<T, size> &v) {\
     SIMPLE_V_FUNCTION(asin, asin);
     SIMPLE_V_FUNCTION(acos, acos);
     SIMPLE_V_FUNCTION(atan, atan);
+    SIMPLE_V_FUNCTION(floor, floor);
+    SIMPLE_V_FUNCTION(fract, v[i] - floor);
 
     template<size_t size>
     constexpr inline bool any(const Vector<bool, size> &v) {
